@@ -1,0 +1,44 @@
+{
+  "name": "projects/6461763874648769046",
+  "projectId": "6461763874648769046",
+  "title": "El Capitán de la Playa",
+  "visibility": "PRIVATE",
+  "createTime": "2026-03-11T04:35:07.938273Z",
+  "updateTime": "2026-03-11T04:35:07.938273Z",
+  "projectType": "PROJECT_DESIGN",
+  "origin": "STITCH",
+  "deviceType": "DESKTOP",
+  "designTheme": {
+    "colorMode": "DARK",
+    "font": "INTER",
+    "roundness": "ROUND_FULL",
+    "customColor": "#f5a524",
+    "saturation": 3
+  },
+  "screens": {
+    "atardecer": {
+      "id": "e8e41114de284ae6bb120b7914035fa3",
+      "sourceScreen": "projects/6461763874648769046/screens/e8e41114de284ae6bb120b7914035fa3",
+      "x": 0, "y": 0,
+      "width": 2560, "height": 4176,
+      "title": "El Capitán - Sunset Experience"
+    },
+    "noche": {
+      "id": "1fa695b5c4f2409896f01c421b6a624d",
+      "sourceScreen": "projects/6461763874648769046/screens/1fa695b5c4f2409896f01c421b6a624d",
+      "x": 2660, "y": 0,
+      "width": 2560, "height": 3542,
+      "title": "El Capitán - Night Gourmet"
+    },
+    "mediodia": {
+      "id": "655e94a1ac6844cab0e71f38f4569b24",
+      "sourceScreen": "projects/6461763874648769046/screens/655e94a1ac6844cab0e71f38f4569b24",
+      "x": 5320, "y": 0,
+      "width": 2560, "height": 4152,
+      "title": "El Capitán - Tropical Lunch"
+    }
+  },
+  "metadata": {
+    "userRole": "OWNER"
+  }
+}

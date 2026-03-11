@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Galería — El Capitán de la Playa</title>
+  <meta name="description" content="Galería de fotos de El Capitán de la Playa: platos, ambiente y momentos únicos frente al mar." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Inter:wght@300;400&family=Playfair+Display:ital,wght@1,700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --gold: #F5A623; --gold-glow: rgba(245,166,35,0.35); --cream: #FFF8F0; --pearl: #D6CFC7; --glass-bg: rgba(10,10,30,0.45); --glass-border: rgba(245,166,35,0.22); }
+    body { font-family: 'Inter', sans-serif; color: var(--cream); background: linear-gradient(160deg, #06121e 0%, #0d1b36 45%, #15102a 100%); min-height: 100vh; }
+
+    nav { position: sticky; top: 0; z-index: 100; backdrop-filter: blur(18px); background: rgba(5,8,26,0.7); border-bottom: 1px solid var(--glass-border); padding: 0 2rem; height: 70px; display: flex; align-items: center; justify-content: space-between; }
+    .nav-logo { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1.2rem; color: var(--gold); text-decoration: none; }
+    .nav-logo span { color: var(--cream); font-weight: 300; font-size: 0.8rem; display: block; }
+    .nav-links { display: flex; gap: 0.5rem; list-style: none; }
+    .nav-links a { color: var(--pearl); text-decoration: none; font-family: 'Outfit', sans-serif; font-size: 0.9rem; padding: 0.4rem 0.9rem; border-radius: 999px; transition: all 0.3s; }
+    .nav-links a:hover { color: var(--gold); background: rgba(245,166,35,0.12); }
+
+    main { max-width: 1200px; margin: 0 auto; padding: 4rem 2rem 6rem; }
+    .page-header { text-align: center; margin-bottom: 3rem; }
+    .eyebrow { font-size: 0.75rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold); font-family: 'Outfit', sans-serif; font-weight: 600; margin-bottom: 0.5rem; }
+    .page-title { font-family: 'Playfair Display', serif; font-size: clamp(2rem, 5vw, 3.5rem); font-style: italic; color: var(--cream); margin-bottom: 0.75rem; }
+    .page-sub { font-size: 1rem; color: var(--pearl); font-weight: 300; }
+
+    .filter-bar { display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap; margin-bottom: 2.5rem; }
+    .filter-btn { background: var(--glass-bg); border: 1px solid var(--glass-border); color: var(--pearl); padding: 0.5rem 1.2rem; border-radius: 999px; font-family: 'Outfit', sans-serif; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s; backdrop-filter: blur(10px); }
+    .filter-btn.active, .filter-btn:hover { background: var(--gold); color: #1a0900; border-color: var(--gold); box-shadow: 0 4px 16px var(--gold-glow); }
+
+    /* Masonry-style gallery using CSS columns */
+    .gallery-grid {
+      columns: 3 280px;
+      column-gap: 1.25rem;
+    }
+
+    .gallery-item {
+      break-inside: avoid;
+      margin-bottom: 1.25rem;
+      border-radius: 18px;
+      overflow: hidden;
+      position: relative;
+      cursor: pointer;
+      border: 1px solid var(--glass-border);
+      transition: all 0.4s ease;
+    }
+    .gallery-item:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(245,166,35,0.2); border-color: rgba(245,166,35,0.4); }
+    .gallery-item:hover .gallery-overlay { opacity: 1; }
+
+    .gallery-visual {
+      width: 100%;
+      display: block;
+      font-size: 0;
+    }
+
+    /* Emoji-art placeholders styled to look like rich photos */
+    .gallery-visual-inner {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 4rem;
+      position: relative;
+    }
+
+    .gallery-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.75) 0%, transparent 55%);
+      opacity: 0;
+      transition: opacity 0.35s ease;
+      display: flex;
+      align-items: flex-end;
+      padding: 1.25rem;
+    }
+    .gallery-overlay-text h3 { font-family: 'Outfit', sans-serif; font-size: 1rem; font-weight: 700; color: var(--cream); }
+    .gallery-overlay-text p { font-size: 0.78rem; color: var(--pearl); font-weight: 300; }
+    .gallery-tag { position: absolute; top: 0.8rem; left: 0.8rem; background: rgba(0,0,0,0.55); backdrop-filter: blur(8px); color: var(--gold); font-family: 'Outfit', sans-serif; font-size: 0.7rem; font-weight: 600; padding: 0.25rem 0.65rem; border-radius: 999px; letter-spacing: 0.06em; text-transform: uppercase; border: 1px solid rgba(245,166,35,0.3); }
+
+    footer { padding: 2rem; text-align: center; background: rgba(0,0,0,0.4); border-top: 1px solid var(--glass-border); }
+    footer p { font-size: 0.82rem; color: var(--pearl); }
+    footer a { color: var(--gold); text-decoration: none; }
+
+    @media (max-width: 600px) { .nav-links { display: none; } main { padding: 2.5rem 1rem; } .gallery-grid { columns: 2 150px; } }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="index.html" class="nav-logo">El Capitán <span>de la Playa</span></a>
+    <ul class="nav-links">
+      <li><a href="index.html">← Inicio</a></li>
+      <li><a href="menu.html">Menú</a></li>
+      <li><a href="reservas.html">Reservas</a></li>
+    </ul>
+  </nav>
+
+  <main>
+    <header class="page-header">
+      <p class="eyebrow">📸 Galería de Momentos</p>
+      <h1 class="page-title">Nuestra Galería</h1>
+      <p class="page-sub">Platos, ambiente y momentos únicos que el mar inspira</p>
+    </header>
+
+    <div class="filter-bar">
+      <button class="filter-btn active">Todo</button>
+      <button class="filter-btn">🍽️ Platos</button>
+      <button class="filter-btn">🌅 Ambiente</button>
+      <button class="filter-btn">🍹 Cócteles</button>
+      <button class="filter-btn">🌊 El Mar</button>
+    </div>
+
+    <div class="gallery-grid" id="gallery">
+      <!-- Row 1 -->
+      <div class="gallery-item">
+        <span class="gallery-tag">Platos</span>
+        <div class="gallery-visual-inner" style="background:linear-gradient(135deg,#006994,#00436a);height:280px;font-size:5rem;">🐟</div>
+        <div class="gallery-overlay"><div class="gallery-overlay-text"><h3>Pescado Frito Artesanal</h3><p>Captura del día, frito a la perfección</p></div></div>
+      </div>
+      <div class="gallery-item">
+        <span class="gallery-tag">Ambiente</span>
+        <div class="gallery-visual-inner" style="background:linear-gradient(135deg,#4a0e2a,#c45c0e,#e8803a);height:220px;font-size:4rem;">🌅</div>
+        <div class="gallery-overlay"><div class="gallery-overlay-text"><h3>Atardecer en la Terraza</h3><p>El espectáculo natural que nos regala el mar</p></div></div>
+      </div>
+      <div class="gallery-item">
+        <span class="gallery-tag">Cócteles</span>
+        <div class="gallery-visual-inner" style="background:linear-gradient(135deg,#9b2066,#c45c0e);height:300px;font-size:5rem;">🍹</div>
+        <div class="gallery-overlay"><div class="gallery-overlay-text"><h3>Pisco Sour del Capitán</h3><p>Nuestro cóctel insignia al atardecer</p></div></div>
+      </div>
+
+      <!-- Row 2 -->
+      <div class="gallery-item">
+        <span class="gallery-tag">Platos</span>
+        <div class="gallery-visual-inner" style="background:linear-gradient(135deg,#005c71,#001f30);height:240px;font-size:5rem;">🐙</div>
+        <div class="gallery-overlay"><div class="gallery-overlay-text"><h3>Ceviche de Pulpo</h3><p>Fresco, marino y absolutamente delicioso</p></div></div>
+      </div>
+      <div class="gallery-item">
+        <span class="gallery-tag">El Mar</span>
+        <div class="gallery-visual-inner" style="background:linear-gradient(160deg,#05081a,#0d1b50,#1a0533);height:320px;font-size:4.5rem;">🌙</div>
+        <div class="gallery-overlay"><div class="gallery-overlay-text"><h3>Noche en la Playa</h3><p>El cielo estrellado como decoración perfecta</p></div></div>
+      </div>
+      <div class="gallery-item">
+        <span class="gallery-tag">Platos</span>
+        <div class="gallery-visual-inner" style="background:linear-gradient(135deg,#0d1b50,#060d30);height:250px;font-size:5rem;">🍝</div>
+        <div class="gallery-overlay"><div class="gallery-overlay-text"><h3>Linguine al Nero di Seppia</h3><p>Presencia en el plato digna de alta cocina</p></div></div>
+      </div>
+
+      <!-- Row 3 -->
+      <div class="gallery-item">
+        <span class="gallery-tag">Ambiente</span>
+        <div class="gallery-visual-inner" style="background:linear-gradient(135deg,#1a3a4a,#2d6a8a,#c9a227);height:260px;font-size:4rem;">🌊</div>
+        <div class="gallery-overlay"><div class="gallery-overlay-text"><h3>Amanecer en el Muelle</h3><p>El mejor inicio del día con vista al mar</p></div></div>
+      </div>
+      <div class="gallery-item">
+        <span class="gallery-tag">Platos</span>
+        <div class="gallery-visual-inner" style="background:linear-gradient(135deg,#1a0533,#0a0220);height:210px;font-size:5rem;">🦞</div>
+        <div class="gallery-overlay"><div class="gallery-overlay-text"><h3>Lobster & Truffle Risotto</h3><p>Nuestra creación más preciada de la noche</p></div></div>
+      </div>
+      <div class="gallery-item">
+        <span class="gallery-tag">Cócteles</span>
+        <div class="gallery-visual-inner" style="background:linear-gradient(135deg,#a0522d,#5c3317);height:280px;font-size:5rem;">🥃</div>
+        <div class="gallery-overlay"><div class="gallery-overlay-text"><h3>Ron Añejo Venezolano</h3><p>Copa de ron 12 años con hielo esférico</p></div></div>
+      </div>
+
+      <!-- Row 4 -->
+      <div class="gallery-item">
+        <span class="gallery-tag">Platos</span>
+        <div class="gallery-visual-inner" style="background:linear-gradient(135deg,#c9a227,#8b5e08);height:230px;font-size:5rem;">🥟</div>
+        <div class="gallery-overlay"><div class="gallery-overlay-text"><h3>Empanadas de Cazón</h3><p>Tradición costera en cada mordida</p></div></div>
+      </div>
+      <div class="gallery-item">
+        <span class="gallery-tag">Ambiente</span>
+        <div class="gallery-visual-inner" style="background:linear-gradient(135deg,#006994,#00b4d8,#ffd60a);height:290px;font-size:4rem;">☀️</div>
+        <div class="gallery-overlay"><div class="gallery-overlay-text"><h3>Mediodía en la Terraza</h3><p>El Caribe en todo su esplendor tropical</p></div></div>
+      </div>
+      <div class="gallery-item">
+        <span class="gallery-tag">Platos</span>
+        <div class="gallery-visual-inner" style="background:linear-gradient(135deg,#600040,#9b2066);height:240px;font-size:5rem;">🍢</div>
+        <div class="gallery-overlay"><div class="gallery-overlay-text"><h3>Brochetas de Langostinos</h3><p>Parrilla y sabor marino en perfecta armonía</p></div></div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>¿Te gustó lo que viste? <a href="reservas.html">Reserva tu mesa</a> · © 2025 El Capitán de la Playa</p>
+  </footer>
+
+  <a href="https://wa.me/1234567890" target="_blank" style="position:fixed;bottom:2rem;right:2rem;width:56px;height:56px;background:#25D366;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.5rem;text-decoration:none;box-shadow:0 4px 18px rgba(37,211,102,0.4);z-index:999;">
+    <i class="fab fa-whatsapp"></i>
+  </a>
+</body>
+</html>

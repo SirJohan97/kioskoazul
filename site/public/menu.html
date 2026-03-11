@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Menú Completo — El Capitán de la Playa</title>
+  <meta name="description" content="Explora el menú completo de El Capitán de la Playa: desayunos, almuerzos, cenas gourmet y cócteles de autor." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Inter:wght@300;400;500&family=Playfair+Display:ital,wght@1,700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --gold: #F5A623; --gold-glow: rgba(245,166,35,0.35);
+      --cream: #FFF8F0; --pearl: #D6CFC7;
+      --glass-bg: rgba(10,10,30,0.45); --glass-border: rgba(245,166,35,0.22);
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      color: var(--cream);
+      background: linear-gradient(160deg, #06121e 0%, #0d1b36 40%, #15102a 100%);
+      min-height: 100vh;
+    }
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      backdrop-filter: blur(18px); background: rgba(5,8,26,0.7);
+      border-bottom: 1px solid var(--glass-border);
+      padding: 0 2rem; height: 70px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .nav-logo { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1.2rem; color: var(--gold); text-decoration: none; }
+    .nav-logo span { color: var(--cream); font-weight: 300; font-size: 0.8rem; display: block; }
+    .nav-links { display: flex; gap: 0.5rem; list-style: none; }
+    .nav-links a { color: var(--pearl); text-decoration: none; font-family: 'Outfit', sans-serif; font-size: 0.9rem; padding: 0.4rem 0.9rem; border-radius: 999px; transition: all 0.3s; }
+    .nav-links a:hover, .nav-links a.active { color: var(--gold); background: rgba(245,166,35,0.12); }
+
+    main { max-width: 1100px; margin: 0 auto; padding: 4rem 2rem 6rem; }
+
+    .page-header { text-align: center; margin-bottom: 3.5rem; }
+    .eyebrow { font-size: 0.75rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold); font-family: 'Outfit', sans-serif; font-weight: 600; margin-bottom: 0.5rem; }
+    .page-title { font-family: 'Playfair Display', serif; font-size: clamp(2rem, 5vw, 3.5rem); font-style: italic; color: var(--cream); margin-bottom: 0.75rem; }
+    .page-sub { font-size: 1rem; color: var(--pearl); font-weight: 300; }
+
+    .menu-tabs { display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center; margin-bottom: 2.5rem; }
+    .tab-btn {
+      background: var(--glass-bg); border: 1px solid var(--glass-border);
+      color: var(--pearl); padding: 0.6rem 1.4rem; border-radius: 999px;
+      font-family: 'Outfit', sans-serif; font-size: 0.88rem; font-weight: 600;
+      cursor: pointer; transition: all 0.3s; backdrop-filter: blur(10px);
+    }
+    .tab-btn.active, .tab-btn:hover { background: var(--gold); color: #1a0900; border-color: var(--gold); box-shadow: 0 4px 16px var(--gold-glow); }
+
+    .menu-section { display: none; }
+    .menu-section.active { display: block; }
+
+    .menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 1.25rem; }
+
+    .menu-item {
+      background: var(--glass-bg); backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border); border-radius: 16px;
+      padding: 1.5rem; transition: all 0.3s;
+    }
+    .menu-item:hover { border-color: rgba(245,166,35,0.45); transform: translateY(-4px); box-shadow: 0 10px 30px rgba(245,166,35,0.12); }
+    .item-meta { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem; }
+    .item-name { font-family: 'Outfit', sans-serif; font-size: 1.05rem; font-weight: 700; color: var(--cream); }
+    .item-price { font-family: 'Outfit', sans-serif; font-weight: 600; color: var(--gold); font-size: 1rem; white-space: nowrap; margin-left: 1rem; }
+    .item-desc { font-size: 0.85rem; color: var(--pearl); line-height: 1.6; font-weight: 300; }
+    .item-badge { display: inline-block; font-size: 0.7rem; background: rgba(245,166,35,0.12); border: 1px solid rgba(245,166,35,0.25); color: var(--gold); border-radius: 999px; padding: 0.2rem 0.65rem; margin-bottom: 0.5rem; font-family: 'Outfit', sans-serif; font-weight: 600; letter-spacing: 0.05em; }
+
+    .section-heading { font-family: 'Outfit', sans-serif; font-size: 1.4rem; font-weight: 800; color: var(--cream); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.6rem; }
+    .section-heading i { color: var(--gold); }
+    .section-divider { margin: 2rem 0; }
+
+    footer { padding: 2rem; text-align: center; background: rgba(0,0,0,0.4); border-top: 1px solid var(--glass-border); }
+    footer a { color: var(--gold); text-decoration: none; font-family: 'Outfit', sans-serif; }
+    footer p { font-size: 0.82rem; color: var(--pearl); font-weight: 300; }
+
+    @media (max-width: 600px) { .nav-links { display: none; } main { padding: 2.5rem 1.2rem; } }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="index.html" class="nav-logo">El Capitán <span>de la Playa</span></a>
+    <ul class="nav-links">
+      <li><a href="index.html">← Inicio</a></li>
+      <li><a href="galeria.html">Galería</a></li>
+      <li><a href="reservas.html">Reservas</a></li>
+    </ul>
+  </nav>
+
+  <main>
+    <header class="page-header">
+      <p class="eyebrow">🍽️ Nuestra Carta</p>
+      <h1 class="page-title">Menú Completo</h1>
+      <p class="page-sub">Todo preparado con ingredientes frescos del mar y la tierra</p>
+    </header>
+
+    <div class="menu-tabs">
+      <button class="tab-btn active" onclick="showTab('desayunos', this)">🌅 Desayunos</button>
+      <button class="tab-btn" onclick="showTab('almuerzos', this)">☀️ Almuerzos</button>
+      <button class="tab-btn" onclick="showTab('cockteles', this)">🍹 Cócteles</button>
+      <button class="tab-btn" onclick="showTab('cenas', this)">🌙 Cenas</button>
+    </div>
+
+    <!-- DESAYUNOS -->
+    <section class="menu-section active" id="desayunos">
+      <h2 class="section-heading"><i class="fas fa-sun"></i> Desayunos Costeros</h2>
+      <div class="menu-grid">
+        <div class="menu-item"><div class="item-badge">⭐ Popular</div><div class="item-meta"><span class="item-name">Empanadas de Cazón</span><span class="item-price">$8</span></div><p class="item-desc">Empanadas fritas rellenas de cazón fresco. Servidas con salsa criolla.</p></div>
+        <div class="menu-item"><div class="item-meta"><span class="item-name">Arepas Asadas</span><span class="item-price">$6</span></div><p class="item-desc">Arepas de maíz a la brasa con queso blanco, aguacate y mantequilla.</p></div>
+        <div class="menu-item"><div class="item-meta"><span class="item-name">Pabellón Criollo</span><span class="item-price">$10</span></div><p class="item-desc">Caraotas negras, carne mechada, tajadas y arroz blanco. El desayuno venezolano por excelencia.</p></div>
+        <div class="menu-item"><div class="item-badge">Vegano</div><div class="item-meta"><span class="item-name">Fruta Tropical</span><span class="item-price">$5</span></div><p class="item-desc">Selección de frutas tropicales frescas con miel de agave y granola artesanal.</p></div>
+        <div class="menu-item"><div class="item-meta"><span class="item-name">Huevos Revueltos del Mar</span><span class="item-price">$9</span></div><p class="item-desc">Huevos revueltos con camarones, cebollín, tomate y cilantro. Servidos con tostadas.</p></div>
+        <div class="menu-item"><div class="item-meta"><span class="item-name">Café Capitán</span><span class="item-price">$3</span></div><p class="item-desc">Espresso doble de origen venezolano con espuma de leche o solo. El mejor inicio del día.</p></div>
+      </div>
+    </section>
+
+    <!-- ALMUERZOS -->
+    <section class="menu-section" id="almuerzos">
+      <h2 class="section-heading"><i class="fas fa-fish"></i> Almuerzos Tropicales</h2>
+      <div class="menu-grid">
+        <div class="menu-item"><div class="item-badge">⭐ El Más Pedido</div><div class="item-meta"><span class="item-name">Pescado Frito con Patacones</span><span class="item-price">$14</span></div><p class="item-desc">Pescado del día frito crujiente, patacones, ensalada de repollo y salsa tártara de la casa.</p></div>
+        <div class="menu-item"><div class="item-badge">Premium</div><div class="item-meta"><span class="item-name">Ceviche de Pulpo</span><span class="item-price">$16</span></div><p class="item-desc">Pulpo fresco curado en limón, cilantro, cebolla morada y ají amarillo peruano.</p></div>
+        <div class="menu-item"><div class="item-meta"><span class="item-name">Camarones al Ajillo</span><span class="item-price">$15</span></div><p class="item-desc">Camarones jumbo salteados con ajo, vino blanco, limón y hierbas. Servidos sobre arroz blanco.</p></div>
+        <div class="menu-item"><div class="item-meta"><span class="item-name">Arroz con Mariscos</span><span class="item-price">$18</span></div><p class="item-desc">Arroz cremoso estilo risotto con camarones, calamar, mejillones y almejas frescas.</p></div>
+        <div class="menu-item"><div class="item-meta"><span class="item-name">Banderilla de Atún</span><span class="item-price">$13</span></div><p class="item-desc">Atún fresco a la plancha con ensalada de mango, aguacate y vinagreta de maracuyá.</p></div>
+        <div class="menu-item"><div class="item-badge">Vegetariano</div><div class="item-meta"><span class="item-name">Pasta del Mar Verde</span><span class="item-price">$11</span></div><p class="item-desc">Linguine con pesto de albahaca fresca, tomates cherry, aceitunas negras y queso de cabra.</p></div>
+      </div>
+    </section>
+
+    <!-- CÓCTELES -->
+    <section class="menu-section" id="cockteles">
+      <h2 class="section-heading"><i class="fas fa-cocktail"></i> Cócteles & Bebidas</h2>
+      <div class="menu-grid">
+        <div class="menu-item"><div class="item-badge">⭐ Signature</div><div class="item-meta"><span class="item-name">Pisco Sour del Capitán</span><span class="item-price">$9</span></div><p class="item-desc">Pisco premium, limón fresco, jarabe de caña, clara de huevo y bitter Angostura.</p></div>
+        <div class="menu-item"><div class="item-meta"><span class="item-name">Mojito Caribeño</span><span class="item-price">$8</span></div><p class="item-desc">Ron blanco, menta fresca, lima, azúcar de caña y agua con gas. Refrescante y tropical.</p></div>
+        <div class="menu-item"><div class="item-meta"><span class="item-name">Margarita Maracuyá</span><span class="item-price">$9</span></div><p class="item-desc">Tequila blanco, licor de naranja, maracuyá fresco y sal de mar en el borde del vaso.</p></div>
+        <div class="menu-item"><div class="item-meta"><span class="item-name">Sunset Spritz</span><span class="item-price">$10</span></div><p class="item-desc">Aperol, prosecco, un toque de maracuyá y naranja fresca. El cóctel del atardecer.</p></div>
+        <div class="menu-item"><div class="item-badge">Sin Alcohol</div><div class="item-meta"><span class="item-name">Agua de Mar (NA)</span><span class="item-price">$5</span></div><p class="item-desc">Limonada de coco con jengibre fresco, menta y agua mineral con gas.</p></div>
+        <div class="menu-item"><div class="item-meta"><span class="item-name">Ron Añejo al Atardecer</span><span class="item-price">$12</span></div><p class="item-desc">Copa de ron venezolano 12 años añejado, servido con hielo esférico y naranja caramelizada.</p></div>
+      </div>
+    </section>
+
+    <!-- CENAS -->
+    <section class="menu-section" id="cenas">
+      <h2 class="section-heading"><i class="fas fa-moon"></i> Cenas Gourmet</h2>
+      <div class="menu-grid">
+        <div class="menu-item"><div class="item-badge">⭐ Chef's Special</div><div class="item-meta"><span class="item-name">Linguine al Nero di Seppia</span><span class="item-price">$22</span></div><p class="item-desc">Pasta negra al tinto de calamar con medallones de mariscos en bisque de langosta y Parmigiano.</p></div>
+        <div class="menu-item"><div class="item-badge">Signature</div><div class="item-meta"><span class="item-name">Lobster & Truffle Risotto</span><span class="item-price">$35</span></div><p class="item-desc">Risotto Arborio con cola de langosta, aceite de trufa negra y Parmesano añejado 24 meses.</p></div>
+        <div class="menu-item"><div class="item-meta"><span class="item-name">Brochetas de Langostinos</span><span class="item-price">$19</span></div><p class="item-desc">Langostinos tigre a la parrilla con mantequilla de ajo, chimichurri y limón tahitiano.</p></div>
+        <div class="menu-item"><div class="item-meta"><span class="item-name">Pulpo a la Brasa Gourmet</span><span class="item-price">$24</span></div><p class="item-desc">Pulpo entero a la parrilla sobre puré de papas ahumado, olivada negra y aceite de ají amarillo.</p></div>
+        <div class="menu-item"><div class="item-meta"><span class="item-name">Pargo Entero al Horno</span><span class="item-price">$26</span></div><p class="item-desc">Pargo rojo fresco al horno con vegetales mediterráneos, hierbas y salsa de vino blanco.</p></div>
+        <div class="menu-item"><div class="item-meta"><span class="item-name">Tiramisu de Coco</span><span class="item-price">$8</span></div><p class="item-desc">Nuestra versión tropical del clásico italiano: bizcochos de café con mousse de coco y cacao.</p></div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>¿Quieres hacer tu pedido? <a href="https://wa.me/1234567890" target="_blank"><i class="fab fa-whatsapp"></i> WhatsApp</a> | <a href="reservas.html">Reservar Mesa</a></p>
+    <br><p>© 2025 El Capitán de la Playa</p>
+  </footer>
+
+  <a href="https://wa.me/1234567890" target="_blank" style="position:fixed;bottom:2rem;right:2rem;width:56px;height:56px;background:#25D366;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.5rem;text-decoration:none;box-shadow:0 4px 18px rgba(37,211,102,0.4);z-index:999;">
+    <i class="fab fa-whatsapp"></i>
+  </a>
+
+  <script>
+    function showTab(id, btn) {
+      document.querySelectorAll('.menu-section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      btn.classList.add('active');
+    }
+  </script>
+</body>
+</html>

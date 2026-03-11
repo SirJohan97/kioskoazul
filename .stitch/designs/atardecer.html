@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>El Capitán - Sunset Experience</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              colors: {
+                "primary": "#f5a524",
+                "background-light": "#f8f7f5",
+                "background-dark": "#221b10",
+                "sunset-deep": "#4a0e2a",
+                "sunset-orange": "#c45c0e",
+                "sunset-glow": "#e8803a",
+                "sunset-purple": "#9b2066",
+                "pearl": "#D6CFC7",
+                "cream": "#FFF8F0"
+              },
+              fontFamily: {
+                "display": ["Outfit", "sans-serif"],
+                "sans": ["Inter", "sans-serif"]
+              },
+              borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+            },
+          },
+        }
+    </script>
+<style>
+        .sunset-gradient {
+            background: linear-gradient(135deg, #4a0e2a, #c45c0e, #e8803a, #9b2066);
+        }
+        .glass-nav {
+            backdrop-filter: blur(12px);
+            background: rgba(34, 27, 16, 0.7);
+        }
+        .glass-card {
+            backdrop-filter: blur(16px);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(245, 166, 35, 0.2);
+        }
+        .text-shadow-lg {
+            text-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-sans text-slate-900 dark:text-slate-100 overflow-x-hidden">
+<div class="relative min-h-screen sunset-gradient">
+<nav class="sticky top-0 z-50 glass-nav border-b border-primary/10 px-6 py-4 lg:px-20">
+<div class="max-w-7xl mx-auto flex items-center justify-between">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary text-3xl">anchor</span>
+<h1 class="font-display text-2xl font-bold tracking-tight text-cream">El Capitán</h1>
+</div>
+<div class="hidden md:flex items-center gap-10">
+<a class="text-pearl hover:text-primary transition-colors font-medium" href="#">Menú</a>
+<a class="text-pearl hover:text-primary transition-colors font-medium" href="#">Galería</a>
+<a class="text-pearl hover:text-primary transition-colors font-medium" href="#">Reservas</a>
+</div>
+<div class="flex items-center gap-4">
+<button class="bg-primary text-background-dark p-3 rounded-full shadow-[0_0_20px_rgba(245,166,35,0.4)] flex items-center justify-center hover:scale-105 transition-transform">
+<span class="material-symbols-outlined font-bold">chat</span>
+</button>
+<div class="w-10 h-10 rounded-full bg-cover bg-center border-2 border-primary/30" data-alt="User profile avatar" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBqYEPUgAWHGdgO_RUVf1Ypt-LqiqPATx67FtJo0mP0z2Hc27yuU1sv1p5v93E9DoywJN3n3GeuqwcZ84H7apNMUpQub31jXL0MT7Cj7OllvVPOwE36nBZfHQ71cWSNn5taRuZ-joGgqfgNYc-rX8e9z1Ab2zeKnA62KSYqTMouL_jbZd0bdWAOujzSoOCHxK-omfWUP7Bq_O7RW5WeYHWX1Q5jZp-JjLTKmr0FQdjgwzTCiy5gX34enfZv_ZhSoGavHE0sNkrbuGQ')"></div>
+</div>
+</div>
+</nav>
+<section class="relative h-[calc(100vh-80px)] flex flex-col items-center justify-center text-center px-6">
+<div class="space-y-6 max-w-4xl">
+<div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/20 border border-primary/30 backdrop-blur-md">
+<span class="text-primary font-bold text-sm tracking-wider uppercase">🌅 Atardecer — 6:45 PM</span>
+</div>
+<p class="font-display text-cream text-xl lg:text-2xl font-light italic">¡Bienvenido al Atardecer!</p>
+<h2 class="font-display text-5xl lg:text-8xl font-bold text-cream leading-tight text-shadow-lg">
+                    El Capitán de la Playa
+                </h2>
+<p class="text-pearl text-lg lg:text-2xl font-light tracking-wide max-w-2xl mx-auto">
+                    La Mejor Cocina Costera, al Ritmo del Mar.
+                </p>
+<div class="pt-12">
+<button class="group flex flex-col items-center gap-4 mx-auto text-pearl/60">
+<span class="text-xs tracking-[0.3em] uppercase font-semibold">Descubre más</span>
+<span class="material-symbols-outlined animate-bounce text-primary text-3xl">expand_more</span>
+</button>
+</div>
+</div>
+</section>
+<section class="max-w-7xl mx-auto px-6 py-24">
+<div class="flex flex-col items-center mb-16">
+<h3 class="font-display text-primary text-sm font-bold tracking-[0.4em] uppercase mb-4">Recomendaciones</h3>
+<h2 class="font-display text-4xl lg:text-5xl font-bold text-cream text-center">CENA LIGERA &amp; CÓCTELES</h2>
+<p class="text-pearl/80 mt-4 text-lg italic">Fancy Moments Before Night</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
+<div class="glass-card rounded-xl p-6 lg:p-8 flex flex-col gap-6 group hover:border-primary/50 transition-all duration-500">
+<div class="relative overflow-hidden rounded-lg aspect-[16/9]">
+<div class="absolute inset-0 bg-gradient-to-tr from-sunset-deep to-sunset-glow mix-blend-overlay"></div>
+<img alt="Pisco Sour Cocktail" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" data-alt="Signature pisco sour cocktail glass with sunset lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCILxF9G-mXiJoLZY7ohC93ExfbgRdLKxVGOF3zwlomtJ2nDShp29Qj0pbEtJA-lXGzabaeh1cbVodEhCL3YfqFnE96RJY1dkkrT76C1fxXP1nAxbX16x0O3O1hCX9nWCc2rdwIccgKufJ1qO10LmqsBR4v20DMJF4s6nDsIvyoTqQrrCKJ0ysA6k1EpnTsz3bCbuXuzCcbod-uJuaygem78c-2ePA4Osyh7xXE3pdFJJ3AZPeGpYt94fEn0ZGQZL-0FIBM7eC1Zeg"/>
+</div>
+<div class="space-y-4">
+<div class="flex justify-between items-center">
+<h4 class="font-display text-2xl font-bold text-cream">Pisco Sour del Capitán</h4>
+<span class="text-primary font-bold text-lg">$14</span>
+</div>
+<p class="text-pearl/70 leading-relaxed">Nuestra receta insignia con cítricos costeros, clara de huevo y un toque secreto de esencia de maracuyá.</p>
+<button class="bg-primary hover:bg-primary/80 text-background-dark font-bold py-3 px-8 rounded-full flex items-center gap-2 w-fit transition-all shadow-[0_4px_15px_rgba(245,166,35,0.3)]">
+                            Pedir <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+</div>
+<div class="glass-card rounded-xl p-6 lg:p-8 flex flex-col gap-6 group hover:border-primary/50 transition-all duration-500">
+<div class="relative overflow-hidden rounded-lg aspect-[16/9]">
+<div class="absolute inset-0 bg-gradient-to-tr from-sunset-purple to-sunset-orange mix-blend-overlay"></div>
+<img alt="Grilled Prawn Skewers" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" data-alt="Grilled coastal prawns on skewers with garlic butter glaze" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB7u1EF5Z0CGspMmE0WaP6_102pbv49rmInveG04UQj9UfHCnPZ_Bpo4wgqkayYcPQPZtQh5v_ueRpQDIOuENLhi8_UTic6RsElIduo6XPq-xGI6fFQBL-pvPKIDkgacvU0zNxGDcMIQE1bzYsv_Rmy3tCvMdBtF8F0MQpoYb1CdMUv_2nZ0_WpUkRD20igQH0KGf8ScCtTfwWW-2gItL2AWLak2YFoXZtGxWdFiJX86Ha6OEgienIEoaBW0evAW05qxgv_hF5uCnE"/>
+</div>
+<div class="space-y-4">
+<div class="flex justify-between items-center">
+<h4 class="font-display text-2xl font-bold text-cream">Brochetas de Langostinos</h4>
+<span class="text-primary font-bold text-lg">$22</span>
+</div>
+<p class="text-pearl/70 leading-relaxed">Langostinos jumbo a la parrilla, bañados en mantequilla de ajo y hierbas frescas, servidos con dip de coco.</p>
+<button class="bg-primary hover:bg-primary/80 text-background-dark font-bold py-3 px-8 rounded-full flex items-center gap-2 w-fit transition-all shadow-[0_4px_15px_rgba(245,166,35,0.3)]">
+                            Pedir <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<footer class="bg-background-dark/80 backdrop-blur-md border-t border-primary/10 py-12 px-6">
+<div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary text-2xl">anchor</span>
+<span class="font-display text-xl font-bold text-pearl">El Capitán</span>
+</div>
+<div class="flex gap-8">
+<a class="text-pearl/40 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">public</span>
+</a>
+<a class="text-pearl/40 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">share_reviews</span>
+</a>
+<a class="text-pearl/40 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">contact_support</span>
+</a>
+</div>
+<p class="text-pearl/30 text-sm font-light">
+                    © 2024 El Capitán de la Playa. Todos los derechos reservados.
+                </p>
+</div>
+</footer>
+</div>
+</body></html>
