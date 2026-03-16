@@ -101,10 +101,10 @@
     <!-- NAVIGATION -->
     <nav id="navbar">
       <a href="#hero" class="nav-logo">
-        <img src="assets/logo.png" alt="Logo" style="height:45px;width:45px;border-radius:50%;object-fit:cover;">
+        <img src="assets/logo.png" alt="Kiosko Azul Logo" style="height:40px;width:40px;border-radius:50%;object-fit:cover;border:1px solid var(--glass-border-gold);">
         <div>
-          Restaurant
           <span>Kiosko Azul</span>
+          <small style="font-family:'Inter',sans-serif;color:var(--gold);font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;">Restaurant</small>
         </div>
       </a>
 
@@ -132,10 +132,8 @@
         <i class="fas fa-sun"></i>
         <span id="time-badge-text">Mediodía — 12:00 PM</span>
       </div>
-      <p class="hero-greeting" id="hero-greeting">¡Buen Provecho!</p>
-      <div class="hero-logo-wrapper">
-        <img src="assets/logo.png" alt="Restaurante Kiosko Azul Logo" class="hero-logo" />
-      </div>
+      <h1 class="hero-greeting" id="hero-greeting">¡Buen Provecho!</h1>
+      <span class="hero-greeting-sub" id="hero-greeting-sub">Experiencia Costera Premium</span>
       <div class="hero-ctas">
         <a href="#recommendations" class="btn-primary">Ver Recomendaciones</a>
         <a href="reservas.html" class="btn-outline">Reservar Mesa</a>
@@ -220,19 +218,17 @@
         greeting: '¡Buenos Días!',
         recEyebrow: '☀️ Para Empezar el Día',
         recTitle: 'RECOMENDACIONES DE DESAYUNO',
-        recSubtitle: 'Fresh & Traditional Options',
+        recSubtitle: 'Opciones clásicas con un toque de alta cocina frente al mar.',
         dishes: [
           {
             tag: 'Desayuno Estrella',
-            icon: '🥟',
-            bgGradient: 'linear-gradient(135deg, #c9a227, #8b5e08)',
+            bgImage: 'https://images.unsplash.com/photo-1541592106381-b31e9677c0e5?q=80&w=2070',
             title: 'Empanadas de Cazón',
-            desc: 'Tradicionales empanadas rellenas con cazón fresco, fritas a la perfección con una masa dorada crujiente. Acompañadas de salsa criolla.',
+            desc: 'Tradicionales empanadas rellenas con cazón fresco, con una masa dorada crujiente. Acompañadas de salsa de ajo confitado.',
           },
           {
             tag: 'Clásico Costero',
-            icon: '🌽',
-            bgGradient: 'linear-gradient(135deg, #a0522d, #5c3317)',
+            bgImage: 'https://images.unsplash.com/photo-1615719413546-198b25453f85?q=80&w=2070',
             title: 'Arepas Asadas',
             desc: 'Arepas de maíz asadas a la brasa con queso blanco derretido, aguacate cremoso y un toque de mantequilla artesanal.',
           }
@@ -246,21 +242,19 @@
         greeting: '¡Buen Provecho!',
         recEyebrow: '🌊 Especiales del Día',
         recTitle: 'ALMUERZO TROPICAL',
-        recSubtitle: 'Daily Specials with Sea Flavor',
+        recSubtitle: 'Especialidades diarias capturadas esta misma mañana, con frescura incomparable.',
         dishes: [
           {
-            tag: 'Plato del Día',
-            icon: '🐟',
-            bgGradient: 'linear-gradient(135deg, #006994, #00436a)',
-            title: 'Pescado Frito con Patacones',
-            desc: 'Pescado fresco frito en su punto justo, con patacones doblemente fritos, ensalada de repollo y salsa tártara de la casa.',
+            tag: 'Pesca del Día',
+            bgImage: 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?q=80&w=2070',
+            title: 'Pescado Frito Premium',
+            desc: 'Pescado fresco frito en su punto justo, con crujientes patacones y salsa tártara de la casa.',
           },
           {
-            tag: 'Selección Premium',
-            icon: '🐙',
-            bgGradient: 'linear-gradient(135deg, #005c71, #004055)',
+            tag: 'Selección de Autor',
+            bgImage: 'https://images.unsplash.com/photo-1596796333909-50cce2201d4a?q=80&w=2070',
             title: 'Ceviche de Pulpo',
-            desc: 'Pulpo tierno curado en limón fresco, cilantro, cebolla roja morada y ají amarillo. Fresco, marino y absolutamente delicioso.',
+            desc: 'Pulpo tierno curado en limón fresco, cilantro, cebolla morada y ají amarillo. Una obra de arte marino.',
           }
         ]
       },
@@ -269,24 +263,22 @@
         bodyClass: 'atardecer',
         badgeIcon: '🌅',
         badgeLabel: 'Atardecer',
-        greeting: '¡Bienvenido al Atardecer!',
+        greeting: '¡El Atardecer!',
         recEyebrow: '🍹 Momentos Especiales',
         recTitle: 'CENA LIGERA & CÓCTELES',
-        recSubtitle: 'Fancy Moments Before Night',
+        recSubtitle: 'Transición a la noche con alta mixología artesanal y sutiles tapas contemporáneas.',
         dishes: [
           {
-            tag: 'Cóctel Signature',
-            icon: '🍹',
-            bgGradient: 'linear-gradient(135deg, #c45c0e, #7a3208)',
-            title: 'Pisco Sour Kiosco Azul',
-            desc: 'Nuestro cóctel insignia: pisco premium, jugo de limón recién exprimido, clara de huevo batida y unas gotas de bitter Angostura.',
+            tag: 'Alta Mixología',
+            bgImage: 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?q=80&w=2070',
+            title: 'Pisco Sour Azul',
+            desc: 'Nuestro cóctel insignia: pisco premium, jugo de limón recién exprimido, claras batidas a punto y notas herbales.',
           },
           {
             tag: 'Para Compartir',
-            icon: '🍢',
-            bgGradient: 'linear-gradient(135deg, #9b2066, #600040)',
+            bgImage: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=2070',
             title: 'Brochetas de Langostinos',
-            desc: 'Langostinos tigre en brochetas a la parrilla con mantequilla de ajo, chimichurri fresco y limón tahitiano. Ideales para el atardecer.',
+            desc: 'Langostinos en brochetas asadas a la parrilla con mantequilla de ajo y exótico chimichurri fresco. Ideales para la puesta de sol.',
           }
         ]
       },
@@ -298,21 +290,19 @@
         greeting: '¡Buenas Noches!',
         recEyebrow: '🌟 Nuestras Creaciones Finas',
         recTitle: 'CENA GOURMET & CREACIONES',
-        recSubtitle: 'Our Finest Creations',
+        recSubtitle: 'Una experiencia culinaria inmersiva, a luz tenue.',
         dishes: [
           {
             tag: 'Plato Gourmet',
-            icon: '🍝',
-            bgGradient: 'linear-gradient(135deg, #0d1b50, #060d30)',
+            bgImage: 'https://images.unsplash.com/photo-1551183053-bf91a1d81141?q=80&w=2070',
             title: 'Linguine al Nero di Seppia',
-            desc: 'Pasta negra al tinto de calamar con medallones de mariscos salteados en bisque de langosta, terminada con Parmigiano-Reggiano y microgreens.',
+            desc: 'Pasta negra al tinto de calamar con medallones de mariscos salteados en bisque de langosta y queso Parmigiano-Reggiano.',
           },
           {
-            tag: 'Chef\'s Signature',
-            icon: '🦞',
-            bgGradient: 'linear-gradient(135deg, #1a0533, #0a0220)',
+            tag: 'Firma del Chef',
+            bgImage: 'https://images.unsplash.com/photo-1621509938561-12c40c156ca5?q=80&w=2070',
             title: 'Lobster & Truffle Risotto',
-            desc: 'Risotto Arborio cremoso con media cola de langosta a la mantequilla, aceite de trufa negra y Parmesano añejado 24 meses. Una experiencia única.',
+            desc: 'Risotto cremoso de Arborio importado con media cola de langosta a la mantequilla, perfumado con aceite de trufa blanca.',
           }
         ]
       }
@@ -339,16 +329,14 @@
       return `
         <div class="dish-card fade-up">
           <div class="dish-card-image">
-            <div class="img-placeholder" style="background: ${dish.bgGradient};">
-              <span class="dish-icon">${dish.icon}</span>
-            </div>
+            <div class="img-placeholder" style="background: url('${dish.bgImage}') no-repeat center center; background-size: cover;"></div>
           </div>
           <div class="dish-card-body">
             <span class="dish-card-tag">${dish.tag}</span>
             <h3 class="dish-card-title">${dish.title}</h3>
             <p class="dish-card-desc">${dish.desc}</p>
             <a href="https://wa.me/+584126071753?text=${waMsg}" class="btn-order" target="_blank" rel="noopener">
-              <i class="fab fa-whatsapp"></i> Pedir →
+              Solicitar <i class="fas fa-arrow-right"></i>
             </a>
           </div>
         </div>
