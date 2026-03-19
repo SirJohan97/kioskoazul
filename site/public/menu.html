@@ -16,76 +16,127 @@
   <link rel="icon" href="assets/logo.png" />
 
   <style>
-    
     /* CHECKOUT MODAL STYLES */
     .checkout-overlay {
       position: fixed;
-      top: 0; left: 0; width: 100%; height: 100vh;
-      background: rgba(0,0,0,0.8);
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.8);
       backdrop-filter: blur(5px);
       z-index: 2000;
       display: none;
-      align-items: center; justify-content: center;
-      opacity: 0; transition: opacity 0.3s;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.3s;
     }
+
     .checkout-overlay.active {
-      display: flex; opacity: 1;
+      display: flex;
+      opacity: 1;
     }
+
     .checkout-modal {
       background: var(--navy);
       border: 1px solid var(--gold);
       border-radius: 4px;
       padding: 2.5rem;
-      width: 90%; max-width: 500px;
-      max-height: 90vh; /* Para que no se salga de la pantalla */
-      overflow-y: auto; /* Scroll interno si es muy largo */
+      width: 90%;
+      max-width: 500px;
+      max-height: 90vh;
+      /* Para que no se salga de la pantalla */
+      overflow-y: auto;
+      /* Scroll interno si es muy largo */
       color: var(--cream);
-      box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
       position: relative;
       transform: translateY(20px);
       transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     }
+
     .checkout-overlay.active .checkout-modal {
       transform: translateY(0);
     }
+
     .checkout-close {
-      position: absolute; top: 1.5rem; right: 1.5rem;
-      background: none; border: none; color: var(--pearl);
-      font-size: 1.2rem; cursor: pointer; transition: color 0.3s;
+      position: absolute;
+      top: 1.5rem;
+      right: 1.5rem;
+      background: none;
+      border: none;
+      color: var(--pearl);
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: color 0.3s;
     }
-    .checkout-close:hover { color: var(--gold); }
+
+    .checkout-close:hover {
+      color: var(--gold);
+    }
+
     .checkout-title {
-      font-family: 'Outfit', sans-serif; font-size: 1.5rem;
-      margin-bottom: 1.5rem; color: var(--cream);
-      display: flex; align-items: center; gap: 0.5rem;
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+      color: var(--cream);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
     }
-    .checkout-title i { color: var(--gold); }
-    
+
+    .checkout-title i {
+      color: var(--gold);
+    }
+
     .checkout-form label {
-      display: block; font-family: 'Inter', sans-serif;
-      font-size: 0.85rem; color: var(--pearl); margin-bottom: 0.5rem;
+      display: block;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
+      color: var(--pearl);
+      margin-bottom: 0.5rem;
     }
-    .checkout-form input, .checkout-form select {
-      width: 100%; padding: 0.8rem 1rem; margin-bottom: 1.25rem;
-      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 10px; color: var(--cream); font-family: 'Inter', sans-serif;
+
+    .checkout-form input,
+    .checkout-form select {
+      width: 100%;
+      padding: 0.8rem 1rem;
+      margin-bottom: 1.25rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      color: var(--cream);
+      font-family: 'Inter', sans-serif;
     }
-    .checkout-form input:focus, .checkout-form select:focus {
-      outline: none; border-color: var(--gold); background: rgba(255,255,255,0.1);
+
+    .checkout-form input:focus,
+    .checkout-form select:focus {
+      outline: none;
+      border-color: var(--gold);
+      background: rgba(255, 255, 255, 0.1);
     }
+
     .checkout-form select option {
       background: var(--navy);
       color: var(--cream);
     }
-    
+
     .payment-info {
       background: rgba(192, 57, 43, 0.1);
       border: 1px solid rgba(192, 57, 43, 0.3);
-      border-radius: 10px; padding: 1rem; margin-bottom: 1.5rem;
-      font-size: 0.85rem; color: var(--pearl); line-height: 1.5;
+      border-radius: 10px;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+      font-size: 0.85rem;
+      color: var(--pearl);
+      line-height: 1.5;
     }
-    .payment-info strong { color: var(--gold); }
-    
+
+    .payment-info strong {
+      color: var(--gold);
+    }
+
     .checkout-summary {
       background: rgba(18, 33, 60, 0.8);
       border: 1px solid rgba(255, 255, 255, 0.08);
@@ -93,6 +144,7 @@
       padding: 1.2rem;
       margin-bottom: 2rem;
     }
+
     .checkout-summary-row {
       display: flex;
       justify-content: space-between;
@@ -100,33 +152,42 @@
       font-size: 0.9rem;
       color: var(--pearl);
     }
+
     .checkout-summary-total {
       display: flex;
       justify-content: space-between;
       margin-top: 1rem;
       padding-top: 1rem;
-      border-top: 1px dashed rgba(255,255,255,0.1);
+      border-top: 1px dashed rgba(255, 255, 255, 0.1);
       font-size: 1.1rem;
       color: var(--cream);
       font-weight: 600;
       font-family: 'Outfit', sans-serif;
     }
-    
+
     .btn-submit-order {
-      width: 100%; padding: 1rem;
-      background: var(--gold); color: #1a0900;
-      border: none; border-radius: 999px;
-      font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 1rem;
-      cursor: pointer; transition: all 0.3s;
+      width: 100%;
+      padding: 1rem;
+      background: var(--gold);
+      color: #1a0900;
+      border: none;
+      border-radius: 999px;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s;
     }
+
     .btn-submit-order:hover {
-      background: #ffb83d; transform: translateY(-2px);
+      background: #ffb83d;
+      transform: translateY(-2px);
       box-shadow: 0 4px 15px rgba(192, 57, 43, 0.4);
     }
 
     /* CART STYLES */
     .btn-add-cart {
-      background: rgba(255,255,255,0.05);
+      background: rgba(255, 255, 255, 0.05);
       color: var(--cream);
       border: 1px solid var(--gold);
       padding: 0.5rem 1rem;
@@ -138,11 +199,13 @@
       transition: all 0.3s;
       width: 100%;
     }
+
     .btn-add-cart:hover {
       background: var(--gold);
       color: #1a0900;
       box-shadow: 0 4px 15px var(--gold-glow);
     }
+
     #cart-float {
       position: fixed;
       bottom: 6.5rem;
@@ -159,12 +222,14 @@
       font-size: 1.5rem;
       cursor: pointer;
       z-index: 998;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
       transition: transform 0.3s;
     }
+
     #cart-float:hover {
       transform: scale(1.1);
     }
+
     #cart-count {
       position: absolute;
       top: -6px;
@@ -182,6 +247,7 @@
       justify-content: center;
       border: 2px solid var(--navy);
     }
+
     .cart-sidebar {
       position: fixed;
       top: 0;
@@ -197,11 +263,13 @@
       display: flex;
       flex-direction: column;
       padding: 2rem;
-      box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+      box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
     }
+
     .cart-sidebar.open {
       right: 0;
     }
+
     .menu-tabs {
       display: flex;
       gap: 0.5rem;
@@ -224,6 +292,7 @@
       border-radius: 999px;
       border: 1px solid rgba(255, 255, 255, 0.05);
     }
+
     .rate-indicator span {
       color: var(--gold);
       font-weight: 600;
@@ -231,8 +300,8 @@
     }
 
     .tab-btn {
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
       color: var(--pearl);
       padding: 0.7rem 1.5rem;
       border-radius: 999px;
@@ -243,23 +312,27 @@
       transition: all 0.3s;
       white-space: nowrap;
     }
+
     .tab-btn:hover {
-      background: rgba(255,255,255,0.1);
+      background: rgba(255, 255, 255, 0.1);
       border-color: var(--gold);
       color: var(--cream);
     }
+
     .tab-btn.active {
       background: var(--gold);
       color: #1a0900;
       border-color: var(--gold);
       box-shadow: 0 4px 15px rgba(192, 57, 43, 0.4);
     }
+
     .cart-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 2rem;
     }
+
     .cart-header h3 {
       font-family: 'Outfit', sans-serif;
       font-size: 1.6rem;
@@ -268,12 +341,14 @@
       align-items: center;
       gap: 0.5rem;
     }
+
     .cart-header h3 i {
       color: var(--gold);
     }
+
     .cart-header button {
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
       color: var(--pearl);
       font-size: 1.2rem;
       width: 40px;
@@ -285,11 +360,13 @@
       justify-content: center;
       transition: all 0.3s;
     }
+
     .cart-header button:hover {
       background: rgba(192, 57, 43, 0.2);
       color: #ff6b6b;
       border-color: rgba(192, 57, 43, 0.4);
     }
+
     .cart-items {
       flex-grow: 1;
       overflow-y: auto;
@@ -298,22 +375,26 @@
       gap: 1rem;
       padding-right: 0.5rem;
     }
+
     .cart-items::-webkit-scrollbar {
       width: 6px;
     }
+
     .cart-items::-webkit-scrollbar-thumb {
-      background: rgba(255,255,255,0.2);
+      background: rgba(255, 255, 255, 0.2);
       border-radius: 4px;
     }
+
     .cart-item {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: rgba(255,255,255,0.03);
+      background: rgba(255, 255, 255, 0.03);
       padding: 1.25rem;
       border-radius: 4px;
-      border: 1px solid rgba(255,255,255,0.05);
+      border: 1px solid rgba(255, 255, 255, 0.05);
     }
+
     .cart-item-info h4 {
       font-family: 'Outfit', sans-serif;
       color: var(--cream);
@@ -321,18 +402,21 @@
       margin-bottom: 0.3rem;
       line-height: 1.2;
     }
+
     .cart-item-info p {
       color: var(--gold);
       font-weight: 500;
       font-size: 0.95rem;
     }
+
     .cart-item-actions {
       display: flex;
       align-items: center;
       gap: 0.5rem;
     }
+
     .cart-item-actions button {
-      background: rgba(255,255,255,0.1);
+      background: rgba(255, 255, 255, 0.1);
       border: none;
       color: var(--cream);
       width: 28px;
@@ -344,16 +428,20 @@
       justify-content: center;
       transition: all 0.2s;
     }
+
     .cart-item-actions button:hover {
-      background: rgba(255,255,255,0.2);
+      background: rgba(255, 255, 255, 0.2);
     }
+
     .cart-item-actions button.remove {
       background: transparent;
-      color: rgba(255,255,255,0.4);
+      color: rgba(255, 255, 255, 0.4);
     }
+
     .cart-item-actions button.remove:hover {
       color: #ff6b6b;
     }
+
     .cart-qty {
       color: var(--cream);
       font-family: 'Inter', sans-serif;
@@ -362,11 +450,13 @@
       min-width: 20px;
       text-align: center;
     }
+
     .cart-footer {
       margin-top: 1.5rem;
       padding-top: 1.5rem;
-      border-top: 1px solid rgba(255,255,255,0.1);
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
     }
+
     .cart-total {
       display: flex;
       justify-content: space-between;
@@ -377,9 +467,11 @@
       color: var(--cream);
       margin-bottom: 1.5rem;
     }
+
     .cart-total-amount {
       color: var(--gold);
     }
+
     .btn-send-whatsapp {
       width: 100%;
       background: #25D366;
@@ -398,11 +490,13 @@
       transition: all 0.3s;
       box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
     }
+
     .btn-send-whatsapp:hover {
       background: #20b85a;
       transform: translateY(-2px);
       box-shadow: 0 6px 20px rgba(37, 211, 102, 0.45);
     }
+
     @media (max-width: 600px) {
       .cart-sidebar {
         width: 100%;
@@ -413,25 +507,27 @@
   </style>
 
 
-  </head>
+</head>
 
 
 <body>
-  
-      <div class="wave"></div>
-      <div class="wave"></div>
-      <div class="wave"></div>
-      <div class="wave"></div>
-    </div>
+
+  <div class="wave"></div>
+  <div class="wave"></div>
+  <div class="wave"></div>
+  <div class="wave"></div>
+  </div>
   </div>
 
   <!-- Background layers -->
   <nav>
     <a href="index.html" class="nav-logo">
-      <img src="assets/logo.png" alt="Kiosko Azul Logo" style="height:40px;width:40px;border-radius:50%;object-fit:cover;border:1px solid var(--glass-border-gold);">
+      <img src="assets/logo.png" alt="Kiosko Azul Logo"
+        style="height:40px;width:40px;border-radius:50%;object-fit:cover;border:1px solid var(--glass-border-gold);">
       <div>
         <span>Kiosko Azul</span>
-        <small style="font-family:'Inter',sans-serif;color:var(--gold);font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;">Restaurant</small>
+        <small
+          style="font-family:'Inter',sans-serif;color:var(--gold);font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;">Restaurant</small>
       </div>
     </a>
     <ul class="nav-links">
@@ -453,10 +549,10 @@
         <i class="fas fa-sync-alt fa-spin" style="font-size: 0.7rem;"></i> Obteniendo tasa BCV...
       </div>
     </div>
-      <button class="tab-btn active" onclick="showTab('desayunos', this)">🌅 Desayunos</button>
-      <button class="tab-btn" onclick="showTab('almuerzos', this)">☀️ Almuerzos</button>
-      <button class="tab-btn" onclick="showTab('cockteles', this)">🍹 Cócteles</button>
-      <button class="tab-btn" onclick="showTab('cenas', this)">🌙 Cenas</button>
+    <button class="tab-btn active" onclick="showTab('desayunos', this)">🌅 Desayunos</button>
+    <button class="tab-btn" onclick="showTab('almuerzos', this)">☀️ Almuerzos</button>
+    <button class="tab-btn" onclick="showTab('cockteles', this)">🍹 Cócteles</button>
+    <button class="tab-btn" onclick="showTab('cenas', this)">🌙 Cenas</button>
     </div>
 
     <!-- DESAYUNOS -->
@@ -468,37 +564,45 @@
           <div class="item-meta"><span class="item-name">Empanadas de Cazón</span><span class="item-price">$8</span>
           </div>
           <p class="item-desc">Empanadas fritas rellenas de cazón fresco. Servidas con salsa criolla.</p>
-          <div style="margin-top: 1rem;"><button class="btn-add-cart" onclick="addToCart('Empanadas de Cazón', 8)"><i class="fas fa-shopping-cart"></i> Agregar por $8</button></div>
+          <div style="margin-top: 1rem;"><button class="btn-add-cart" onclick="addToCart('Empanadas de Cazón', 8)"><i
+                class="fas fa-shopping-cart"></i> Agregar por $8</button></div>
         </div>
         <div class="menu-item">
           <div class="item-meta"><span class="item-name">Arepas Asadas</span><span class="item-price">$6</span></div>
           <p class="item-desc">Arepas de maíz a la brasa con queso blanco, aguacate y mantequilla.</p>
-          <div style="margin-top: 1rem;"><button class="btn-add-cart" onclick="addToCart('Arepas Asadas', 6)"><i class="fas fa-shopping-cart"></i> Agregar por $6</button></div>
+          <div style="margin-top: 1rem;"><button class="btn-add-cart" onclick="addToCart('Arepas Asadas', 6)"><i
+                class="fas fa-shopping-cart"></i> Agregar por $6</button></div>
         </div>
         <div class="menu-item">
           <div class="item-meta"><span class="item-name">Pabellón Criollo</span><span class="item-price">$10</span>
           </div>
           <p class="item-desc">Caraotas negras, carne mechada, tajadas y arroz blanco. El desayuno venezolano por
             excelencia.</p>
-          <div style="margin-top: 1rem;"><button class="btn-add-cart" onclick="addToCart('Pabellón Criollo', 10)"><i class="fas fa-shopping-cart"></i> Agregar por $10</button></div>
+          <div style="margin-top: 1rem;"><button class="btn-add-cart" onclick="addToCart('Pabellón Criollo', 10)"><i
+                class="fas fa-shopping-cart"></i> Agregar por $10</button></div>
         </div>
         <div class="menu-item">
           <div class="item-badge">Vegano</div>
           <div class="item-meta"><span class="item-name">Fruta Tropical</span><span class="item-price">$5</span></div>
           <p class="item-desc">Selección de frutas tropicales frescas con miel de agave y granola artesanal.</p>
-          <div style="margin-top: 1rem;"><button class="btn-add-cart" onclick="addToCart('Fruta Tropical', 5)"><i class="fas fa-shopping-cart"></i> Agregar por $5</button></div>
+          <div style="margin-top: 1rem;"><button class="btn-add-cart" onclick="addToCart('Fruta Tropical', 5)"><i
+                class="fas fa-shopping-cart"></i> Agregar por $5</button></div>
         </div>
         <div class="menu-item">
           <div class="item-meta"><span class="item-name">Huevos Revueltos del Mar</span><span
               class="item-price">$9</span></div>
           <p class="item-desc">Huevos revueltos con camarones, cebollín, tomate y cilantro. Servidos con tostadas.</p>
-          <div style="margin-top: 1rem;"><button class="btn-add-cart" onclick="addToCart('Huevos Revueltos del Mar', 3)"><i class="fas fa-shopping-cart"></i> Agregar por $3</button></div>
+          <div style="margin-top: 1rem;"><button class="btn-add-cart"
+              onclick="addToCart('Huevos Revueltos del Mar', 3)"><i class="fas fa-shopping-cart"></i> Agregar por
+              $3</button></div>
         </div>
         <div class="menu-item">
           <div class="item-meta"><span class="item-name">Café Capitán</span><span class="item-price">$3</span></div>
           <p class="item-desc">Espresso doble de origen venezolano con espuma de leche o solo. El mejor inicio del día.
           </p>
-          <div style="margin-top: 1rem;"><button class="btn-add-cart" onclick="addToCart('Huevos Revueltos del Mar', 3)"><i class="fas fa-shopping-cart"></i> Agregar por $3</button></div>
+          <div style="margin-top: 1rem;"><button class="btn-add-cart"
+              onclick="addToCart('Huevos Revueltos del Mar', 3)"><i class="fas fa-shopping-cart"></i> Agregar por
+              $3</button></div>
         </div>
       </div>
     </section>
@@ -513,33 +617,40 @@
               class="item-price">$14</span></div>
           <p class="item-desc">Pescado del día frito crujiente, tostones, ensalada de repollo y salsa tártara de la
             casa.</p>
-          <div style="margin-top: 1rem;"><button class="btn-add-cart" onclick="addToCart('Pescado Frito con Tostones', 16)"><i class="fas fa-shopping-cart"></i> Agregar por $16</button></div>
+          <div style="margin-top: 1rem;"><button class="btn-add-cart"
+              onclick="addToCart('Pescado Frito con Tostones', 16)"><i class="fas fa-shopping-cart"></i> Agregar por
+              $16</button></div>
         </div>
         <div class="menu-item">
           <div class="item-badge">Premium</div>
           <div class="item-meta"><span class="item-name">Ceviche de Pulpo</span><span class="item-price">$16</span>
           </div>
           <p class="item-desc">Pulpo fresco curado en limón, cilantro, cebolla morada y ají amarillo peruano.</p>
-          <div style="margin-top: 1rem;"><button class="btn-add-cart" onclick="addToCart('Pescado Frito con Tostones', 16)"><i class="fas fa-shopping-cart"></i> Agregar por $16</button></div>
+          <div style="margin-top: 1rem;"><button class="btn-add-cart"
+              onclick="addToCart('Pescado Frito con Tostones', 16)"><i class="fas fa-shopping-cart"></i> Agregar por
+              $16</button></div>
         </div>
         <div class="menu-item">
           <div class="item-meta"><span class="item-name">Camarones al Ajillo</span><span class="item-price">$15</span>
           </div>
           <p class="item-desc">Camarones jumbo salteados con ajo, vino blanco, limón y hierbas. Servidos sobre arroz
             blanco.</p>
-          <div style="margin-top: 1rem;"><button class="btn-add-cart" onclick="addToCart('Camarones al Ajillo', 15)"><i class="fas fa-shopping-cart"></i> Agregar por $15</button></div>
+          <div style="margin-top: 1rem;"><button class="btn-add-cart" onclick="addToCart('Camarones al Ajillo', 15)"><i
+                class="fas fa-shopping-cart"></i> Agregar por $15</button></div>
         </div>
         <div class="menu-item">
           <div class="item-meta"><span class="item-name">Arroz con Mariscos</span><span class="item-price">$18</span>
           </div>
           <p class="item-desc">Arroz cremoso estilo risotto con camarones, calamar, mejillones y almejas frescas.</p>
-          <div style="margin-top: 1rem;"><button class="btn-add-cart" onclick="addToCart('Arroz con Mariscos', 18)"><i class="fas fa-shopping-cart"></i> Agregar por $18</button></div>
+          <div style="margin-top: 1rem;"><button class="btn-add-cart" onclick="addToCart('Arroz con Mariscos', 18)"><i
+                class="fas fa-shopping-cart"></i> Agregar por $18</button></div>
         </div>
         <div class="menu-item">
           <div class="item-meta"><span class="item-name">Banderilla de Atún</span><span class="item-price">$13</span>
           </div>
           <p class="item-desc">Atún fresco a la plancha con ensalada de mango, aguacate y vinagreta de maracuyá.</p>
-          <div style="margin-top: 1rem;"><button class="btn-add-cart" onclick="addToCart('Banderilla de Atún', 13)"><i class="fas fa-shopping-cart"></i> Agregar por $13</button></div>
+          <div style="margin-top: 1rem;"><button class="btn-add-cart" onclick="addToCart('Banderilla de Atún', 13)"><i
+                class="fas fa-shopping-cart"></i> Agregar por $13</button></div>
         </div>
         <div class="menu-item">
           <div class="item-badge">Vegetariano</div>
@@ -547,7 +658,8 @@
           </div>
           <p class="item-desc">Linguine con pesto de albahaca fresca, tomates cherry, aceitunas negras y queso de cabra.
           </p>
-          <div style="margin-top: 1rem;"><button class="btn-add-cart" onclick="addToCart('Pasta del Mar Verde', 11)"><i class="fas fa-shopping-cart"></i> Agregar por $11</button></div>
+          <div style="margin-top: 1rem;"><button class="btn-add-cart" onclick="addToCart('Pasta del Mar Verde', 11)"><i
+                class="fas fa-shopping-cart"></i> Agregar por $11</button></div>
         </div>
       </div>
     </section>
@@ -561,37 +673,45 @@
           <div class="item-meta"><span class="item-name">Pisco Sour Kiosco Azul</span><span class="item-price">$9</span>
           </div>
           <p class="item-desc">Pisco premium, limón fresco, jarabe de caña, clara de huevo y bitter Angostura.</p>
-          <div style="margin-top: 1rem;"><button class="btn-add-cart" onclick="addToCart('Pisco Sour Kiosco Azul', 9)"><i class="fas fa-shopping-cart"></i> Agregar por $9</button></div>
+          <div style="margin-top: 1rem;"><button class="btn-add-cart"
+              onclick="addToCart('Pisco Sour Kiosco Azul', 9)"><i class="fas fa-shopping-cart"></i> Agregar por
+              $9</button></div>
         </div>
         <div class="menu-item">
           <div class="item-meta"><span class="item-name">Mojito Caribeño</span><span class="item-price">$8</span></div>
           <p class="item-desc">Ron blanco, menta fresca, lima, azúcar de caña y agua con gas. Refrescante y tropical.
           </p>
-          <div style="margin-top: 1rem;"><button class="btn-add-cart" onclick="addToCart('Mojito Caribeño', 8)"><i class="fas fa-shopping-cart"></i> Agregar por $8</button></div>
+          <div style="margin-top: 1rem;"><button class="btn-add-cart" onclick="addToCart('Mojito Caribeño', 8)"><i
+                class="fas fa-shopping-cart"></i> Agregar por $8</button></div>
         </div>
         <div class="menu-item">
           <div class="item-meta"><span class="item-name">Margarita Maracuyá</span><span class="item-price">$9</span>
           </div>
           <p class="item-desc">Tequila blanco, licor de naranja, maracuyá fresco y sal de mar en el borde del vaso.</p>
-          <div style="margin-top: 1rem;"><button class="btn-add-cart" onclick="addToCart('Margarita Maracuyá', 9)"><i class="fas fa-shopping-cart"></i> Agregar por $9</button></div>
+          <div style="margin-top: 1rem;"><button class="btn-add-cart" onclick="addToCart('Margarita Maracuyá', 9)"><i
+                class="fas fa-shopping-cart"></i> Agregar por $9</button></div>
         </div>
         <div class="menu-item">
           <div class="item-meta"><span class="item-name">Sunset Spritz</span><span class="item-price">$10</span></div>
           <p class="item-desc">Aperol, prosecco, un toque de maracuyá y naranja fresca. El cóctel del atardecer.</p>
-          <div style="margin-top: 1rem;"><button class="btn-add-cart" onclick="addToCart('Sunset Spritz', 10)"><i class="fas fa-shopping-cart"></i> Agregar por $10</button></div>
+          <div style="margin-top: 1rem;"><button class="btn-add-cart" onclick="addToCart('Sunset Spritz', 10)"><i
+                class="fas fa-shopping-cart"></i> Agregar por $10</button></div>
         </div>
         <div class="menu-item">
           <div class="item-badge">Sin Alcohol</div>
           <div class="item-meta"><span class="item-name">Agua de Mar (NA)</span><span class="item-price">$5</span></div>
           <p class="item-desc">Limonada de coco con jengibre fresco, menta y agua mineral con gas.</p>
-          <div style="margin-top: 1rem;"><button class="btn-add-cart" onclick="addToCart('Agua de Mar (NA)', 5)"><i class="fas fa-shopping-cart"></i> Agregar por $5</button></div>
+          <div style="margin-top: 1rem;"><button class="btn-add-cart" onclick="addToCart('Agua de Mar (NA)', 5)"><i
+                class="fas fa-shopping-cart"></i> Agregar por $5</button></div>
         </div>
         <div class="menu-item">
           <div class="item-meta"><span class="item-name">Ron Añejo al Atardecer</span><span
               class="item-price">$12</span></div>
           <p class="item-desc">Copa de ron venezolano 12 años añejado, servido con hielo esférico y naranja
             caramelizada.</p>
-          <div style="margin-top: 1rem;"><button class="btn-add-cart" onclick="addToCart('Ron Añejo al Atardecer', 26)"><i class="fas fa-shopping-cart"></i> Agregar por $26</button></div>
+          <div style="margin-top: 1rem;"><button class="btn-add-cart"
+              onclick="addToCart('Ron Añejo al Atardecer', 26)"><i class="fas fa-shopping-cart"></i> Agregar por
+              $26</button></div>
         </div>
       </div>
     </section>
@@ -606,7 +726,9 @@
               class="item-price">$22</span></div>
           <p class="item-desc">Pasta negra al tinto de calamar con medallones de mariscos en bisque de langosta y
             Parmigiano.</p>
-          <div style="margin-top: 1rem;"><button class="btn-add-cart" onclick="addToCart('Ron Añejo al Atardecer', 26)"><i class="fas fa-shopping-cart"></i> Agregar por $26</button></div>
+          <div style="margin-top: 1rem;"><button class="btn-add-cart"
+              onclick="addToCart('Ron Añejo al Atardecer', 26)"><i class="fas fa-shopping-cart"></i> Agregar por
+              $26</button></div>
         </div>
         <div class="menu-item">
           <div class="item-badge">Signature</div>
@@ -614,34 +736,43 @@
               class="item-price">$35</span></div>
           <p class="item-desc">Risotto Arborio con cola de langosta, aceite de trufa negra y Parmesano añejado 24 meses.
           </p>
-          <div style="margin-top: 1rem;"><button class="btn-add-cart" onclick="addToCart('Ron Añejo al Atardecer', 26)"><i class="fas fa-shopping-cart"></i> Agregar por $26</button></div>
+          <div style="margin-top: 1rem;"><button class="btn-add-cart"
+              onclick="addToCart('Ron Añejo al Atardecer', 26)"><i class="fas fa-shopping-cart"></i> Agregar por
+              $26</button></div>
         </div>
         <div class="menu-item">
           <div class="item-meta"><span class="item-name">Brochetas de Langostinos</span><span
               class="item-price">$19</span></div>
           <p class="item-desc">Langostinos tigre a la parrilla con mantequilla de ajo, chimichurri y limón tahitiano.
           </p>
-          <div style="margin-top: 1rem;"><button class="btn-add-cart" onclick="addToCart('Ron Añejo al Atardecer', 26)"><i class="fas fa-shopping-cart"></i> Agregar por $26</button></div>
+          <div style="margin-top: 1rem;"><button class="btn-add-cart"
+              onclick="addToCart('Ron Añejo al Atardecer', 26)"><i class="fas fa-shopping-cart"></i> Agregar por
+              $26</button></div>
         </div>
         <div class="menu-item">
           <div class="item-meta"><span class="item-name">Pulpo a la Brasa Gourmet</span><span
               class="item-price">$24</span></div>
           <p class="item-desc">Pulpo entero a la parrilla sobre puré de papas ahumado, olivada negra y aceite de ají
             amarillo.</p>
-          <div style="margin-top: 1rem;"><button class="btn-add-cart" onclick="addToCart('Ron Añejo al Atardecer', 26)"><i class="fas fa-shopping-cart"></i> Agregar por $26</button></div>
+          <div style="margin-top: 1rem;"><button class="btn-add-cart"
+              onclick="addToCart('Ron Añejo al Atardecer', 26)"><i class="fas fa-shopping-cart"></i> Agregar por
+              $26</button></div>
         </div>
         <div class="menu-item">
           <div class="item-meta"><span class="item-name">Pargo Entero al Horno</span><span class="item-price">$26</span>
           </div>
           <p class="item-desc">Pargo rojo fresco al horno con vegetales mediterráneos, hierbas y salsa de vino blanco.
           </p>
-          <div style="margin-top: 1rem;"><button class="btn-add-cart" onclick="addToCart('Ron Añejo al Atardecer', 26)"><i class="fas fa-shopping-cart"></i> Agregar por $26</button></div>
+          <div style="margin-top: 1rem;"><button class="btn-add-cart"
+              onclick="addToCart('Ron Añejo al Atardecer', 26)"><i class="fas fa-shopping-cart"></i> Agregar por
+              $26</button></div>
         </div>
         <div class="menu-item">
           <div class="item-meta"><span class="item-name">Tiramisu de Coco</span><span class="item-price">$8</span></div>
           <p class="item-desc">Nuestra versión tropical del clásico italiano: bizcochos de café con mousse de coco y
             cacao.</p>
-          <div style="margin-top: 1rem;"><button class="btn-add-cart" onclick="addToCart('Tiramisu de Coco', 8)"><i class="fas fa-shopping-cart"></i> Agregar por $8</button></div>
+          <div style="margin-top: 1rem;"><button class="btn-add-cart" onclick="addToCart('Tiramisu de Coco', 8)"><i
+                class="fas fa-shopping-cart"></i> Agregar por $8</button></div>
         </div>
       </div>
     </section>
@@ -684,10 +815,12 @@
     </div>
     <div class="cart-footer">
       <div class="cart-total">
-        <span>Total a Pagar</span> 
+        <span>Total a Pagar</span>
         <div style="text-align: right;">
           <span class="cart-total-amount">$<span id="cart-total-price">0</span></span>
-          <span class="cart-total-amount" style="display: block; font-size: 0.8rem; color: var(--pearl); font-weight: 400; margin-top: 0.2rem;" id="cart-total-ves">Bs. 0.00</span>
+          <span class="cart-total-amount"
+            style="display: block; font-size: 0.8rem; color: var(--pearl); font-weight: 400; margin-top: 0.2rem;"
+            id="cart-total-ves">Bs. 0.00</span>
         </div>
       </div>
       <button class="btn-send-whatsapp" onclick="openCheckout()">
@@ -705,25 +838,25 @@
         const res = await fetch('https://ve.dolarapi.com/v1/dolares/oficial');
         const data = await res.json();
         bcvRate = data.promedio;
-        
+
         // Update Indicator
         const indicator = document.getElementById('rate-indicator');
         indicator.innerHTML = `<i class="fas fa-university"></i> Tasa BCV: <span>Bs. ${bcvRate.toFixed(2)}</span>`;
-        
+
         // Update all menu items
         document.querySelectorAll('.item-price').forEach(el => {
           const usdPrice = parseFloat(el.textContent.replace('$', ''));
           const vesPrice = (usdPrice * bcvRate).toFixed(2);
-          
+
           // Check if it already has the ves price to avoid duplicate appending
           if (!el.querySelector('.item-price-ves')) {
             el.innerHTML += `<span class="item-price-ves">Bs. ${vesPrice}</span>`;
           }
         });
-        
+
         // Update cart if there are items
         updateCartUI();
-        
+
       } catch (e) {
         console.error("Error fetching BCV rate:", e);
         document.getElementById('rate-indicator').innerHTML = `<i class="fas fa-exclamation-circle" style="color:#C0392B;"></i> Tasa no disponible`;
@@ -740,13 +873,13 @@
         cart.push({ name, price, qty: 1 });
       }
       updateCartUI();
-      
+
       const floatBtn = document.getElementById('cart-float');
       floatBtn.style.transform = 'scale(1.2)';
       setTimeout(() => floatBtn.style.transform = '', 200);
-      
-      if(cart.length === 1 && cart[0].qty === 1) {
-          toggleCart(true);
+
+      if (cart.length === 1 && cart[0].qty === 1) {
+        toggleCart(true);
       }
     }
 
@@ -772,7 +905,7 @@
       let total = 0;
       let count = 0;
 
-      if(cart.length === 0) {
+      if (cart.length === 0) {
         container.innerHTML = '<div style="text-align:center;color:var(--pearl);margin-top:4rem;"><i class="fas fa-shopping-basket" style="font-size:3rem;opacity:0.2;margin-bottom:1rem;display:block;"></i>Tu carrito está vacío</div>';
       }
 
@@ -801,7 +934,7 @@
 
       countEl.textContent = count;
       totalEl.textContent = total;
-      
+
       const totalVesEl = document.getElementById('cart-total-ves');
       if (totalVesEl) {
         if (bcvRate > 0) {
@@ -814,15 +947,15 @@
 
     function toggleCart(forceOpen = false) {
       const sidebar = document.getElementById('cart-sidebar');
-      if(forceOpen === true) {
-          sidebar.classList.add('open');
+      if (forceOpen === true) {
+        sidebar.classList.add('open');
       } else {
-          sidebar.classList.toggle('open');
+        sidebar.classList.toggle('open');
       }
     }
 
-    
-    
+
+
     // Init
     updateCartUI();
   </script>
@@ -832,7 +965,7 @@
     <div class="checkout-modal">
       <button class="checkout-close" onclick="toggleCheckout()"><i class="fas fa-times"></i></button>
       <h3 class="checkout-title"><i class="fas fa-clipboard-check"></i> Finalizar Pedido</h3>
-      
+
       <div id="checkout-summary" class="checkout-summary">
         <!-- Generado dinamicamente -->
       </div>
@@ -840,31 +973,32 @@
       <div class="checkout-form">
         <label>Nombre y Apellido</label>
         <input type="text" id="order-name" placeholder="Ej: Juan Pérez" required>
-        
+
         <label>Teléfono (WhatsApp)</label>
         <input type="text" id="order-phone" placeholder="0412-1234567" required>
-        
+
         <label>Método de Pago</label>
         <select id="payment-method" onchange="updatePaymentInfo()">
-          <option value="Pago Movil Banesco">Pago Móvil (Banesco)</option>
+          <option value="Pago Movil Venezolano de Credito">Pago Móvil (Venezolano de Credito)</option>
           <option value="Pago Movil Provincial">Pago Móvil (Provincial)</option>
           <option value="Pago Movil Mercantil">Pago Móvil (Mercantil)</option>
           <option value="Pago Movil Venezuela">Pago Móvil (BDV)</option>
           <option value="Zelle">Zelle</option>
           <option value="Binance Pay">Binance Pay USDT</option>
         </select>
-        
+
         <div id="payment-info" class="payment-info">
-          <strong>Pago Móvil Banesco (0134)</strong><br>
-          Teléfono: 0412-1234567<br>
-          CI: V-12345678<br>
+          <strong>Pago Móvil Venezolano de Credito</strong><br>
+          Teléfono: 0412-6071753<br>
+          CI: V-9960373<br>
           <em>Realice el pago y coloque la referencia abajo.</em>
         </div>
-        
+
         <label>Número de Referencia del Pago</label>
         <input type="text" id="order-ref" placeholder="Ej: 854721" required>
-        
-        <button class="btn-submit-order" onclick="submitOrder()"><i class="fas fa-paper-plane"></i> Enviar Orden al Restaurante</button>
+
+        <button class="btn-submit-order" onclick="submitOrder()"><i class="fas fa-paper-plane"></i> Enviar Orden al
+          Restaurante</button>
       </div>
     </div>
   </div>
@@ -876,16 +1010,16 @@
         alert('Agrega al menos un plato a tu carrito para hacer el pedido.');
         return;
       }
-      
+
       let total = 0;
       let count = 0;
       cart.forEach(item => {
         total += item.price * item.qty;
         count += item.qty;
       });
-      
+
       const totalVes = bcvRate > 0 ? (total * bcvRate).toFixed(2) : '0.00';
-      
+
       const summaryHTML = `
         <div class="checkout-summary-row">
           <span>Total de Platos:</span>
@@ -900,12 +1034,12 @@
         </div>
       `;
       document.getElementById('checkout-summary').innerHTML = summaryHTML;
-      
+
       toggleCart();
       toggleCheckout();
       updatePaymentInfo(); // Forzar actualización de info de pago al abrir
     }
-    
+
     function toggleCheckout() {
       const overlay = document.getElementById('checkout-overlay');
       if (overlay.classList.contains('active')) {
@@ -916,51 +1050,51 @@
         setTimeout(() => overlay.classList.add('active'), 10);
       }
     }
-    
+
     function updatePaymentInfo() {
       const method = document.getElementById('payment-method').value;
       const infoBox = document.getElementById('payment-info');
-      
+
       let totalUsd = 0;
       cart.forEach(item => totalUsd += item.price * item.qty);
       const totalVes = bcvRate > 0 ? (totalUsd * bcvRate).toFixed(2) : '0.00';
-      
+
       let amountTxt = '';
       if (method.includes('Pago Movil')) {
-         amountTxt = `<div style="margin-bottom: 0.6rem; padding-bottom: 0.6rem; border-bottom: 1px solid rgba(192,57,43,0.2);">Monto exacto a transferir: <strong style="font-size: 1.1rem; display: block;">Bs. ${totalVes}</strong></div>`;
+        amountTxt = `<div style="margin-bottom: 0.6rem; padding-bottom: 0.6rem; border-bottom: 1px solid rgba(192,57,43,0.2);">Monto exacto a transferir: <strong style="font-size: 1.1rem; display: block;">Bs. ${totalVes}</strong></div>`;
       } else {
-         amountTxt = `<div style="margin-bottom: 0.6rem; padding-bottom: 0.6rem; border-bottom: 1px solid rgba(192,57,43,0.2);">Monto exacto a transferir: <strong style="font-size: 1.1rem; display: block;">$${totalUsd.toFixed(2)}</strong></div>`;
+        amountTxt = `<div style="margin-bottom: 0.6rem; padding-bottom: 0.6rem; border-bottom: 1px solid rgba(192,57,43,0.2);">Monto exacto a transferir: <strong style="font-size: 1.1rem; display: block;">$${totalUsd.toFixed(2)}</strong></div>`;
       }
-      
-      if (method === 'Pago Movil Banesco') {
-        infoBox.innerHTML = amountTxt + '<strong>Pago Móvil Banesco (0134)</strong><br>Teléfono: 0412-1234567<br>CI: V-12345678<br><em>Realice el pago y coloque el monto exacto y la referencia abajo.</em>';
+
+      if (method === 'Pago Movil Venezolano de Credito') {
+        infoBox.innerHTML = amountTxt + '<strong>Pago Móvil Venezolano de Credito </strong><br>Teléfono: 0412-6071753<br>CI: V-9960373<br><em>Realice el pago y coloque el monto exacto y la referencia abajo.</em>';
       } else if (method === 'Pago Movil Provincial') {
-        infoBox.innerHTML = amountTxt + '<strong>Pago Móvil Provincial (0108)</strong><br>Teléfono: 0412-1234567<br>CI: V-12345678<br><em>Realice el pago y coloque el monto exacto y la referencia abajo.</em>';
-      } else if (method === 'Pago Movil Mercantil') {
-        infoBox.innerHTML = amountTxt + '<strong>Pago Móvil Mercantil (0105)</strong><br>Teléfono: 0412-1234567<br>CI: V-12345678<br><em>Realice el pago y coloque el monto exacto y la referencia abajo.</em>';
+        infoBox.innerHTML = amountTxt + '<strong>Pago Móvil Provincial </strong><br>Teléfono: 0412-6071753<br>CI: V-9960373<br><em>Realice el pago y coloque el monto exacto y la referencia abajo.</em>';
+      } else if (method === 'Pago Movil Banesco') {
+        infoBox.innerHTML = amountTxt + '<strong>Pago Móvil Banesco </strong><br>Teléfono: 0412-6071753<br>CI: V-9960373<br><em>Realice el pago y coloque el monto exacto y la referencia abajo.</em>';
       } else if (method === 'Pago Movil Venezuela') {
-        infoBox.innerHTML = amountTxt + '<strong>Pago Móvil BDV (0102)</strong><br>Teléfono: 0412-1234567<br>CI: V-12345678<br><em>Realice el pago y coloque el monto exacto y la referencia abajo.</em>';
+        infoBox.innerHTML = amountTxt + '<strong>Pago Móvil BDV </strong><br>Teléfono: 0412-6071753<br>CI: V-9960373<br><em>Realice el pago y coloque el monto exacto y la referencia abajo.</em>';
       } else if (method === 'Zelle') {
-        infoBox.innerHTML = amountTxt + '<strong>Zelle</strong><br>Correo: pagos@kioscoazul.com<br>Titular: Kiosco Azul LLC<br><em>Coloque el número de confirmación o el nombre del titular de la cuenta que envió.</em>';
+        infoBox.innerHTML = amountTxt + '<strong>$</strong><br><em>Coloque el número de confirmación o el nombre del titular de la cuenta que envió.</em>';
       } else if (method === 'Binance Pay') {
         infoBox.innerHTML = amountTxt + '<strong>Binance Pay (ID)</strong><br>Pay ID: 123456789<br><em>Envíe USDT y coloque el Pay ID de la transferencia abajo.</em>';
       }
     }
-    
+
     async function submitOrder() {
       const name = document.getElementById('order-name').value;
       const phone = document.getElementById('order-phone').value;
       const method = document.getElementById('payment-method').value;
       const ref = document.getElementById('order-ref').value;
-      
+
       if (!name || !phone || !ref) {
         alert("Por favor completa todos los campos.");
         return;
       }
-      
+
       let total = 0;
       cart.forEach(item => total += item.price * item.qty);
-      
+
       const orderPayload = {
         customer_name: name,
         customer_phone: phone,
@@ -969,11 +1103,11 @@
         items: cart,
         total: total
       };
-      
+
       const btn = document.querySelector('.btn-submit-order');
       btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
       btn.disabled = true;
-      
+
       try {
         // Asumiendo que el servidor corre en localhost:8000 en desarollo
         const response = await fetch('http://localhost:8000/api/orden', {
@@ -983,9 +1117,9 @@
           },
           body: JSON.stringify(orderPayload)
         });
-        
+
         const data = await response.json();
-        
+
         if (response.ok) {
           alert(`¡Pedido Enviado Exitosamente!\nSu número de orden es: ${data.order_id}\n\nEl pago está siendo verificado. Pronto nos comunicaremos al ${phone}.`);
           cart = [];
@@ -1002,9 +1136,9 @@
         btn.disabled = false;
       }
     }
-  
-    
-</script>
+
+
+  </script>
 
 
 </body>

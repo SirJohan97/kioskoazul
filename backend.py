@@ -15,10 +15,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.get("/")
+async def root():
+    return {"message": "Kiosko Azul API está activa. Los pedidos se procesan en /api/orden"}
+
 # Telegram Bot Configuration
 # IMPORTANTE: Reemplaza estos valores con tu bot real
-TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "TU_TOKEN_AQUI")
-TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "TU_CHAT_ID_AQUI")
+TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "8741738690:AAG_ONxfjhzIQ6NA0RrzMJ9AhW61_cdA-wY")
+TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "6526066600")
 
 class CartItem(BaseModel):
     name: str
