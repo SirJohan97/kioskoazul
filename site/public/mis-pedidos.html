@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mis Pedidos — Kiosko Azul</title>
+  <link rel="icon" href="assets/logo.png" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --navy: #0A1428;
+      --navy-dark: #050A14;
+      --gold: #D4AF37;
+      --gold-glow: rgba(212, 175, 55, 0.4);
+      --cream: #FDFBF7;
+      --pearl: #E8E5DF;
+      --surface: rgba(10, 20, 40, 0.7);
+      --border: rgba(255, 255, 255, 0.1);
+    }
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      background: var(--navy-dark);
+      color: var(--pearl);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem;
+    }
+
+    /* Navbar Cliente */
+    .client-nav {
+      width: 100%;
+      max-width: 800px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 99px;
+      margin-bottom: 2rem;
+      backdrop-filter: blur(10px);
+    }
+
+    .client-nav .logo-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      text-decoration: none;
+      color: var(--gold);
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      font-size: 1.2rem;
+    }
+
+    .client-nav img {
+      width: 40px; height: 40px; border-radius: 50%; object-fit: cover;
+      border: 2px solid var(--gold);
+    }
+
+    .nav-actions {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .btn-outline {
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--pearl);
+      padding: 0.5rem 1rem;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+    .btn-outline:hover { background: rgba(255,255,255,0.05); color: var(--gold); border-color: var(--gold); }
+
+    .btn-gold {
+      background: var(--gold);
+      color: #000;
+      padding: 0.5rem 1rem;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: 700;
+      font-family: 'Outfit', sans-serif;
+      transition: all 0.3s;
+    }
+    .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 4px 15px var(--gold-glow); }
+
+    /* Contenedor Principal */
+    .dashboard {
+      width: 100%;
+      max-width: 800px;
+    }
+
+    .dashboard-header { margin-bottom: 2rem; }
+    .dashboard-title { font-family: 'Outfit', sans-serif; font-size: 2.5rem; color: var(--cream); margin-bottom: 0.5rem; }
+
+    /* Orders Grid */
+    .order-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      transition: all 0.3s;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .order-card:hover { border-color: var(--gold); transform: translateY(-2px); }
+
+    .order-header { display: flex; justify-content: space-between; align-items: flex-start; }
+    
+    .order-info h3 { color: var(--gold); font-family: 'Outfit', sans-serif; margin-bottom: 0.25rem; }
+    .order-meta { font-size: 0.85rem; color: rgba(255,255,255,0.6); display: flex; gap: 1rem; }
+    
+    .order-price { font-size: 1.25rem; font-weight: 800; color: var(--cream); }
+
+    .order-body {
+      background: rgba(0,0,0,0.3);
+      padding: 1rem;
+      border-radius: 10px;
+      font-size: 0.9rem;
+    }
+
+    .badge {
+      padding: 0.3rem 0.8rem; border-radius: 99px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+    }
+    .badge-orange { background: rgba(230, 126, 34, 0.2); color: #e67e22; border: 1px solid #e67e22; }
+    .badge-blue { background: rgba(52, 152, 219, 0.2); color: #3498db; border: 1px solid #3498db; }
+    .badge-green { background: rgba(46, 204, 113, 0.2); color: #2ecc71; border: 1px solid #2ecc71; }
+    .badge-gold { background: rgba(212, 175, 55, 0.2); color: var(--gold); border: 1px solid var(--gold); }
+    .badge-red { background: rgba(231, 76, 60, 0.2); color: #e74c3c; border: 1px solid #e74c3c; }
+
+    .order-footer {
+      display: flex;
+      justify-content: flex-end;
+      border-top: 1px dashed var(--border);
+      padding-top: 1rem;
+    }
+
+    /* Modal Rastreo */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
+      display: none; justify-content: center; align-items: center; z-index: 1000;
+    }
+    .modal-overlay.active { display: flex; }
+    
+    .tracker-modal {
+      background: var(--navy); border: 1px solid var(--gold); border-radius: 16px;
+      padding: 2rem; width: 90%; max-width: 600px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+    }
+    .tracker-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+    .tracker-close { background: none; border: none; color: var(--pearl); font-size: 1.5rem; cursor: pointer; }
+
+    /* Timeline Stepper de Seguimiento */
+    .timeline { display: flex; justify-content: space-between; position: relative; margin-bottom: 2rem; }
+    .timeline::before { content: ''; position: absolute; top: 25px; left: 10%; right: 10%; height: 4px; background: var(--border); z-index: 0; }
+    .timeline-progress { position: absolute; top: 25px; left: 10%; height: 4px; background: var(--gold); z-index: 1; transition: width 0.8s ease; width: 0%; }
+    
+    .step { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; width: 25%; }
+    .step-icon { width: 50px; height: 50px; border-radius: 50%; background: var(--surface); border: 4px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: var(--pearl); transition: all 0.5s ease; }
+    .step.active .step-icon { border-color: var(--gold); color: var(--gold); background: rgba(212,175,55,0.1); box-shadow: 0 0 15px rgba(212,175,55,0.3); animation: pulse 2s infinite; }
+    .step.completed .step-icon { border-color: var(--gold); background: var(--gold); color: #000; }
+    .step-label { margin-top: 0.8rem; font-size: 0.85rem; font-weight: 600; text-align: center; color: var(--pearl); }
+    .step.active .step-label, .step.completed .step-label { color: var(--gold); }
+
+    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.4); } 70% { box-shadow: 0 0 0 15px rgba(212, 175, 55, 0); } 100% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0); } }
+
+  </style>
+</head>
+<body>
+
+  <nav class="client-nav">
+    <a href="index.html" class="logo-wrapper">
+      <img src="assets/logo.png" alt="Logo"> Mi Kiosko
+    </a>
+    <div class="nav-actions">
+      <a href="menu.html" class="btn-gold"><i class="fas fa-utensils"></i> Pedir Ahora</a>
+      <button onclick="logout()" class="btn-outline"><i class="fas fa-sign-out-alt"></i> Salir</button>
+    </div>
+  </nav>
+
+  <div class="dashboard">
+    <div class="dashboard-header">
+      <h1 class="dashboard-title">Mi Historial</h1>
+      <p>Hola, <b id="ui-name">...</b>. Aquí puedes ver y rastrear todos tus pedidos.</p>
+    </div>
+
+    <div id="orders-container">
+      <div style="text-align:center; padding: 3rem; color: var(--pearl); opacity: 0.5;">
+        <i class="fas fa-spinner fa-spin fa-2x"></i>
+        <p style="margin-top:1rem;">Cargando tus pedidos...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal-overlay" id="tracker-modal">
+    <div class="tracker-modal">
+      <div class="tracker-header">
+        <h2 style="color:var(--gold); font-family:'Outfit'">Rastreando Objeto</h2>
+        <button class="tracker-close" onclick="closeTracker()"><i class="fas fa-times"></i></button>
+      </div>
+
+      <div class="timeline" id="timeline-stepper">
+        <div class="timeline-progress" id="timeline-progress"></div>
+        <div class="step" id="step-pendiente"><div class="step-icon"><i class="fas fa-clock"></i></div><div class="step-label">Confirmando</div></div>
+        <div class="step" id="step-preparando"><div class="step-icon"><i class="fas fa-fire-burner"></i></div><div class="step-label">Cocina</div></div>
+        <div class="step" id="step-listo"><div class="step-icon"><i class="fas fa-shopping-bag"></i></div><div class="step-label">Listo</div></div>
+        <div class="step" id="step-entregado"><div class="step-icon"><i class="fas fa-check-double"></i></div><div class="step-label">Despachado</div></div>
+      </div>
+      <div style="text-align:center; color:var(--pearl); font-size:0.9rem; margin-top:1rem;">
+        <i class="fas fa-sync fa-spin"></i> Sincronizado en vivo con el restaurante.
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let cliente = null;
+    let trackInterval = null;
+
+    (function(){
+      const saved = localStorage.getItem('kb_cliente');
+      if(!saved) { window.location.href = 'login.html'; return; }
+      cliente = JSON.parse(saved);
+      document.getElementById('ui-name').textContent = cliente.nombre.split(' ')[0];
+      loadPedidos();
+    })();
+
+    function logout() {
+      localStorage.removeItem('kb_cliente');
+      window.location.href = 'index.html';
+    }
+
+    const badgeMap = {
+      pendiente: 'badge-orange',
+      preparando: 'badge-blue',
+      listo: 'badge-green',
+      entregado: 'badge-gold',
+      cancelado: 'badge-red'
+    };
+
+    async function loadPedidos() {
+      try {
+        const r = await fetch(`/api/clientes/${cliente.telefono}/pedidos`);
+        if(!r.ok) throw new Error();
+        const pedidos = await r.json();
+        const container = document.getElementById('orders-container');
+
+        if(pedidos.length === 0) {
+          container.innerHTML = `
+            <div style="text-align:center; background:var(--surface); border:1px solid var(--border); padding:3rem; border-radius:16px;">
+              <i class="fas fa-box-open" style="font-size:3rem; color:var(--gold); margin-bottom:1rem;"></i>
+              <h3>No has pedido nada aún</h3>
+              <p style="opacity:0.7; margin-top:0.5rem; margin-bottom:1.5rem;">Te estás perdiendo de lo mejor de la costa.</p>
+              <a href="menu.html" class="btn-gold"><i class="fas fa-utensils"></i> Ir al Menú</a>
+            </div>`;
+          return;
+        }
+
+        container.innerHTML = pedidos.map(p => {
+          const fecha = new Date(p.creado_en + "Z").toLocaleString('es-VE');
+          let iconEntrega = p.tipo_entrega === 'delivery' ? '<i class="fas fa-motorcycle"></i> Delivery' : '<i class="fas fa-store"></i> Pick-Up';
+          let showTrack = p.estado !== 'cancelado' && p.estado !== 'entregado';
+
+          return `
+            <div class="order-card">
+              <div class="order-header">
+                <div class="order-info">
+                  <h3>${p.order_ref}</h3>
+                  <div class="order-meta">
+                    <span><i class="far fa-calendar"></i> ${fecha}</span>
+                    <span style="color:var(--gold)">${iconEntrega}</span>
+                  </div>
+                </div>
+                <div style="text-align:right;">
+                  <div class="order-price">$${p.total.toFixed(2)}</div>
+                  <span class="badge ${badgeMap[p.estado]}">${p.estado}</span>
+                </div>
+              </div>
+              <div class="order-body">
+                <b>Resumen:</b> ${p.items_resumen}
+              </div>
+              ${showTrack ? `
+              <div class="order-footer">
+                <button class="btn-outline" onclick="openTracker('${p.order_ref}')" style="color:var(--gold); border-color:var(--gold);">
+                  <i class="fas fa-location-arrow"></i> Seguir en Vivo
+                </button>
+              </div>` : ''}
+            </div>
+          `;
+        }).join('');
+
+        // Verificar si hay auto-tracking
+        const urlParams = new URLSearchParams(window.location.search);
+        const trackRef = urlParams.get('track');
+        if (trackRef) {
+          openTracker(trackRef);
+          // Opcionalmente limpiar la URL sin recargar
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
+
+      } catch(e) {
+        document.getElementById('orders-container').innerHTML = `<p style="color:#e74c3c;text-align:center;">Error cargando el historial.</p>`;
+      }
+    }
+
+    /* Lógica tracker Modal */
+    function openTracker(ref) {
+      document.getElementById('tracker-modal').classList.add('active');
+      fetchStatus(ref);
+      trackInterval = setInterval(() => fetchStatus(ref), 10000);
+    }
+    
+    function closeTracker() {
+      document.getElementById('tracker-modal').classList.remove('active');
+      if(trackInterval) clearInterval(trackInterval);
+    }
+
+    async function fetchStatus(ref) {
+      try {
+        const r = await fetch(`/api/rastreo/${ref}`);
+        if(r.ok) {
+          const d = await r.json();
+          updateStepper(d.estado);
+          // Actualiza silente el layout base también para sincronizar badges
+          loadPedidos(); 
+        }
+      } catch(e) {}
+    }
+
+    function updateStepper(estado) {
+      const states = ['pendiente', 'preparando', 'listo', 'entregado'];
+      const cx = states.indexOf(estado);
+      if(cx === -1) return;
+
+      document.getElementById('timeline-progress').style.width = ['0%', '33%', '66%', '100%'][cx];
+      states.forEach((s, idx) => {
+        const el = document.getElementById(`step-${s}`);
+        el.classList.remove('completed', 'active');
+        if(idx < cx) el.classList.add('completed');
+        else if(idx === cx) el.classList.add('active');
+      });
+    }
+
+    // Auto-refresco del panel en segundo plano cada 15 segundos
+    setInterval(() => {
+      // Si el tracker está abierto, ya hace su propio fetch, pero recarguemos el global
+      loadPedidos();
+    }, 15000);
+  </script>
+</body>
+</html>

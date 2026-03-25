@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Regístrate — Kiosko Azul</title>
+  <link rel="icon" href="assets/logo.png" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --navy: #0A1428;
+      --navy-dark: #050A14;
+      --gold: #D4AF37;
+      --gold-glow: rgba(212, 175, 55, 0.4);
+      --cream: #FDFBF7;
+      --pearl: #E8E5DF;
+      --glass-bg: rgba(10, 20, 40, 0.7);
+      --glass-border: rgba(255, 255, 255, 0.1);
+    }
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      background: var(--navy-dark);
+      background-image: radial-gradient(circle at top center, rgba(212, 175, 55, 0.1), transparent 50%),
+                        radial-gradient(circle at bottom right, rgba(212, 175, 55, 0.05), transparent 40%);
+      color: var(--pearl);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .auth-container {
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 2.5rem;
+      width: 100%;
+      max-width: 500px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .auth-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2rem;
+      color: var(--gold);
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+      text-align: center;
+    }
+    
+    .auth-subtitle {
+      text-align: center;
+      margin-bottom: 2rem;
+      font-size: 0.95rem;
+      color: var(--pearl);
+    }
+
+    .form-group { margin-bottom: 1.25rem; }
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      color: var(--pearl);
+      margin-bottom: 0.4rem;
+      font-weight: 500;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 0.9rem;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--glass-border);
+      border-radius: 10px;
+      color: white;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.95rem;
+      transition: all 0.3s;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--gold);
+      box-shadow: 0 0 15px var(--gold-glow);
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 1rem;
+      background: var(--gold);
+      color: #000;
+      border: none;
+      border-radius: 12px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-top: 1.5rem;
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px var(--gold-glow);
+    }
+
+    .auth-footer {
+      text-align: center;
+      margin-top: 1.5rem;
+      font-size: 0.9rem;
+    }
+
+    .auth-link {
+      color: var(--gold);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .auth-link:hover { text-decoration: underline; color: #FFF; }
+  </style>
+</head>
+<body>
+
+  <div class="auth-container">
+    <h1 class="auth-title">Crear Cuenta</h1>
+    <p class="auth-subtitle">Únete a la familia Kiosko Azul</p>
+
+    <form id="register-form">
+      <div class="form-group">
+        <label>Nombre Completo *</label>
+        <input type="text" id="nombre" class="form-control" required placeholder="Juan Pérez" />
+      </div>
+      
+      <div class="form-group">
+        <label>Teléfono (Tu Usuario) *</label>
+        <input type="text" id="telefono" class="form-control" required placeholder="04121234567" />
+      </div>
+
+      <div class="form-group">
+        <label>Contraseña *</label>
+        <input type="password" id="password" class="form-control" required placeholder="Min. 6 caracteres" minlength="6" />
+      </div>
+
+      <div class="form-group">
+        <label>Correo Electrónico (Opcional)</label>
+        <input type="email" id="correo" class="form-control" placeholder="juan@email.com" />
+      </div>
+
+      <div class="form-group">
+        <label>Dirección Principal de Delivery (Opcional, puede cambiar luego)</label>
+        <input type="text" id="direccion" class="form-control" placeholder="Res. Las Palmeras, Apto 4B" />
+      </div>
+
+      <button type="submit" class="btn-submit" id="submit-btn"><i class="fas fa-user-plus"></i> Registrarme</button>
+    </form>
+
+    <div class="auth-footer">
+      ¿Ya tienes cuenta? <a href="login.html" class="auth-link">Inicia Sesión aquí</a>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('register-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const payload = {
+        nombre: document.getElementById('nombre').value.trim(),
+        telefono: document.getElementById('telefono').value.trim(),
+        password: document.getElementById('password').value,
+        correo: document.getElementById('correo').value.trim() || null,
+        direccion: document.getElementById('direccion').value.trim() || null
+      };
+
+      const btn = document.getElementById('submit-btn');
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
+      btn.disabled = true;
+
+      try {
+        const r = await fetch('/api/clientes/registro', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(payload)
+        });
+
+        if (!r.ok) {
+          const d = await r.json();
+          alert(d.detail || 'Error al registrar');
+          btn.innerHTML = '<i class="fas fa-user-plus"></i> Registrarme';
+          btn.disabled = false;
+          return;
+        }
+
+        const data = await r.json();
+        // Auto-login after register
+        localStorage.setItem('kb_cliente', JSON.stringify(data.cliente));
+        alert('¡Cuenta creada exitosamente! Bienvenido/a a Kiosko Azul.');
+        window.location.href = 'menu.html';
+      } catch (err) {
+        alert("Error de conexión");
+        btn.innerHTML = '<i class="fas fa-user-plus"></i> Registrarme';
+        btn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Iniciar Sesión — Kiosko Azul</title>
+  <link rel="icon" href="assets/logo.png" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --navy: #0A1428;
+      --navy-dark: #050A14;
+      --gold: #D4AF37;
+      --gold-glow: rgba(212, 175, 55, 0.4);
+      --cream: #FDFBF7;
+      --pearl: #E8E5DF;
+      --glass-bg: rgba(10, 20, 40, 0.7);
+      --glass-border: rgba(255, 255, 255, 0.1);
+    }
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      background: var(--navy-dark);
+      background-image: radial-gradient(circle at top center, rgba(212, 175, 55, 0.1), transparent 50%),
+                        radial-gradient(circle at bottom right, rgba(212, 175, 55, 0.05), transparent 40%);
+      color: var(--pearl);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .auth-container {
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 3rem;
+      width: 100%;
+      max-width: 450px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .auth-logo {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .auth-logo img {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      border: 2px solid var(--gold);
+      object-fit: cover;
+      margin-bottom: 1rem;
+    }
+
+    .auth-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2rem;
+      color: var(--gold);
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+    }
+
+    .form-group { margin-bottom: 1.5rem; }
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      color: var(--pearl);
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 1rem;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      color: white;
+      font-family: 'Inter', sans-serif;
+      font-size: 1rem;
+      transition: all 0.3s;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--gold);
+      box-shadow: 0 0 15px var(--gold-glow);
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 1rem;
+      background: var(--gold);
+      color: #000;
+      border: none;
+      border-radius: 12px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-top: 1rem;
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px var(--gold-glow);
+    }
+
+    .auth-footer {
+      text-align: center;
+      margin-top: 2rem;
+      font-size: 0.9rem;
+    }
+
+    .auth-link {
+      color: var(--gold);
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.3s;
+    }
+
+    .auth-link:hover { text-decoration: underline; color: #FFF; }
+
+    .btn-back {
+      position: absolute;
+      top: 2rem;
+      left: 2rem;
+      color: var(--pearl);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 500;
+      opacity: 0.7;
+      transition: opacity 0.3s;
+    }
+
+    .btn-back:hover { opacity: 1; color: var(--gold); }
+  </style>
+</head>
+<body>
+
+  <a href="menu.html" class="btn-back"><i class="fas fa-arrow-left"></i> Volver al Menú</a>
+
+  <div class="auth-container">
+    <div class="auth-logo">
+      <img src="assets/logo.png" alt="Kiosko Azul">
+      <h1 class="auth-title">Bienvenido</h1>
+      <p>Inicia sesión para pedir y rastrear</p>
+    </div>
+
+    <form id="login-form">
+      <div class="form-group">
+        <label>Teléfono (Ej: 04121234567)</label>
+        <input type="text" id="telefono" class="form-control" required placeholder="Tu número registrado" />
+      </div>
+      <div class="form-group">
+        <label>Contraseña</label>
+        <input type="password" id="password" class="form-control" required placeholder="••••••••" />
+      </div>
+
+      <button type="submit" class="btn-submit" id="submit-btn">Ingresar <i class="fas fa-sign-in-alt"></i></button>
+    </form>
+
+    <div class="auth-footer">
+      ¿Aún no tienes cuenta? <br><br>
+      <a href="registro.html" class="auth-link">Regístrate en 1 minuto</a>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const t = document.getElementById('telefono').value.trim();
+      const p = document.getElementById('password').value;
+      const btn = document.getElementById('submit-btn');
+
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Entrando...';
+      btn.disabled = true;
+
+      try {
+        const r = await fetch('/api/clientes/login', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({telefono: t, password: p})
+        });
+
+        if (!r.ok) {
+          const d = await r.json();
+          alert(d.detail || 'Error al iniciar sesión');
+          btn.innerHTML = 'Ingresar <i class="fas fa-sign-in-alt"></i>';
+          btn.disabled = false;
+          return;
+        }
+
+        const data = await r.json();
+        localStorage.setItem('kb_cliente', JSON.stringify(data.cliente));
+        window.location.href = 'menu.html';
+      } catch (err) {
+        alert("Error de conexión");
+        btn.innerHTML = 'Ingresar <i class="fas fa-sign-in-alt"></i>';
+        btn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

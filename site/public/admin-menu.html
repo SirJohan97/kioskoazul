@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gestión de Menú — Kiosko Azul Admin</title>
+  <link rel="icon" href="assets/logo.png" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="css/admin.css" />
+</head>
+<body>
+<div class="admin-layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <img src="assets/logo.png" alt="Logo" onerror="this.style.display='none'">
+      <div><span>Kiosko Azul</span><small>Admin Panel</small></div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">Principal</div>
+      <a href="admin.html" class="nav-link"><i class="fas fa-chart-line"></i> Dashboard</a>
+      <a href="admin-pedidos.html" class="nav-link"><i class="fas fa-receipt"></i> Pedidos</a>
+      <div class="nav-section">Gestión</div>
+      <a href="admin-menu.html" class="nav-link active"><i class="fas fa-utensils"></i> Menú</a>
+      <a href="admin-promociones.html" class="nav-link"><i class="fas fa-tag"></i> Promociones</a>
+      <div class="nav-section">Sitio</div>
+      <a href="index.html" target="_blank" class="nav-link"><i class="fas fa-globe"></i> Ver Sitio</a>
+      <a href="menu.html" target="_blank" class="nav-link"><i class="fas fa-book-open"></i> Ver Menú</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="admin-badge">
+        <div class="avatar" id="admin-avatar">A</div>
+        <div class="info"><div class="name" id="admin-name">Admin</div><div class="rol" id="admin-rol">superadmin</div></div>
+      </div>
+      <button class="btn btn-outline btn-sm btn-w100" style="margin-top:0.75rem;" onclick="logout()">
+        <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="admin-main">
+    <header class="admin-topbar">
+      <span class="topbar-title"><i class="fas fa-utensils" style="color:var(--gold);margin-right:0.5rem;"></i>Gestión de Menú</span>
+      <div class="topbar-actions">
+        <button class="btn btn-outline btn-sm" onclick="openBatchModal()"><i class="fas fa-percent"></i> Ajustar Precios</button>
+        <button class="btn btn-gold btn-sm" onclick="openItemModal()"><i class="fas fa-plus"></i> Nuevo Plato</button>
+      </div>
+    </header>
+
+    <div class="admin-content">
+
+      <!-- Filtros -->
+      <div class="filter-bar">
+        <input type="text" class="form-control" id="search-input" placeholder="🔍 Buscar plato…" oninput="filterItems()" />
+        <select class="form-control" id="cat-filter" onchange="filterItems()">
+          <option value="">Todas las categorías</option>
+        </select>
+        <select class="form-control" id="status-filter" onchange="filterItems()">
+          <option value="">Todos los estados</option>
+          <option value="activo">Activos</option>
+          <option value="inactivo">Inactivos</option>
+        </select>
+      </div>
+
+      <!-- Tabla -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Platos del Menú</span>
+          <span id="item-count" style="font-size:0.8rem;color:var(--pearl);">Cargando…</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Imagen</th><th>Plato</th><th>Categoría</th>
+                <th>Precio</th><th>Badge</th><th>Estado</th><th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="menu-tbody">
+              <tr><td colspan="7" style="text-align:center;color:var(--pearl);padding:2rem;">Cargando…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Plato -->
+<div class="modal-overlay" id="item-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="modal-item-title">Nuevo Plato</span>
+      <button class="modal-close" onclick="closeModal('item-modal')"><i class="fas fa-times"></i></button>
+    </div>
+    <form id="item-form">
+      <input type="hidden" id="item-id" />
+      <div class="form-row">
+        <div class="form-group">
+          <label>Nombre del Plato *</label>
+          <input type="text" class="form-control" id="item-nombre" required placeholder="Ej: Empanadas de Cazón" />
+        </div>
+        <div class="form-group">
+          <label>Categoría *</label>
+          <select class="form-control" id="item-cat" required></select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Descripción</label>
+        <textarea class="form-control" id="item-desc" rows="3" placeholder="Ingredientes y preparación…" style="resize:vertical;"></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Precio (USD) *</label>
+          <input type="number" class="form-control" id="item-precio" step="0.01" min="0" required placeholder="0.00" />
+        </div>
+        <div class="form-group">
+          <label>Badge / Etiqueta</label>
+          <input type="text" class="form-control" id="item-badge" placeholder="Ej: ⭐ Popular, Vegano" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Destacado</label>
+          <label class="toggle" style="margin-top:0.5rem;"><input type="checkbox" id="item-destacado"><span class="slider"></span></label>
+        </div>
+        <div class="form-group">
+          <label>Activo</label>
+          <label class="toggle" style="margin-top:0.5rem;"><input type="checkbox" id="item-activo" checked><span class="slider"></span></label>
+        </div>
+      </div>
+
+      <!-- Imagen -->
+      <div class="form-group" id="imagen-group">
+        <label>Imagen del Plato</label>
+        <div class="dropzone" id="dropzone" onclick="document.getElementById('file-input').click()">
+          <i class="fas fa-cloud-upload-alt"></i>
+          <p>Haz clic o arrastra una imagen aquí<br><small>JPG, PNG o WEBP — máx 5MB</small></p>
+        </div>
+        <input type="file" id="file-input" accept="image/jpeg,image/png,image/webp" style="display:none;" onchange="previewImage(this)" />
+        <div id="img-preview-wrap" style="margin-top:1rem;display:none;">
+          <img id="img-preview" class="img-preview" src="" alt="Preview" />
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeModal('item-modal')">Cancelar</button>
+        <button type="submit" class="btn btn-gold" id="item-submit-btn"><i class="fas fa-save"></i> Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal Ajuste de Precios -->
+<div class="modal-overlay" id="batch-modal">
+  <div class="modal" style="max-width:420px;">
+    <div class="modal-header">
+      <span class="modal-title">Ajuste Masivo de Precios</span>
+      <button class="modal-close" onclick="closeModal('batch-modal')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="form-group">
+      <label>Categoría (dejar vacío = todas)</label>
+      <select class="form-control" id="batch-cat"></select>
+    </div>
+    <div class="form-group">
+      <label>Porcentaje de ajuste</label>
+      <input type="number" class="form-control" id="batch-pct" step="0.1" placeholder="Ej: 10 para +10%, -5 para -5%" />
+      <small style="color:var(--pearl);font-size:0.75rem;">Positivo = aumento, Negativo = descuento</small>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('batch-modal')">Cancelar</button>
+      <button class="btn btn-gold" onclick="applyBatch()"><i class="fas fa-percent"></i> Aplicar</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+
+<script>
+  const API = '';
+  let authToken = null, adminData = null;
+  let allItems = [], categorias = [];
+
+  (function(){
+    const saved = localStorage.getItem('kb_admin');
+    if (!saved) return window.location.href = 'admin-login.html';
+    try {
+      const { token, admin } = JSON.parse(saved);
+      authToken = token; adminData = admin;
+      document.getElementById('admin-name').textContent = admin.nombre || admin.username;
+      document.getElementById('admin-rol').textContent  = admin.rol;
+      document.getElementById('admin-avatar').textContent = (admin.nombre||admin.username)[0].toUpperCase();
+    } catch(e) { localStorage.removeItem('kb_admin'); window.location.href = 'admin-login.html'; }
+  })();
+
+  function logout() { localStorage.removeItem('kb_admin'); window.location.href = 'admin-login.html'; }
+  function authHeaders() { return { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' }; }
+
+  function toast(msg, type='success') {
+    const c = document.getElementById('toast-container');
+    const t = document.createElement('div');
+    t.className = `toast ${type}`;
+    t.innerHTML = `<i class="toast-icon fas fa-${type==='success'?'check-circle':'exclamation-circle'}"></i><span class="toast-msg">${msg}</span>`;
+    c.appendChild(t);
+    setTimeout(() => t.remove(), 4000);
+  }
+
+  function openModal(id)  { document.getElementById(id).classList.add('open'); }
+  function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+  // ── Cargar categorías ───────────────────────────────────────
+  async function loadCategorias() {
+    const r = await fetch(`${API}/api/categorias`);
+    categorias = await r.json();
+    const catFilter    = document.getElementById('cat-filter');
+    const itemCat      = document.getElementById('item-cat');
+    const batchCat     = document.getElementById('batch-cat');
+    const opt = '<option value="">Todas</option>' + categorias.map(c => `<option value="${c.id}">${c.emoji} ${c.nombre}</option>`).join('');
+    catFilter.innerHTML = '<option value="">Todas</option>' + categorias.map(c => `<option value="${c.id}">${c.emoji} ${c.nombre}</option>`).join('');
+    itemCat.innerHTML   = categorias.map(c => `<option value="${c.id}">${c.emoji} ${c.nombre}</option>`).join('');
+    batchCat.innerHTML  = '<option value="">Todas las categorías</option>' + categorias.map(c => `<option value="${c.id}">${c.emoji} ${c.nombre}</option>`).join('');
+  }
+
+  // ── Cargar menú ─────────────────────────────────────────────
+  async function loadMenu() {
+    const r = await fetch(`${API}/api/menu/admin`, { headers: authHeaders() });
+    allItems = await r.json();
+    renderItems(allItems);
+  }
+
+  function renderItems(items) {
+    document.getElementById('item-count').textContent = `${items.length} platos`;
+    const tbody = document.getElementById('menu-tbody');
+    if (!items.length) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--pearl);padding:2rem;">Sin platos</td></tr>';
+      return;
+    }
+    tbody.innerHTML = items.map(it => {
+      const catName = it.categoria ? `${it.categoria.emoji} ${it.categoria.nombre}` : '—';
+      const imgHtml = it.imagen_url
+        ? `<img src="${API}${it.imagen_url}" style="width:50px;height:50px;object-fit:cover;border-radius:8px;border:1px solid var(--border-gold);">`
+        : `<div style="width:50px;height:50px;border-radius:8px;background:var(--surface);display:flex;align-items:center;justify-content:center;color:var(--pearl);"><i class="fas fa-utensils"></i></div>`;
+      const badgeHtml = it.badge ? `<span class="badge badge-gold">${it.badge}</span>` : '<span class="badge badge-gray">—</span>';
+      const statusHtml = it.activo
+        ? '<span class="badge badge-green"><i class="fas fa-circle" style="font-size:0.5rem;"></i> Activo</span>'
+        : '<span class="badge badge-red"><i class="fas fa-circle" style="font-size:0.5rem;"></i> Inactivo</span>';
+      return `<tr>
+        <td>${imgHtml}</td>
+        <td>
+          <div style="font-weight:600;">${it.nombre}</div>
+          <div style="font-size:0.78rem;color:var(--pearl);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;">${it.descripcion||''}</div>
+        </td>
+        <td>${catName}</td>
+        <td style="color:var(--gold);font-weight:700;">$${it.precio_usd.toFixed(2)}</td>
+        <td>${badgeHtml}</td>
+        <td>${statusHtml}</td>
+        <td>
+          <div style="display:flex;gap:0.4rem;flex-wrap:wrap;">
+            <button class="btn btn-outline btn-sm" onclick="editItem(${it.id})"><i class="fas fa-pen"></i></button>
+            <button class="btn btn-outline btn-sm" onclick="openImageUpload(${it.id})" title="Cambiar imagen"><i class="fas fa-image"></i></button>
+            <button class="btn btn-danger btn-sm" onclick="toggleItem(${it.id}, ${it.activo})">${it.activo?'<i class="fas fa-eye-slash"></i>':'<i class="fas fa-eye"></i>'}</button>
+          </div>
+        </td>
+      </tr>`;
+    }).join('');
+  }
+
+  function filterItems() {
+    const q     = document.getElementById('search-input').value.toLowerCase();
+    const catId = document.getElementById('cat-filter').value;
+    const st    = document.getElementById('status-filter').value;
+    const res   = allItems.filter(it => {
+      const matchQ  = it.nombre.toLowerCase().includes(q) || (it.descripcion||'').toLowerCase().includes(q);
+      const matchC  = !catId || String(it.categoria_id) === catId;
+      const matchSt = !st || (st==='activo' ? it.activo : !it.activo);
+      return matchQ && matchC && matchSt;
+    });
+    renderItems(res);
+  }
+
+  // ── Modal Plato ─────────────────────────────────────────────
+  function openItemModal(item=null) {
+    document.getElementById('item-form').reset();
+    document.getElementById('item-id').value = '';
+    document.getElementById('img-preview-wrap').style.display = 'none';
+    document.getElementById('modal-item-title').textContent = 'Nuevo Plato';
+    if (item) {
+      document.getElementById('modal-item-title').textContent = 'Editar Plato';
+      document.getElementById('item-id').value       = item.id;
+      document.getElementById('item-nombre').value   = item.nombre;
+      document.getElementById('item-desc').value     = item.descripcion || '';
+      document.getElementById('item-precio').value   = item.precio_usd;
+      document.getElementById('item-badge').value    = item.badge || '';
+      document.getElementById('item-cat').value      = item.categoria_id;
+      document.getElementById('item-destacado').checked = item.destacado;
+      document.getElementById('item-activo').checked = item.activo;
+      if (item.imagen_url) {
+        document.getElementById('img-preview').src = `${API}${item.imagen_url}`;
+        document.getElementById('img-preview-wrap').style.display = 'block';
+      }
+    }
+    openModal('item-modal');
+  }
+
+  function editItem(id) {
+    const item = allItems.find(i => i.id === id);
+    if (item) openItemModal(item);
+  }
+
+  function previewImage(input) {
+    const file = input.files[0];
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    document.getElementById('img-preview').src = url;
+    document.getElementById('img-preview-wrap').style.display = 'block';
+  }
+
+  // Upload image separado (para plato existente por ID)
+  let uploadItemId = null;
+  function openImageUpload(id) {
+    uploadItemId = id;
+    document.getElementById('file-input').click();
+  }
+
+  document.getElementById('file-input').addEventListener('change', async function() {
+    if (!uploadItemId) return;
+    const file = this.files[0];
+    if (!file) return;
+    const fd = new FormData();
+    fd.append('file', file);
+    try {
+      const r = await fetch(`${API}/api/menu/${uploadItemId}/imagen`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${authToken}` },
+        body: fd,
+      });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.detail || 'Error');
+      toast('Imagen actualizada correctamente');
+      uploadItemId = null;
+      loadMenu();
+    } catch(e) { toast(e.message, 'error'); uploadItemId = null; }
+  });
+
+  document.getElementById('item-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const id = document.getElementById('item-id').value;
+    const payload = {
+      nombre:       document.getElementById('item-nombre').value,
+      descripcion:  document.getElementById('item-desc').value,
+      precio_usd:   parseFloat(document.getElementById('item-precio').value),
+      badge:        document.getElementById('item-badge').value || null,
+      categoria_id: parseInt(document.getElementById('item-cat').value),
+      destacado:    document.getElementById('item-destacado').checked,
+      activo:       document.getElementById('item-activo').checked,
+    };
+
+    const url    = id ? `${API}/api/menu/${id}` : `${API}/api/menu`;
+    const method = id ? 'PUT' : 'POST';
+
+    try {
+      const r = await fetch(url, { method, headers: authHeaders(), body: JSON.stringify(payload) });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.detail || 'Error guardando');
+
+      // Si hay nueva imagen seleccionada via dropzone (plato nuevo)
+      const fileInput = document.getElementById('file-input');
+      if (!uploadItemId && fileInput.files[0]) {
+        const fd = new FormData();
+        fd.append('file', fileInput.files[0]);
+        await fetch(`${API}/api/menu/${d.id}/imagen`, {
+          method: 'POST', headers: { 'Authorization': `Bearer ${authToken}` }, body: fd,
+        });
+      }
+
+      toast(id ? 'Plato actualizado' : 'Plato creado');
+      closeModal('item-modal');
+      loadMenu();
+    } catch(ex) { toast(ex.message, 'error'); }
+  });
+
+  async function toggleItem(id, activo) {
+    const item = allItems.find(i => i.id === id);
+    if (!item) return;
+    if (!activo && !confirm(`¿Activar "${item.nombre}"?`)) return;
+    if (activo && !confirm(`¿Desactivar "${item.nombre}"? No aparecerá en el menú público.`)) return;
+    const payload = {
+      nombre: item.nombre, descripcion: item.descripcion,
+      precio_usd: item.precio_usd, badge: item.badge,
+      categoria_id: item.categoria_id, destacado: item.destacado, activo: !activo,
+    };
+    const r = await fetch(`${API}/api/menu/${id}`, { method:'PUT', headers: authHeaders(), body: JSON.stringify(payload) });
+    if (r.ok) { toast(activo ? 'Plato desactivado' : 'Plato activado'); loadMenu(); }
+    else toast('Error', 'error');
+  }
+
+  // ── Batch Modal ─────────────────────────────────────────────
+  function openBatchModal() { openModal('batch-modal'); }
+  async function applyBatch() {
+    const pct   = parseFloat(document.getElementById('batch-pct').value);
+    const catId = document.getElementById('batch-cat').value;
+    if (isNaN(pct)) return toast('Ingresa un porcentaje válido', 'error');
+    const payload = { porcentaje: pct, categoria_id: catId ? parseInt(catId) : null };
+    try {
+      const r = await fetch(`${API}/api/menu/precios/batch`, { method:'PUT', headers: authHeaders(), body: JSON.stringify(payload) });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.detail);
+      toast(`Precios ajustados en ${d.items_actualizados} platos`);
+      closeModal('batch-modal');
+      loadMenu();
+    } catch(e) { toast(e.message, 'error'); }
+  }
+
+  // Drag & drop
+  const dz = document.getElementById('dropzone');
+  dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag-over'); });
+  dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
+  dz.addEventListener('drop', e => {
+    e.preventDefault(); dz.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file) { document.getElementById('file-input').files = e.dataTransfer.files; previewImage(document.getElementById('file-input')); }
+  });
+
+  loadCategorias().then(() => loadMenu());
+</script>
+</body>
+</html>

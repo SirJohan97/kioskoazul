@@ -530,11 +530,11 @@
           style="font-family:'Inter',sans-serif;color:var(--gold);font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;">Restaurant</small>
       </div>
     </a>
-    <ul class="nav-links">
-      <li><a href="index.html">Inicio</a></li>
-      <li><a href="galeria.html">Galería</a></li>
-      <li><a href="reservas.html">Reservas</a></li>
-    </ul>
+      <ul class="nav-links">
+        <li><a href="#menu"><i class="fas fa-book-open"></i> Explorar Menú</a></li>
+        <li><a href="#promociones"><i class="fas fa-tags"></i> Promociones</a></li>
+        <li><a href="mis-pedidos.html" style="color:var(--gold);font-weight:600;"><i class="fas fa-search-location"></i> Mis Pedidos</a></li>
+      </ul>
   </nav>
 
   <main>
@@ -549,233 +549,23 @@
         <i class="fas fa-sync-alt fa-spin" style="font-size: 0.7rem;"></i> Obteniendo tasa BCV...
       </div>
     </div>
-    <button class="tab-btn active" onclick="showTab('desayunos', this)">🌅 Desayunos</button>
-    <button class="tab-btn" onclick="showTab('almuerzos', this)">☀️ Almuerzos</button>
-    <button class="tab-btn" onclick="showTab('cockteles', this)">🍹 Cócteles</button>
-    <button class="tab-btn" onclick="showTab('cenas', this)">🌙 Cenas</button>
+    <!-- TABS DINÁMICOS -->
+    <div class="menu-tabs" id="dynamic-tabs">
+      <div style="text-align:center;width:100%;"><i class="fas fa-spinner fa-spin"></i> Cargando categorías...</div>
     </div>
 
-    <!-- DESAYUNOS -->
-    <section class="menu-section active" id="desayunos">
-      <h2 class="section-heading"><i class="fas fa-sun"></i> Desayunos Costeros</h2>
-      <div class="menu-grid">
-        <div class="menu-item">
-          <div class="item-badge">⭐ Popular</div>
-          <div class="item-meta"><span class="item-name">Empanadas de Cazón</span><span class="item-price">$8</span>
-          </div>
-          <p class="item-desc">Empanadas fritas rellenas de cazón fresco. Servidas con salsa criolla.</p>
-          <div style="margin-top: 1rem;"><button class="btn-add-cart" onclick="addToCart('Empanadas de Cazón', 8)"><i
-                class="fas fa-shopping-cart"></i> Agregar por $8</button></div>
-        </div>
-        <div class="menu-item">
-          <div class="item-meta"><span class="item-name">Arepas Asadas</span><span class="item-price">$6</span></div>
-          <p class="item-desc">Arepas de maíz a la brasa con queso blanco, aguacate y mantequilla.</p>
-          <div style="margin-top: 1rem;"><button class="btn-add-cart" onclick="addToCart('Arepas Asadas', 6)"><i
-                class="fas fa-shopping-cart"></i> Agregar por $6</button></div>
-        </div>
-        <div class="menu-item">
-          <div class="item-meta"><span class="item-name">Pabellón Criollo</span><span class="item-price">$10</span>
-          </div>
-          <p class="item-desc">Caraotas negras, carne mechada, tajadas y arroz blanco. El desayuno venezolano por
-            excelencia.</p>
-          <div style="margin-top: 1rem;"><button class="btn-add-cart" onclick="addToCart('Pabellón Criollo', 10)"><i
-                class="fas fa-shopping-cart"></i> Agregar por $10</button></div>
-        </div>
-        <div class="menu-item">
-          <div class="item-badge">Vegano</div>
-          <div class="item-meta"><span class="item-name">Fruta Tropical</span><span class="item-price">$5</span></div>
-          <p class="item-desc">Selección de frutas tropicales frescas con miel de agave y granola artesanal.</p>
-          <div style="margin-top: 1rem;"><button class="btn-add-cart" onclick="addToCart('Fruta Tropical', 5)"><i
-                class="fas fa-shopping-cart"></i> Agregar por $5</button></div>
-        </div>
-        <div class="menu-item">
-          <div class="item-meta"><span class="item-name">Huevos Revueltos del Mar</span><span
-              class="item-price">$9</span></div>
-          <p class="item-desc">Huevos revueltos con camarones, cebollín, tomate y cilantro. Servidos con tostadas.</p>
-          <div style="margin-top: 1rem;"><button class="btn-add-cart"
-              onclick="addToCart('Huevos Revueltos del Mar', 3)"><i class="fas fa-shopping-cart"></i> Agregar por
-              $3</button></div>
-        </div>
-        <div class="menu-item">
-          <div class="item-meta"><span class="item-name">Café Capitán</span><span class="item-price">$3</span></div>
-          <p class="item-desc">Espresso doble de origen venezolano con espuma de leche o solo. El mejor inicio del día.
-          </p>
-          <div style="margin-top: 1rem;"><button class="btn-add-cart"
-              onclick="addToCart('Huevos Revueltos del Mar', 3)"><i class="fas fa-shopping-cart"></i> Agregar por
-              $3</button></div>
-        </div>
+    <!-- CONTENEDOR DE PROMOCIONES -->
+    <div id="promos-container" style="display:none;margin-bottom:3rem;">
+      <h2 class="section-heading" style="color:var(--gold);"><i class="fas fa-star" style="color:var(--gold);"></i> Promociones Especiales</h2>
+      <div class="menu-grid" id="promos-grid">
+        <!-- Promociones aquí -->
       </div>
-    </section>
+    </div>
 
-    <!-- ALMUERZOS -->
-    <section class="menu-section" id="almuerzos">
-      <h2 class="section-heading"><i class="fas fa-fish"></i> Almuerzos Tropicales</h2>
-      <div class="menu-grid">
-        <div class="menu-item">
-          <div class="item-badge">⭐ El Más Pedido</div>
-          <div class="item-meta"><span class="item-name">Pescado Frito con Tostones</span><span
-              class="item-price">$14</span></div>
-          <p class="item-desc">Pescado del día frito crujiente, tostones, ensalada de repollo y salsa tártara de la
-            casa.</p>
-          <div style="margin-top: 1rem;"><button class="btn-add-cart"
-              onclick="addToCart('Pescado Frito con Tostones', 16)"><i class="fas fa-shopping-cart"></i> Agregar por
-              $16</button></div>
-        </div>
-        <div class="menu-item">
-          <div class="item-badge">Premium</div>
-          <div class="item-meta"><span class="item-name">Ceviche de Pulpo</span><span class="item-price">$16</span>
-          </div>
-          <p class="item-desc">Pulpo fresco curado en limón, cilantro, cebolla morada y ají amarillo peruano.</p>
-          <div style="margin-top: 1rem;"><button class="btn-add-cart"
-              onclick="addToCart('Pescado Frito con Tostones', 16)"><i class="fas fa-shopping-cart"></i> Agregar por
-              $16</button></div>
-        </div>
-        <div class="menu-item">
-          <div class="item-meta"><span class="item-name">Camarones al Ajillo</span><span class="item-price">$15</span>
-          </div>
-          <p class="item-desc">Camarones jumbo salteados con ajo, vino blanco, limón y hierbas. Servidos sobre arroz
-            blanco.</p>
-          <div style="margin-top: 1rem;"><button class="btn-add-cart" onclick="addToCart('Camarones al Ajillo', 15)"><i
-                class="fas fa-shopping-cart"></i> Agregar por $15</button></div>
-        </div>
-        <div class="menu-item">
-          <div class="item-meta"><span class="item-name">Arroz con Mariscos</span><span class="item-price">$18</span>
-          </div>
-          <p class="item-desc">Arroz cremoso estilo risotto con camarones, calamar, mejillones y almejas frescas.</p>
-          <div style="margin-top: 1rem;"><button class="btn-add-cart" onclick="addToCart('Arroz con Mariscos', 18)"><i
-                class="fas fa-shopping-cart"></i> Agregar por $18</button></div>
-        </div>
-        <div class="menu-item">
-          <div class="item-meta"><span class="item-name">Banderilla de Atún</span><span class="item-price">$13</span>
-          </div>
-          <p class="item-desc">Atún fresco a la plancha con ensalada de mango, aguacate y vinagreta de maracuyá.</p>
-          <div style="margin-top: 1rem;"><button class="btn-add-cart" onclick="addToCart('Banderilla de Atún', 13)"><i
-                class="fas fa-shopping-cart"></i> Agregar por $13</button></div>
-        </div>
-        <div class="menu-item">
-          <div class="item-badge">Vegetariano</div>
-          <div class="item-meta"><span class="item-name">Pasta del Mar Verde</span><span class="item-price">$11</span>
-          </div>
-          <p class="item-desc">Linguine con pesto de albahaca fresca, tomates cherry, aceitunas negras y queso de cabra.
-          </p>
-          <div style="margin-top: 1rem;"><button class="btn-add-cart" onclick="addToCart('Pasta del Mar Verde', 11)"><i
-                class="fas fa-shopping-cart"></i> Agregar por $11</button></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- CÓCTELES -->
-    <section class="menu-section" id="cockteles">
-      <h2 class="section-heading"><i class="fas fa-cocktail"></i> Cócteles & Bebidas</h2>
-      <div class="menu-grid">
-        <div class="menu-item">
-          <div class="item-badge">⭐ Signature</div>
-          <div class="item-meta"><span class="item-name">Pisco Sour Kiosco Azul</span><span class="item-price">$9</span>
-          </div>
-          <p class="item-desc">Pisco premium, limón fresco, jarabe de caña, clara de huevo y bitter Angostura.</p>
-          <div style="margin-top: 1rem;"><button class="btn-add-cart"
-              onclick="addToCart('Pisco Sour Kiosco Azul', 9)"><i class="fas fa-shopping-cart"></i> Agregar por
-              $9</button></div>
-        </div>
-        <div class="menu-item">
-          <div class="item-meta"><span class="item-name">Mojito Caribeño</span><span class="item-price">$8</span></div>
-          <p class="item-desc">Ron blanco, menta fresca, lima, azúcar de caña y agua con gas. Refrescante y tropical.
-          </p>
-          <div style="margin-top: 1rem;"><button class="btn-add-cart" onclick="addToCart('Mojito Caribeño', 8)"><i
-                class="fas fa-shopping-cart"></i> Agregar por $8</button></div>
-        </div>
-        <div class="menu-item">
-          <div class="item-meta"><span class="item-name">Margarita Maracuyá</span><span class="item-price">$9</span>
-          </div>
-          <p class="item-desc">Tequila blanco, licor de naranja, maracuyá fresco y sal de mar en el borde del vaso.</p>
-          <div style="margin-top: 1rem;"><button class="btn-add-cart" onclick="addToCart('Margarita Maracuyá', 9)"><i
-                class="fas fa-shopping-cart"></i> Agregar por $9</button></div>
-        </div>
-        <div class="menu-item">
-          <div class="item-meta"><span class="item-name">Sunset Spritz</span><span class="item-price">$10</span></div>
-          <p class="item-desc">Aperol, prosecco, un toque de maracuyá y naranja fresca. El cóctel del atardecer.</p>
-          <div style="margin-top: 1rem;"><button class="btn-add-cart" onclick="addToCart('Sunset Spritz', 10)"><i
-                class="fas fa-shopping-cart"></i> Agregar por $10</button></div>
-        </div>
-        <div class="menu-item">
-          <div class="item-badge">Sin Alcohol</div>
-          <div class="item-meta"><span class="item-name">Agua de Mar (NA)</span><span class="item-price">$5</span></div>
-          <p class="item-desc">Limonada de coco con jengibre fresco, menta y agua mineral con gas.</p>
-          <div style="margin-top: 1rem;"><button class="btn-add-cart" onclick="addToCart('Agua de Mar (NA)', 5)"><i
-                class="fas fa-shopping-cart"></i> Agregar por $5</button></div>
-        </div>
-        <div class="menu-item">
-          <div class="item-meta"><span class="item-name">Ron Añejo al Atardecer</span><span
-              class="item-price">$12</span></div>
-          <p class="item-desc">Copa de ron venezolano 12 años añejado, servido con hielo esférico y naranja
-            caramelizada.</p>
-          <div style="margin-top: 1rem;"><button class="btn-add-cart"
-              onclick="addToCart('Ron Añejo al Atardecer', 26)"><i class="fas fa-shopping-cart"></i> Agregar por
-              $26</button></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- CENAS -->
-    <section class="menu-section" id="cenas">
-      <h2 class="section-heading"><i class="fas fa-moon"></i> Cenas Gourmet</h2>
-      <div class="menu-grid">
-        <div class="menu-item">
-          <div class="item-badge">⭐ Chef's Special</div>
-          <div class="item-meta"><span class="item-name">Linguine al Nero di Seppia</span><span
-              class="item-price">$22</span></div>
-          <p class="item-desc">Pasta negra al tinto de calamar con medallones de mariscos en bisque de langosta y
-            Parmigiano.</p>
-          <div style="margin-top: 1rem;"><button class="btn-add-cart"
-              onclick="addToCart('Ron Añejo al Atardecer', 26)"><i class="fas fa-shopping-cart"></i> Agregar por
-              $26</button></div>
-        </div>
-        <div class="menu-item">
-          <div class="item-badge">Signature</div>
-          <div class="item-meta"><span class="item-name">Lobster & Truffle Risotto</span><span
-              class="item-price">$35</span></div>
-          <p class="item-desc">Risotto Arborio con cola de langosta, aceite de trufa negra y Parmesano añejado 24 meses.
-          </p>
-          <div style="margin-top: 1rem;"><button class="btn-add-cart"
-              onclick="addToCart('Ron Añejo al Atardecer', 26)"><i class="fas fa-shopping-cart"></i> Agregar por
-              $26</button></div>
-        </div>
-        <div class="menu-item">
-          <div class="item-meta"><span class="item-name">Brochetas de Langostinos</span><span
-              class="item-price">$19</span></div>
-          <p class="item-desc">Langostinos tigre a la parrilla con mantequilla de ajo, chimichurri y limón tahitiano.
-          </p>
-          <div style="margin-top: 1rem;"><button class="btn-add-cart"
-              onclick="addToCart('Ron Añejo al Atardecer', 26)"><i class="fas fa-shopping-cart"></i> Agregar por
-              $26</button></div>
-        </div>
-        <div class="menu-item">
-          <div class="item-meta"><span class="item-name">Pulpo a la Brasa Gourmet</span><span
-              class="item-price">$24</span></div>
-          <p class="item-desc">Pulpo entero a la parrilla sobre puré de papas ahumado, olivada negra y aceite de ají
-            amarillo.</p>
-          <div style="margin-top: 1rem;"><button class="btn-add-cart"
-              onclick="addToCart('Ron Añejo al Atardecer', 26)"><i class="fas fa-shopping-cart"></i> Agregar por
-              $26</button></div>
-        </div>
-        <div class="menu-item">
-          <div class="item-meta"><span class="item-name">Pargo Entero al Horno</span><span class="item-price">$26</span>
-          </div>
-          <p class="item-desc">Pargo rojo fresco al horno con vegetales mediterráneos, hierbas y salsa de vino blanco.
-          </p>
-          <div style="margin-top: 1rem;"><button class="btn-add-cart"
-              onclick="addToCart('Ron Añejo al Atardecer', 26)"><i class="fas fa-shopping-cart"></i> Agregar por
-              $26</button></div>
-        </div>
-        <div class="menu-item">
-          <div class="item-meta"><span class="item-name">Tiramisu de Coco</span><span class="item-price">$8</span></div>
-          <p class="item-desc">Nuestra versión tropical del clásico italiano: bizcochos de café con mousse de coco y
-            cacao.</p>
-          <div style="margin-top: 1rem;"><button class="btn-add-cart" onclick="addToCart('Tiramisu de Coco', 8)"><i
-                class="fas fa-shopping-cart"></i> Agregar por $8</button></div>
-        </div>
-      </div>
-    </section>
+    <!-- CONTENEDOR DE SECCIONES (PLATOS) -->
+    <div id="dynamic-menu-content">
+      <!-- Secciones dinámicas aquí -->
+    </div>
   </main>
 
   <footer>
@@ -783,6 +573,11 @@
         WhatsApp</a> | <a href="reservas.html">Reservar Mesa</a></p>
     <br>
     <p>© 2025 Kiosko Azul</p>
+    <p style="margin-top:0.75rem;">
+      <a href="admin-login.html" style="color:rgba(255,255,255,0.25);font-size:0.7rem;text-decoration:none;transition:color 0.3s;letter-spacing:0.1em;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='rgba(255,255,255,0.25)'">
+        <i class="fas fa-lock"></i> Administración
+      </a>
+    </p>
   </footer>
 
   <a href="https://wa.me/+584126071753" target="_blank"
@@ -863,7 +658,167 @@
       }
     }
 
-    document.addEventListener('DOMContentLoaded', fetchBCVRate);
+    document.addEventListener('DOMContentLoaded', async () => {
+      await fetchBCVRate();
+      await loadDynamicMenu();
+    });
+
+    // Cargar menú dinámico desde la API
+    async function loadDynamicMenu() {
+      try {
+        const [catsRes, itemsRes, promosRes] = await Promise.all([
+          fetch('/api/categorias'),
+          fetch('/api/menu'),
+          fetch('/api/promociones')
+        ]);
+        
+        const categorias = await catsRes.json();
+        const menuItems = await itemsRes.json();
+        const promos = await promosRes.json();
+
+        // 1. Render Promociones
+        renderPromos(promos);
+        
+        // 2. Render Categorías (Tabs)
+        const tabsContainer = document.getElementById('dynamic-tabs');
+        tabsContainer.innerHTML = '';
+        
+        // 3. Render Secciones y Platos
+        const contentContainer = document.getElementById('dynamic-menu-content');
+        contentContainer.innerHTML = '';
+
+        if (categorias.length === 0) {
+          tabsContainer.innerHTML = '<p>El menú está vacío.</p>';
+          return;
+        }
+
+        categorias.forEach((cat, index) => {
+          // Tab button
+          const isActive = index === 0 ? 'active' : '';
+          tabsContainer.innerHTML += `<button class="tab-btn ${isActive}" onclick="showTab('cat-${cat.slug}', this)">${cat.emoji} ${cat.nombre}</button>`;
+
+          // Section
+          const catItems = menuItems.filter(i => i.categoria_id === cat.id);
+          
+          let html = `
+            <section class="menu-section ${isActive}" id="cat-${cat.slug}">
+              <h2 class="section-heading">${cat.emoji} ${cat.nombre}</h2>
+              <div class="menu-grid">
+          `;
+
+          if (catItems.length === 0) {
+            html += `<p style="color:var(--pearl);grid-column:1/-1;">No hay platos en esta categoría.</p>`;
+          }
+
+          catItems.forEach(item => {
+            const vesPrice = bcvRate > 0 ? (item.precio_usd * bcvRate).toFixed(2) : '0.00';
+            const vesHtml = bcvRate > 0 ? `<span class="item-price-ves">Bs. ${vesPrice}</span>` : '';
+            
+            // Imagen si existe
+            const imgHtml = item.imagen_url 
+              ? `<div style="width:100%;height:180px;border-radius:10px;margin-bottom:1rem;overflow:hidden;border:1px solid rgba(255,255,255,0.05);"><img src="${item.imagen_url}" style="width:100%;height:100%;object-fit:cover;" alt="${item.nombre}"></div>`
+              : '';
+
+            html += `
+              <div class="menu-item">
+                ${imgHtml}
+                <div class="item-meta">
+                  <span class="item-name">${item.nombre}</span>
+                  <span class="item-price">$${item.precio_usd.toFixed(2)}${vesHtml}</span>
+                </div>
+                <p class="item-desc">${item.descripcion || ''}</p>
+                <div style="margin-top:auto;padding-top:1rem;">
+                  <button class="btn-add-cart" onclick="addToCart('${item.nombre}', ${item.precio_usd})">
+                    <i class="fas fa-shopping-cart"></i> Agregar por $${item.precio_usd.toFixed(2)}
+                  </button>
+                </div>
+              </div>
+            `;
+          });
+
+          html += `</div></section>`;
+          contentContainer.innerHTML += html;
+        });
+
+      } catch (e) {
+        console.error("Error al cargar menú:", e);
+        document.getElementById('dynamic-tabs').innerHTML = '<p style="color:#C0392B;">Error conectando con el servidor.</p>';
+      }
+    }
+
+    function renderPromos(promos) {
+      const container = document.getElementById('promos-container');
+      const grid = document.getElementById('promos-grid');
+      
+      if (!promos || promos.length === 0) {
+        container.style.display = 'none';
+        return;
+      }
+
+      container.style.display = 'block';
+      grid.innerHTML = '';
+
+      promos.forEach(p => {
+        let precioHtml = '';
+        let botonHtml = '';
+
+        if ((p.aplica_a === 'item' || p.aplica_a === 'libre') && p.precio_final !== undefined && p.precio_final !== null) {
+          // Es un combo de platos específicos o un anuncio libre con precios explícitos
+          const finalPrice = p.precio_final;
+          const originalPrice = p.precio_original || null;
+          const vesPrice = bcvRate > 0 ? (finalPrice * bcvRate).toFixed(2) : '0.00';
+          const vesHtml = bcvRate > 0 ? `<span class="item-price-ves">Bs. ${vesPrice}</span>` : '';
+          
+          let descT = '';
+          if (p.precio_original && p.precio_original > p.precio_final) {
+             const diff = p.precio_original - p.precio_final;
+             descT = `-$${diff.toFixed(2)} OFF`;
+             if (p.tipo === 'porcentaje') descT = `${p.valor}% OFF`;
+          } else if (p.tipo === 'porcentaje') {
+             descT = `${p.valor}% OFF`;
+          }
+
+          const originalHtml = originalPrice ? `<span style="font-size:0.75rem;color:var(--pearl);text-decoration:line-through;">$${originalPrice.toFixed(2)}</span>` : '';
+          const descHtml = descT ? `<span style="font-size:0.75rem;color:#E74C3C;font-weight:700;">${descT}</span>` : '';
+
+          precioHtml = `
+            <div style="display:flex;flex-direction:column;align-items:flex-end;">
+              ${originalHtml}
+              <span>$${finalPrice.toFixed(2)}${vesHtml}</span>
+              ${descHtml}
+            </div>
+          `;
+          botonHtml = `
+            <button class="btn-add-cart" style="background:var(--gold);color:#000;" onclick="addToCart('[PROMO] ${p.nombre}', ${finalPrice})">
+              <i class="fas fa-tag"></i> Pedir Promo por $${finalPrice.toFixed(2)}
+            </button>
+          `;
+        } else {
+          // Descuentos generales o a categorías (difíciles de agregar al carrito unitario)
+          if (p.tipo === 'porcentaje') {
+            precioHtml = `<span style="font-size:0.9rem;letter-spacing:1px;color:var(--gold)">${p.valor}% OFF</span>`;
+            botonHtml = `<p style="color:var(--pearl);font-size:0.8rem;font-style:italic;">Descuento aplicable en pedidos de ${p.aplica_a}</p>`;
+          } else {
+             precioHtml = `<span style="font-size:0.9rem;color:var(--gold);">$${p.valor} OFF</span>`;
+             botonHtml = `<p style="color:var(--pearl);font-size:0.8rem;font-style:italic;">Descuento aplicable en pedidos de ${p.aplica_a}</p>`;
+          }
+        }
+        
+        grid.innerHTML += `
+          <div class="menu-item" style="border-color:var(--gold);background:rgba(212,175,55,0.05);">
+            <div class="item-badge" style="background:var(--gold);color:#000;">PROMO ESPECIAL</div>
+            <div class="item-meta">
+              <span class="item-name" style="color:var(--gold);">${p.nombre}</span>
+              <span class="item-price">${precioHtml}</span>
+            </div>
+            <p class="item-desc">${p.descripcion || ''}</p>
+            <div style="margin-top:auto;padding-top:1rem;">
+              ${botonHtml}
+            </div>
+          </div>
+        `;
+      });
+    }
 
     function addToCart(name, price) {
       const existing = cart.find(item => item.name === name);
@@ -971,11 +926,26 @@
       </div>
 
       <div class="checkout-form">
-        <label>Nombre y Apellido</label>
-        <input type="text" id="order-name" placeholder="Ej: Juan Pérez" required>
+        <div style="background:rgba(212,175,55,0.05); border:1px solid rgba(212,175,55,0.2); padding:1rem; border-radius:12px; margin-bottom:1.5rem; display:flex; gap:1rem; align-items:center;">
+          <div style="width:40px; height:40px; background:var(--gold); color:#000; display:flex; align-items:center; justify-content:center; border-radius:50%; font-size:1.2rem;">
+            <i class="fas fa-user-check"></i>
+          </div>
+          <div>
+            <div style="font-size:0.8rem; color:var(--pearl); opacity:0.8;">Cliente Identificado</div>
+            <div id="logged-client-name" style="font-weight:700; color:var(--gold); font-family:'Outfit';">...</div>
+          </div>
+        </div>
 
-        <label>Teléfono (WhatsApp)</label>
-        <input type="text" id="order-phone" placeholder="0412-1234567" required>
+        <label>Tipo de Entrega</label>
+        <select id="tipo-entrega" onchange="toggleDireccion()">
+          <option value="pickup">Pick-Up (Retiro por Tienda)</option>
+          <option value="delivery">Delivery</option>
+        </select>
+
+        <div id="direccion-container" style="display:none; margin-bottom:1rem;">
+          <label>Dirección de Delivery (Obligatorio)</label>
+          <input type="text" id="order-address" placeholder="Ej: Res. Las Palmeras, Apto 4B" />
+        </div>
 
         <label>Método de Pago</label>
         <select id="payment-method" onchange="updatePaymentInfo()">
@@ -988,24 +958,29 @@
         </select>
 
         <div id="payment-info" class="payment-info">
-          <strong>Pago Móvil Venezolano de Credito</strong><br>
-          Teléfono: 0412-6071753<br>
-          CI: V-9960373<br>
-          <em>Realice el pago y coloque la referencia abajo.</em>
+          <!-- autocompletado -->
         </div>
 
         <label>Número de Referencia del Pago</label>
         <input type="text" id="order-ref" placeholder="Ej: 854721" required>
 
-        <button class="btn-submit-order" onclick="submitOrder()"><i class="fas fa-paper-plane"></i> Enviar Orden al
-          Restaurante</button>
+        <button class="btn-submit-order" onclick="submitOrder()"><i class="fas fa-paper-plane"></i> Enviar Orden al Restaurante</button>
       </div>
     </div>
   </div>
 
   <!-- CHECKOUT JS -->
   <script>
+    let cliente = null;
+
     function openCheckout() {
+      const saved = localStorage.getItem('kb_cliente');
+      if (!saved) {
+        window.location.href = 'login.html';
+        return;
+      }
+      cliente = JSON.parse(saved);
+
       if (cart.length === 0) {
         alert('Agrega al menos un plato a tu carrito para hacer el pedido.');
         return;
@@ -1034,10 +1009,20 @@
         </div>
       `;
       document.getElementById('checkout-summary').innerHTML = summaryHTML;
+      
+      document.getElementById('logged-client-name').textContent = cliente.nombre;
+      if (cliente.direccion) document.getElementById('order-address').value = cliente.direccion;
 
       toggleCart();
       toggleCheckout();
       updatePaymentInfo(); // Forzar actualización de info de pago al abrir
+    }
+
+    function toggleDireccion() {
+      const tipo = document.getElementById('tipo-entrega').value;
+      const c = document.getElementById('direccion-container');
+      if (tipo === 'delivery') c.style.display = 'block';
+      else c.style.display = 'none';
     }
 
     function toggleCheckout() {
@@ -1082,13 +1067,18 @@
     }
 
     async function submitOrder() {
-      const name = document.getElementById('order-name').value;
-      const phone = document.getElementById('order-phone').value;
+      if (!cliente) return;
       const method = document.getElementById('payment-method').value;
       const ref = document.getElementById('order-ref').value;
+      const tipo = document.getElementById('tipo-entrega').value;
+      const direc = document.getElementById('order-address').value;
 
-      if (!name || !phone || !ref) {
-        alert("Por favor completa todos los campos.");
+      if (!ref) {
+        alert("Por favor inserta tu número de referencia de pago.");
+        return;
+      }
+      if (tipo === 'delivery' && !direc.trim()) {
+        alert("Por favor ingresa la dirección de Delivery.");
         return;
       }
 
@@ -1096,12 +1086,15 @@
       cart.forEach(item => total += item.price * item.qty);
 
       const orderPayload = {
-        customer_name: name,
-        customer_phone: phone,
+        customer_name: cliente.nombre,
+        customer_phone: cliente.telefono,
         payment_method: method,
         payment_ref: ref,
+        tipo_entrega: tipo,
+        direccion: tipo === 'delivery' ? direc : null,
         items: cart,
-        total: total
+        total: total,
+        tasa_bcv: bcvRate > 0 ? bcvRate : null
       };
 
       const btn = document.querySelector('.btn-submit-order');
@@ -1109,28 +1102,26 @@
       btn.disabled = true;
 
       try {
-        // Asumiendo que el servidor corre en localhost:8000 en desarollo
-        const response = await fetch('http://localhost:8000/api/orden', {
+        const response = await fetch('/api/orden', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(orderPayload)
         });
 
         const data = await response.json();
 
         if (response.ok) {
-          alert(`¡Pedido Enviado Exitosamente!\nSu número de orden es: ${data.order_id}\n\nEl pago está siendo verificado. Pronto nos comunicaremos al ${phone}.`);
+          alert(`¡Pedido Enviado Exitosamente!\nSu número de orden es: ${data.order_id}\n\nEl pago está siendo verificado.`);
           cart = [];
           updateCartUI();
           toggleCheckout();
+          window.location.href = `mis-pedidos.html?track=${encodeURIComponent(data.order_id)}`;
         } else {
           alert('Hubo un error al procesar la orden. Intente de nuevo.');
         }
       } catch (error) {
         console.error('Error:', error);
-        alert('Error de conexión con el servidor de Kiosco Azul.');
+        alert('Error de conexión con el servidor.');
       } finally {
         btn.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar Orden al Restaurante';
         btn.disabled = false;

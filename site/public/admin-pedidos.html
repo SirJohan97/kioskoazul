@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pedidos — Kiosko Azul Admin</title>
+  <link rel="icon" href="assets/logo.png" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="css/admin.css" />
+</head>
+<body>
+<div class="admin-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <img src="assets/logo.png" alt="Logo" onerror="this.style.display='none'">
+      <div><span>Kiosko Azul</span><small>Admin Panel</small></div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">Principal</div>
+      <a href="admin.html" class="nav-link"><i class="fas fa-chart-line"></i> Dashboard</a>
+      <a href="admin-pedidos.html" class="nav-link active"><i class="fas fa-receipt"></i> Pedidos</a>
+      <div class="nav-section">Gestión</div>
+      <a href="admin-menu.html" class="nav-link"><i class="fas fa-utensils"></i> Menú</a>
+      <a href="admin-promociones.html" class="nav-link"><i class="fas fa-tag"></i> Promociones</a>
+      <div class="nav-section">Sitio</div>
+      <a href="index.html" target="_blank" class="nav-link"><i class="fas fa-globe"></i> Ver Sitio</a>
+      <a href="menu.html" target="_blank" class="nav-link"><i class="fas fa-book-open"></i> Ver Menú</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="admin-badge">
+        <div class="avatar" id="admin-avatar">A</div>
+        <div class="info"><div class="name" id="admin-name">Admin</div><div class="rol" id="admin-rol">superadmin</div></div>
+      </div>
+      <button class="btn btn-outline btn-sm btn-w100" style="margin-top:0.75rem;" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button>
+    </div>
+  </aside>
+
+  <div class="admin-main">
+    <header class="admin-topbar">
+      <span class="topbar-title"><i class="fas fa-receipt" style="color:var(--gold);margin-right:0.5rem;"></i>Historial de Pedidos</span>
+      <button class="btn btn-outline btn-sm" onclick="loadPedidos()" title="Actualizar"><i class="fas fa-sync-alt"></i> Actualizar</button>
+    </header>
+    <div class="admin-content">
+
+      <!-- Filtros -->
+      <div class="filter-bar">
+        <select class="form-control" id="estado-filter" onchange="loadPedidos()">
+          <option value="">Todos los estados</option>
+          <option value="pendiente">Pendiente</option>
+          <option value="preparando">Preparando</option>
+          <option value="listo">Listo</option>
+          <option value="entregado">Entregado</option>
+          <option value="cancelado">Cancelado</option>
+        </select>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Pedidos</span>
+          <span id="pedido-count" style="font-size:0.8rem;color:var(--pearl);">Cargando…</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Ref</th><th>Cliente (Tlf)</th><th>Entrega</th><th>Items</th><th>Total</th><th>Pago</th><th>Estado</th><th>Fecha</th></tr>
+            </thead>
+            <tbody id="pedidos-tbody">
+              <tr><td colspan="8" style="text-align:center;color:var(--pearl);padding:2rem;">Cargando…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Detalle Pedido -->
+<div class="modal-overlay" id="detail-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="detail-ref">Pedido</span>
+      <button class="modal-close" onclick="closeModal('detail-modal')"><i class="fas fa-times"></i></button>
+    </div>
+    <div id="detail-body"></div>
+    <div class="modal-footer">
+      <select class="form-control" id="detail-estado" style="border-radius:8px;max-width:200px;">
+        <option value="pendiente">Pendiente</option>
+        <option value="preparando">Preparando</option>
+        <option value="listo">Listo</option>
+        <option value="entregado">Entregado</option>
+        <option value="cancelado">Cancelado</option>
+      </select>
+      <button class="btn btn-gold" onclick="saveEstado()"><i class="fas fa-save"></i> Guardar Estado</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+
+<script>
+  const API = '';
+  let authToken = null;
+  let currentPedidoId = null;
+
+  (function(){
+    const saved = localStorage.getItem('kb_admin');
+    if (!saved) return window.location.href = 'admin-login.html';
+    try {
+      const { token, admin } = JSON.parse(saved);
+      authToken = token;
+      document.getElementById('admin-name').textContent = admin.nombre || admin.username;
+      document.getElementById('admin-rol').textContent  = admin.rol;
+      document.getElementById('admin-avatar').textContent = (admin.nombre||admin.username)[0].toUpperCase();
+    } catch(e) { localStorage.removeItem('kb_admin'); window.location.href = 'admin-login.html'; }
+  })();
+
+  function logout() { localStorage.removeItem('kb_admin'); window.location.href = 'admin-login.html'; }
+  function authHeaders() { return { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' }; }
+  function openModal(id)  { document.getElementById(id).classList.add('open'); }
+  function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+  function toast(msg, type='success') {
+    const c = document.getElementById('toast-container');
+    const t = document.createElement('div');
+    t.className = `toast ${type}`;
+    t.innerHTML = `<i class="toast-icon fas fa-${type==='success'?'check-circle':'exclamation-circle'}"></i><span class="toast-msg">${msg}</span>`;
+    c.appendChild(t); setTimeout(() => t.remove(), 4000);
+  }
+
+  const estadoBadge = {
+    pendiente:  'badge-orange', preparando: 'badge-blue',
+    listo:      'badge-green',  entregado:  'badge-gold',
+    cancelado:  'badge-red',
+  };
+
+  async function loadPedidos() {
+    const estado = document.getElementById('estado-filter').value;
+    let url = `${API}/api/pedidos?limit=100`;
+    if (estado) url += `&estado=${estado}`;
+    try {
+      const r  = await fetch(url, { headers: authHeaders() });
+      const ps = await r.json();
+      
+      const activos = ps.filter(p => p.estado !== 'cancelado');
+      const sumatoria = activos.reduce((acc, p) => acc + p.total, 0);
+      
+      document.getElementById('pedido-count').innerHTML = `<b>${ps.length}</b> pedidos | <span style="color:var(--gold)"><b>$${sumatoria.toFixed(2)}</b> válidos</span>`;
+      
+      const tbody = document.getElementById('pedidos-tbody');
+      if (!ps.length) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--pearl);padding:2rem;">Sin pedidos</td></tr>';
+        return;
+      }
+      tbody.innerHTML = ps.map(p => {
+        const fecha = new Date(p.creado_en + 'Z').toLocaleString('es-VE', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
+        const cls   = estadoBadge[p.estado] || 'badge-gray';
+        const resumen = p.items.map(i => `${i.cantidad}x ${i.nombre}`).join(', ');
+        const rowOpacity = p.estado === 'cancelado' ? '0.5' : '1';
+        
+        const entregaHtml = p.tipo_entrega === 'delivery' 
+            ? '<i class="fas fa-motorcycle" style="color:#e67e22;"></i> Delivery' 
+            : '<i class="fas fa-store" style="color:#3498db;"></i> Pick-Up';
+        
+        return `<tr style="cursor:pointer; opacity:${rowOpacity}; transition:opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='${rowOpacity}'" onclick="viewDetail(${JSON.stringify(p).replace(/"/g,'&quot;')})">
+          <td><b>${p.order_ref}</b></td>
+          <td>${p.cliente_nombre}<br><small style="color:var(--pearl);">${p.cliente_telefono}</small></td>
+          <td style="font-weight:600;">${entregaHtml}</td>
+          <td style="font-size:0.8rem;color:var(--pearl);max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${resumen}</td>
+          <td style="color:var(--gold);font-weight:700;">$${p.total.toFixed(2)}</td>
+          <td>${p.metodo_pago}</td>
+          <td><span class="badge ${cls}">${p.estado}</span></td>
+          <td style="font-size:0.8rem;white-space:nowrap;">${fecha}</td>
+        </tr>`;
+      }).join('');
+    } catch(e) { toast('Error cargando pedidos', 'error'); }
+  }
+
+  function viewDetail(p) {
+    currentPedidoId = p.id;
+    document.getElementById('detail-ref').textContent = p.order_ref;
+    document.getElementById('detail-estado').value    = p.estado;
+    const fecha = new Date(p.creado_en + 'Z').toLocaleString('es-VE');
+    const itemsHtml = p.items.map(i =>
+      `<div style="display:flex;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid var(--border);">
+        <span>${i.cantidad}× ${i.nombre}</span>
+        <span style="color:var(--gold);font-weight:600;">$${i.subtotal.toFixed(2)}</span>
+      </div>`
+    ).join('');
+    
+    let logisticsHtml = p.tipo_entrega === 'delivery' 
+        ? `<div style="grid-column: span 2; background:rgba(230,126,34,0.1); padding:1rem; border:1px solid rgba(230,126,34,0.3); border-radius:8px;">
+             <div style="font-size:0.8rem; color:#e67e22; font-weight:700; margin-bottom:0.25rem;"><i class="fas fa-motorcycle"></i> DELIVERY</div>
+             <div style="font-size:0.95rem;">${p.direccion || 'Sin dirección registrada'}</div>
+           </div>`
+        : `<div style="grid-column: span 2; background:rgba(52,152,219,0.1); padding:1rem; border:1px solid rgba(52,152,219,0.3); border-radius:8px;">
+             <div style="font-size:0.8rem; color:#3498db; font-weight:700; margin-bottom:0.25rem;"><i class="fas fa-store"></i> PICK-UP EN TIENDA</div>
+             <div style="font-size:0.95rem;">El cliente retirará su pedido.</div>
+           </div>`;
+
+    document.getElementById('detail-body').innerHTML = `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem;">
+        <div><div style="font-size:0.75rem;color:var(--pearl);">Cliente</div><div style="font-weight:600;">${p.cliente_nombre}</div></div>
+        <div><div style="font-size:0.75rem;color:var(--pearl);">Teléfono</div><div>${p.cliente_telefono||'—'}</div></div>
+        ${logisticsHtml}
+        <div><div style="font-size:0.75rem;color:var(--pearl);">Método de Pago</div><div>${p.metodo_pago} (${p.referencia_pago||''})</div></div>
+        <div><div style="font-size:0.75rem;color:var(--pearl);">Fecha</div><div style="font-size:0.85rem;">${fecha}</div></div>
+      </div>
+      <div style="background:var(--surface);border-radius:10px;padding:1rem;margin-bottom:1rem;">
+        ${itemsHtml}
+        <div style="display:flex;justify-content:space-between;padding-top:0.75rem;margin-top:0.25rem;font-family:'Outfit',sans-serif;font-size:1.1rem;font-weight:800;">
+          <span>Total</span><span style="color:var(--gold);">$${p.total.toFixed(2)}</span>
+        </div>
+      </div>`;
+    openModal('detail-modal');
+  }
+
+  async function saveEstado() {
+    const estado = document.getElementById('detail-estado').value;
+    try {
+      const r = await fetch(`${API}/api/pedidos/${currentPedidoId}/estado`, {
+        method: 'PUT', headers: authHeaders(), body: JSON.stringify({ estado }),
+      });
+      if (!r.ok) throw new Error();
+      toast(`Estado actualizado: ${estado}`);
+      closeModal('detail-modal');
+      loadPedidos();
+    } catch(e) { toast('Error actualizando estado', 'error'); }
+  }
+
+  loadPedidos();
+
+  // Auto-refresco cada 15 segundos
+  setInterval(() => {
+    // Si no está lidiando con un modal, refresca la tabla por debajo
+    if(!document.getElementById('detail-modal').classList.contains('open')) {
+        loadPedidos();
+    }
+  }, 15000);
+</script>
+</body>
+</html>

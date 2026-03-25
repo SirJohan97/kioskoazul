@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Promociones — Kiosko Azul Admin</title>
+  <link rel="icon" href="assets/logo.png" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="css/admin.css" />
+</head>
+<body>
+<div class="admin-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <img src="assets/logo.png" alt="Logo" onerror="this.style.display='none'">
+      <div><span>Kiosko Azul</span><small>Admin Panel</small></div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">Principal</div>
+      <a href="admin.html" class="nav-link"><i class="fas fa-chart-line"></i> Dashboard</a>
+      <a href="admin-pedidos.html" class="nav-link"><i class="fas fa-receipt"></i> Pedidos</a>
+      <div class="nav-section">Gestión</div>
+      <a href="admin-menu.html" class="nav-link"><i class="fas fa-utensils"></i> Menú</a>
+      <a href="admin-promociones.html" class="nav-link active"><i class="fas fa-tag"></i> Promociones</a>
+      <div class="nav-section">Sitio</div>
+      <a href="index.html" target="_blank" class="nav-link"><i class="fas fa-globe"></i> Ver Sitio</a>
+      <a href="menu.html" target="_blank" class="nav-link"><i class="fas fa-book-open"></i> Ver Menú</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="admin-badge">
+        <div class="avatar" id="admin-avatar">A</div>
+        <div class="info"><div class="name" id="admin-name">Admin</div><div class="rol" id="admin-rol">superadmin</div></div>
+      </div>
+      <button class="btn btn-outline btn-sm btn-w100" style="margin-top:0.75rem;" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button>
+    </div>
+  </aside>
+
+  <div class="admin-main">
+    <header class="admin-topbar">
+      <span class="topbar-title"><i class="fas fa-tag" style="color:var(--gold);margin-right:0.5rem;"></i>Promociones</span>
+      <button class="btn btn-gold btn-sm" onclick="openPromoModal()"><i class="fas fa-plus"></i> Nueva Promoción</button>
+    </header>
+    <div class="admin-content">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Todas las Promociones</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Nombre</th><th>Precio / Oferta</th><th>Descuento</th><th>Aplica a</th><th>Vigencia</th><th>Estado</th><th>Acciones</th></tr>
+            </thead>
+            <tbody id="promos-tbody">
+              <tr><td colspan="8" style="text-align:center;color:var(--pearl);padding:2rem;">Cargando…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Promoción -->
+<div class="modal-overlay" id="promo-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="modal-promo-title">Nueva Promoción</span>
+      <button class="modal-close" onclick="closeModal('promo-modal')"><i class="fas fa-times"></i></button>
+    </div>
+    <form id="promo-form">
+      <input type="hidden" id="promo-id" />
+      <div class="form-group">
+        <label>Nombre de la Promoción *</label>
+        <input type="text" class="form-control" id="promo-nombre" required placeholder="Ej: Happy Hour Cócteles" />
+      </div>
+      <div class="form-group">
+        <label>Descripción</label>
+        <textarea class="form-control" id="promo-desc" rows="2" style="resize:vertical;" placeholder="Descripción visible al cliente…"></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Precio Original del Producto ($) *</label>
+          <input type="number" class="form-control" id="promo-precio-org" step="0.01" min="0" required placeholder="Ej: 15.00" oninput="calcFinalPrice()" />
+        </div>
+        <div class="form-group">
+          <label>Tipo de Descuento</label>
+          <select class="form-control" id="promo-tipo" onchange="calcFinalPrice()">
+            <option value="porcentaje">Porcentaje (%)</option>
+            <option value="monto_fijo">Monto Fijo a Descontar ($)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label id="lbl-promo-valor">Descuento a Aplicar *</label>
+          <input type="number" class="form-control" id="promo-valor" step="0.01" min="0" required placeholder="Ej: 20" oninput="calcFinalPrice()" />
+        </div>
+        <div class="form-group">
+          <label style="color:var(--gold);">Precio Final Oferta ($)</label>
+          <input type="number" class="form-control" id="promo-precio-fin" readonly style="background:rgba(212,175,55,0.05); color:var(--gold); font-weight:bold; border:1px solid var(--gold);" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Relacionar con el Menú (Opcional)</label>
+          <select class="form-control" id="promo-aplica" onchange="toggleCatField()">
+            <option value="libre">Ninguno (Solo Título y Precios) ✨</option>
+            <option value="item">Vincular a Platos específicos</option>
+            <option value="categoria">Vincular a Categoría completa</option>
+            <option value="total">Descuento global en carrito</option>
+          </select>
+        </div>
+        <div class="form-group" id="promo-cat-group" style="display:none;">
+          <label>Categoría</label>
+          <select class="form-control" id="promo-cat"></select>
+        </div>
+      </div>
+      
+      <div id="promo-items-group" class="form-group" style="display:none;">
+        <label>Platos aplicables (selección múltiple)</label>
+        <select class="form-control" id="promo-items" multiple style="height:120px;"></select>
+        <small style="color:var(--pearl);font-size:0.75rem;">Ctrl/Cmd + clic para seleccionar varios</small>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Fecha Inicio</label>
+          <input type="datetime-local" class="form-control" id="promo-inicio" />
+        </div>
+        <div class="form-group">
+          <label>Fecha Fin</label>
+          <input type="datetime-local" class="form-control" id="promo-fin" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Activa</label>
+        <label class="toggle" style="margin-top:0.4rem;"><input type="checkbox" id="promo-activa" checked><span class="slider"></span></label>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeModal('promo-modal')">Cancelar</button>
+        <button type="submit" class="btn btn-gold"><i class="fas fa-save"></i> Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+
+<script>
+  const API = '';
+  let authToken = null;
+  let allPromos = [], menuItems = [], cats = [];
+
+  (function(){
+    const saved = localStorage.getItem('kb_admin');
+    if (!saved) return window.location.href = 'admin-login.html';
+    try {
+      const { token, admin } = JSON.parse(saved);
+      authToken = token;
+      document.getElementById('admin-name').textContent = admin.nombre || admin.username;
+      document.getElementById('admin-rol').textContent  = admin.rol;
+      document.getElementById('admin-avatar').textContent = (admin.nombre||admin.username)[0].toUpperCase();
+    } catch(e) { localStorage.removeItem('kb_admin'); window.location.href = 'admin-login.html'; }
+  })();
+
+  function logout() { localStorage.removeItem('kb_admin'); window.location.href = 'admin-login.html'; }
+  function authHeaders() { return { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' }; }
+
+  function toast(msg, type='success') {
+    const c = document.getElementById('toast-container');
+    const t = document.createElement('div');
+    t.className = `toast ${type}`;
+    t.innerHTML = `<i class="toast-icon fas fa-${type==='success'?'check-circle':'exclamation-circle'}"></i><span class="toast-msg">${msg}</span>`;
+    c.appendChild(t); setTimeout(() => t.remove(), 4000);
+  }
+
+  function openModal(id)  { document.getElementById(id).classList.add('open'); }
+  function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+  function toggleCatField() {
+    const aplica = document.getElementById('promo-aplica').value;
+    document.getElementById('promo-cat-group').style.display  = aplica==='categoria' ? 'block' : 'none';
+    document.getElementById('promo-items-group').style.display = aplica==='item' ? 'block' : 'none';
+    calcFinalPrice();
+  }
+
+  function calcFinalPrice() {
+    const aplica = document.getElementById('promo-aplica').value;
+    const items = [...document.getElementById('promo-items').selectedOptions];
+    const orgInput = document.getElementById('promo-precio-org');
+    
+    // Autocalcular precio original si seleccionan platos específicos
+    if (aplica === 'item' && items.length > 0) {
+      let sum = 0;
+      items.forEach(opt => {
+        const item = menuItems.find(i => i.id === parseInt(opt.value));
+        if (item) sum += item.precio_usd;
+      });
+      orgInput.value = sum.toFixed(2);
+      orgInput.readOnly = true;
+    } else {
+      orgInput.readOnly = false;
+    }
+
+    const org = parseFloat(orgInput.value) || 0;
+    const tipo = document.getElementById('promo-tipo').value;
+    const val = parseFloat(document.getElementById('promo-valor').value) || 0;
+
+    const lbl = document.getElementById('lbl-promo-valor');
+    if (tipo === 'porcentaje') lbl.textContent = 'Porcentaje de Descuento (%) *';
+    else lbl.textContent = 'Monto a Descontar ($) *';
+
+    let fin = org;
+    if (tipo === 'porcentaje') {
+      fin = org * (1 - val/100);
+    } else {
+      fin = org - val;
+    }
+    
+    if (fin < 0) fin = 0;
+    // Si no hay precio original ni valor, no forzar 0.00
+    if (org === 0 && val === 0) {
+      document.getElementById('promo-precio-fin').value = '';
+    } else {
+      document.getElementById('promo-precio-fin').value = fin.toFixed(2);
+    }
+  }
+
+  async function loadData() {
+    const [rCats, rItems, rPromos] = await Promise.all([
+      fetch(`${API}/api/categorias`),
+      fetch(`${API}/api/menu/admin`, { headers: authHeaders() }),
+      fetch(`${API}/api/promociones/admin`, { headers: authHeaders() }),
+    ]);
+    cats      = await rCats.json();
+    menuItems = await rItems.json();
+    allPromos = await rPromos.json();
+
+    document.getElementById('promo-cat').innerHTML = cats.map(c => `<option value="${c.id}">${c.emoji} ${c.nombre}</option>`).join('');
+    document.getElementById('promo-items').innerHTML = menuItems.filter(i=>i.activo).map(i => `<option value="${i.id}">${i.nombre} — $${i.precio_usd}</option>`).join('');
+
+    renderPromos();
+  }
+
+  function promoEstado(p) {
+    const now = new Date();
+    if (!p.activa) return '<span class="badge badge-red">Inactiva</span>';
+    const inicio = p.fecha_inicio ? new Date(p.fecha_inicio) : null;
+    const fin    = p.fecha_fin    ? new Date(p.fecha_fin)    : null;
+    if (inicio && inicio > now) return '<span class="badge badge-blue">Futura</span>';
+    if (fin && fin < now)       return '<span class="badge badge-gray">Expirada</span>';
+    return '<span class="badge badge-green">Activa</span>';
+  }
+
+  function renderPromos() {
+    const tbody = document.getElementById('promos-tbody');
+    if (!allPromos.length) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--pearl);padding:2rem;">Sin promociones aún</td></tr>';
+      return;
+    }
+    tbody.innerHTML = allPromos.map(p => {
+      let descuento = p.tipo === 'porcentaje' ? `${p.valor}%` : `-$${p.valor}`;
+      let precioVal = p.precio_final !== null && p.precio_final !== undefined ? `$${p.precio_final}` : '—';
+      let originalVal = p.precio_original ? `<div style="font-size:0.75rem;text-decoration:line-through;color:var(--pearl)">$${p.precio_original}</div>` : '';
+
+      const catName   = p.categoria_id ? (cats.find(c=>c.id===p.categoria_id)?.nombre||'—') : '—';
+      const inicio = p.fecha_inicio ? new Date(p.fecha_inicio).toLocaleDateString('es-VE') : 'Sin límite';
+      const fin    = p.fecha_fin    ? new Date(p.fecha_fin).toLocaleDateString('es-VE')    : 'Sin límite';
+
+      return `<tr>
+        <td><div style="font-weight:600;">${p.nombre}</div><div style="font-size:0.78rem;color:var(--pearl);">${p.descripcion||''}</div></td>
+        <td style="color:var(--gold);font-weight:700;">${originalVal}${precioVal}</td>
+        <td><span class="badge badge-blue">${descuento}</span></td>
+        <td>${p.aplica_a === 'categoria' ? catName : (p.aplica_a === 'libre' ? 'Manual' : p.aplica_a)}</td>
+        <td style="font-size:0.8rem;color:var(--pearl);">${inicio} → ${fin}</td>
+        <td>${promoEstado(p)}</td>
+        <td>
+          <div style="display:flex;gap:0.4rem;">
+            <button class="btn btn-outline btn-sm" onclick="editPromo(${p.id})"><i class="fas fa-pen"></i></button>
+            <button class="btn btn-danger btn-sm" onclick="deletePromo(${p.id}, '${p.nombre}')"><i class="fas fa-trash"></i></button>
+          </div>
+        </td>
+      </tr>`;
+    }).join('');
+  }
+
+  function openPromoModal(promo=null) {
+    document.getElementById('promo-form').reset();
+    document.getElementById('promo-id').value = '';
+    document.getElementById('modal-promo-title').textContent = 'Nueva Promoción';
+    toggleCatField();
+    if (promo) {
+      document.getElementById('modal-promo-title').textContent = 'Editar Promoción';
+      document.getElementById('promo-id').value     = promo.id;
+      document.getElementById('promo-nombre').value = promo.nombre;
+      document.getElementById('promo-desc').value   = promo.descripcion||'';
+      document.getElementById('promo-tipo').value   = promo.tipo;
+      document.getElementById('promo-valor').value  = promo.valor;
+      document.getElementById('promo-aplica').value = promo.aplica_a;
+      document.getElementById('promo-activa').checked = promo.activa;
+      
+      if (promo.precio_original !== null && promo.precio_original !== undefined) {
+          document.getElementById('promo-precio-org').value = promo.precio_original;
+      } else {
+          document.getElementById('promo-precio-org').value = '';
+      }
+      
+      if (promo.categoria_id) document.getElementById('promo-cat').value = promo.categoria_id;
+      if (promo.fecha_inicio) document.getElementById('promo-inicio').value = promo.fecha_inicio.replace('Z','').slice(0,16);
+      if (promo.fecha_fin)    document.getElementById('promo-fin').value    = promo.fecha_fin.replace('Z','').slice(0,16);
+      toggleCatField();
+      calcFinalPrice();
+    }
+    openModal('promo-modal');
+  }
+
+  function editPromo(id) {
+    const p = allPromos.find(x => x.id === id);
+    if (p) openPromoModal(p);
+  }
+
+  async function deletePromo(id, nombre) {
+    if (!confirm(`¿Desactivar la promoción "${nombre}"?`)) return;
+    const r = await fetch(`${API}/api/promociones/${id}`, { method:'DELETE', headers: authHeaders() });
+    if (r.ok) { toast('Promoción desactivada'); loadData(); }
+    else toast('Error', 'error');
+  }
+
+  document.getElementById('promo-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const id = document.getElementById('promo-id').value;
+    const aplica = document.getElementById('promo-aplica').value;
+
+    // Ids de items seleccionados
+    const sel = [...document.getElementById('promo-items').selectedOptions].map(o => parseInt(o.value));
+
+    let tipo = document.getElementById('promo-tipo').value;
+    let valorStr = document.getElementById('promo-valor').value;
+    let valor = valorStr ? parseFloat(valorStr) : 0;
+    
+    let p_orgStr = document.getElementById('promo-precio-org').value;
+    let p_finStr = document.getElementById('promo-precio-fin').value;
+    let p_org = p_orgStr ? parseFloat(p_orgStr) : null;
+    let p_fin = p_finStr ? parseFloat(p_finStr) : null;
+
+    const payload = {
+      nombre:       document.getElementById('promo-nombre').value,
+      descripcion:  document.getElementById('promo-desc').value || null,
+      tipo:         tipo,
+      valor:        valor,
+      aplica_a:     aplica,
+      categoria_id: aplica==='categoria' ? parseInt(document.getElementById('promo-cat').value) : null,
+      fecha_inicio: document.getElementById('promo-inicio').value || null,
+      fecha_fin:    document.getElementById('promo-fin').value || null,
+      activa:       document.getElementById('promo-activa').checked,
+      item_ids:     aplica==='item' ? sel : [],
+      precio_original: p_org,
+      precio_final: p_fin
+    };
+
+    const url    = id ? `${API}/api/promociones/${id}` : `${API}/api/promociones`;
+    const method = id ? 'PUT' : 'POST';
+
+    try {
+      const r = await fetch(url, { method, headers: authHeaders(), body: JSON.stringify(payload) });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.detail || 'Error');
+      toast(id ? 'Promoción actualizada' : 'Promoción creada');
+      closeModal('promo-modal');
+      loadData();
+    } catch(ex) { toast(ex.message, 'error'); }
+  });
+
+  loadData();
+</script>
+</body>
+</html>

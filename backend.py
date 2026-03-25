@@ -1,93 +1,655 @@
+"""
+backend.py — Kiosko Azul
+API FastAPI con autenticación JWT, CRUD de menú, promociones, pedidos e imágenes.
+"""
 import os
-from fastapi import FastAPI, HTTPException
+import shutil
+from datetime import datetime, timedelta
+from typing import Optional, List
+
+from fastapi import FastAPI, HTTPException, Depends, status, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 import requests
 
-app = FastAPI(title="Kiosko Azul - API de Pagos")
+from jose import JWTError, jwt
+from passlib.context import CryptContext
+from sqlalchemy.orm import Session
 
-# Allow requests from our frontend
+from database import (
+    get_db, create_tables,
+    Admin, Cliente, Categoria, MenuItem, Promocion, PromocionItem,
+    Pedido, PedidoItem, AuditLog
+)
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Configuración
+# ─────────────────────────────────────────────────────────────────────────────
+SECRET_KEY  = os.environ.get("SECRET_KEY", "kioskoazul-secret-2025-xK9mPqR")
+ALGORITHM   = "HS256"
+TOKEN_HOURS = 24
+
+TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "8741738690:AAG_ONxfjhzIQ6NA0RrzMJ9AhW61_cdA-wY")
+TELEGRAM_CHAT_ID   = os.environ.get("TELEGRAM_CHAT_ID", "6526066600")
+
+UPLOAD_DIR = os.path.join(os.path.dirname(__file__), "site", "public", "assets", "menu")
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+pwd_ctx = CryptContext(schemes=["sha256_crypt"], deprecated="auto")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
+
+app = FastAPI(title="Kiosko Azul API", version="2.0.0")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # In production, restrict this to your domain
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-@app.get("/")
-async def root():
-    return {"message": "Kiosko Azul API está activa. Los pedidos se procesan en /api/orden"}
+# Crear tablas al arrancar
+create_tables()
 
-# Telegram Bot Configuration
-# IMPORTANTE: Reemplaza estos valores con tu bot real
-TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "8741738690:AAG_ONxfjhzIQ6NA0RrzMJ9AhW61_cdA-wY")
-TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "6526066600")
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Schemas Pydantic
+# ─────────────────────────────────────────────────────────────────────────────
+
+class Token(BaseModel):
+    access_token: str
+    token_type:   str
+    admin:        dict
+
+class CategoriaOut(BaseModel):
+    id: int; nombre: str; emoji: str; slug: str; orden: int; activa: bool
+    class Config: from_attributes = True
+
+class MenuItemIn(BaseModel):
+    nombre:      str
+    descripcion: Optional[str] = None
+    precio_usd:  float
+    imagen_url:  Optional[str] = None
+    badge:       Optional[str] = None
+    categoria_id: int
+    activo:      bool = True
+    destacado:   bool = False
+
+class MenuItemOut(BaseModel):
+    id: int; nombre: str; descripcion: Optional[str]; precio_usd: float
+    imagen_url: Optional[str]; badge: Optional[str]; activo: bool
+    destacado: bool; categoria_id: int; categoria: Optional[CategoriaOut]
+    class Config: from_attributes = True
+
+class PromocionIn(BaseModel):
+    nombre:       str
+    descripcion:  Optional[str] = None
+    tipo:         str = "porcentaje"
+    valor:        float
+    aplica_a:     str = "item"
+    categoria_id: Optional[int] = None
+    fecha_inicio: Optional[datetime] = None
+    fecha_fin:    Optional[datetime] = None
+    activa:       bool = True
+    item_ids:     List[int] = []
+    precio_original: Optional[float] = None
+    precio_final: Optional[float] = None
+
+class PromocionOut(BaseModel):
+    id: int; nombre: str; descripcion: Optional[str]; tipo: str; valor: float
+    aplica_a: str; categoria_id: Optional[int]; fecha_inicio: Optional[datetime]
+    fecha_fin: Optional[datetime]; activa: bool
+    precio_original: Optional[float] = None
+    precio_final: Optional[float] = None
+    class Config: from_attributes = True
 
 class CartItem(BaseModel):
-    name: str
+    name:  str
     price: float
-    qty: int
+    qty:   int
 
 class OrderRequest(BaseModel):
-    customer_name: str
+    customer_name:  str
     customer_phone: str
     payment_method: str
-    payment_ref: str
-    items: list[CartItem]
-    total: float
+    payment_ref:    str
+    tipo_entrega:   str = "pickup"
+    items:          List[CartItem]
+    total:          float
+    tasa_bcv:       Optional[float] = None
+    crear_cuenta:   bool = False
+    correo:         Optional[str] = None
+    direccion:      Optional[str] = None
+    password:       Optional[str] = None
 
-def send_telegram_message(message: str):
-    if TELEGRAM_BOT_TOKEN == "TU_TOKEN_AQUI":
-        print(f"SIMULATED TELEGRAM MSG:\n{message}")
-        return True
-        
+class PedidoEstadoIn(BaseModel):
+    estado: str   # pendiente | preparando | listo | entregado | cancelado
+
+class BatchPrecioIn(BaseModel):
+    categoria_id:   Optional[int] = None
+    porcentaje:     float   # positivo = aumento, negativo = descuento
+
+class ClienteRegistroIn(BaseModel):
+    nombre: str
+    telefono: str
+    password: str
+    correo: Optional[str] = None
+    direccion: Optional[str] = None
+
+class ClienteLoginIn(BaseModel):
+    telefono: str
+    password: str
+
+class ClienteOut(BaseModel):
+    id: int; nombre: str; telefono: str
+    correo: Optional[str]; direccion: Optional[str]
+    class Config: from_attributes = True
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Auth helpers
+# ─────────────────────────────────────────────────────────────────────────────
+
+def verify_password(plain: str, hashed: str) -> bool:
+    return pwd_ctx.verify(plain, hashed)
+
+def create_token(data: dict) -> str:
+    payload = data.copy()
+    payload["exp"] = datetime.utcnow() + timedelta(hours=TOKEN_HOURS)
+    return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+
+def get_current_admin(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> Admin:
+    cred_exc = HTTPException(status_code=401, detail="Token inválido o expirado",
+                             headers={"WWW-Authenticate": "Bearer"})
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        if not username:
+            raise cred_exc
+    except JWTError:
+        raise cred_exc
+    admin = db.query(Admin).filter_by(username=username, activo=True).first()
+    if not admin:
+        raise cred_exc
+    return admin
+
+def log_action(db: Session, admin_id: int, accion: str, tabla: str,
+               registro_id: int = None, detalle: dict = None):
+    db.add(AuditLog(admin_id=admin_id, accion=accion, tabla=tabla,
+                    registro_id=registro_id, detalle=detalle))
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Telegram
+# ─────────────────────────────────────────────────────────────────────────────
+
+def send_telegram(message: str):
     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
-    payload = {
-        "chat_id": TELEGRAM_CHAT_ID,
-        "text": message,
-        "parse_mode": "HTML"
-    }
-    response = requests.post(url, json=payload)
-    return response.ok
+    try:
+        r = requests.post(url, json={"chat_id": TELEGRAM_CHAT_ID, "text": message, "parse_mode": "HTML"}, timeout=5)
+        return r.ok
+    except Exception:
+        return False
 
-# In-memory counter for orders
-order_counter = 100
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Rutas
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+
+# ── Auth ─────────────────────────────────────────────────────────────
+
+@app.post("/api/auth/login", response_model=Token)
+async def login(form: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+    admin = db.query(Admin).filter_by(username=form.username, activo=True).first()
+    if not admin or not verify_password(form.password, admin.password_hash):
+        raise HTTPException(status_code=401, detail="Usuario o contraseña incorrectos")
+    admin.ultimo_login = datetime.utcnow()
+    db.commit()
+    token = create_token({"sub": admin.username, "rol": admin.rol})
+    return {"access_token": token, "token_type": "bearer",
+            "admin": {"id": admin.id, "username": admin.username,
+                      "nombre": admin.nombre, "rol": admin.rol}}
+
+@app.get("/api/auth/me")
+async def me(current: Admin = Depends(get_current_admin)):
+    return {"id": current.id, "username": current.username,
+            "nombre": current.nombre, "rol": current.rol}
+
+
+# ── Categorías ────────────────────────────────────────────────────────
+
+@app.get("/api/categorias", response_model=List[CategoriaOut])
+async def list_categorias(db: Session = Depends(get_db)):
+    return db.query(Categoria).filter_by(activa=True).order_by(Categoria.orden).all()
+
+@app.post("/api/categorias", response_model=CategoriaOut)
+async def create_categoria(nombre: str, emoji: str = "🍽️", slug: str = "",
+                            orden: int = 0, db: Session = Depends(get_db),
+                            current: Admin = Depends(get_current_admin)):
+    if not slug:
+        slug = nombre.lower().replace(" ", "_")
+    cat = Categoria(nombre=nombre, emoji=emoji, slug=slug, orden=orden)
+    db.add(cat); db.commit(); db.refresh(cat)
+    log_action(db, current.id, "crear_categoria", "categorias", cat.id, {"nombre": nombre})
+    db.commit()
+    return cat
+
+
+# ── Menú Items ────────────────────────────────────────────────────────
+
+@app.get("/api/menu", response_model=List[MenuItemOut])
+async def public_menu(categoria: Optional[str] = None, db: Session = Depends(get_db)):
+    q = db.query(MenuItem).filter_by(activo=True)
+    if categoria:
+        cat = db.query(Categoria).filter_by(slug=categoria).first()
+        if cat:
+            q = q.filter_by(categoria_id=cat.id)
+    return q.all()
+
+@app.get("/api/menu/admin", response_model=List[MenuItemOut])
+async def admin_menu(db: Session = Depends(get_db), current: Admin = Depends(get_current_admin)):
+    return db.query(MenuItem).all()
+
+@app.post("/api/menu", response_model=MenuItemOut)
+async def create_item(item: MenuItemIn, db: Session = Depends(get_db),
+                       current: Admin = Depends(get_current_admin)):
+    obj = MenuItem(**item.model_dump())
+    db.add(obj); db.commit(); db.refresh(obj)
+    log_action(db, current.id, "crear_item", "menu_items", obj.id, {"nombre": obj.nombre})
+    db.commit()
+    return obj
+
+@app.put("/api/menu/{item_id}", response_model=MenuItemOut)
+async def update_item(item_id: int, item: MenuItemIn, db: Session = Depends(get_db),
+                       current: Admin = Depends(get_current_admin)):
+    obj = db.query(MenuItem).filter_by(id=item_id).first()
+    if not obj:
+        raise HTTPException(404, "Plato no encontrado")
+    antes = {"nombre": obj.nombre, "precio_usd": obj.precio_usd}
+    for k, v in item.model_dump().items():
+        setattr(obj, k, v)
+    obj.actualizado = datetime.utcnow()
+    db.commit(); db.refresh(obj)
+    log_action(db, current.id, "editar_item", "menu_items", obj.id,
+               {"antes": antes, "despues": {"nombre": obj.nombre, "precio_usd": obj.precio_usd}})
+    db.commit()
+    return obj
+
+@app.delete("/api/menu/{item_id}")
+async def delete_item(item_id: int, db: Session = Depends(get_db),
+                       current: Admin = Depends(get_current_admin)):
+    obj = db.query(MenuItem).filter_by(id=item_id).first()
+    if not obj:
+        raise HTTPException(404, "Plato no encontrado")
+    obj.activo = False; obj.actualizado = datetime.utcnow()
+    log_action(db, current.id, "desactivar_item", "menu_items", obj.id, {"nombre": obj.nombre})
+    db.commit()
+    return {"status": "ok", "message": f"'{obj.nombre}' desactivado"}
+
+@app.post("/api/menu/{item_id}/imagen")
+async def upload_imagen(item_id: int, file: UploadFile = File(...),
+                         db: Session = Depends(get_db),
+                         current: Admin = Depends(get_current_admin)):
+    obj = db.query(MenuItem).filter_by(id=item_id).first()
+    if not obj:
+        raise HTTPException(404, "Plato no encontrado")
+    ext = file.filename.rsplit(".", 1)[-1].lower()
+    if ext not in ("jpg", "jpeg", "png", "webp"):
+        raise HTTPException(400, "Solo se permiten imágenes JPG, PNG o WEBP")
+    filename = f"item_{item_id}.{ext}"
+    dest = os.path.join(UPLOAD_DIR, filename)
+    with open(dest, "wb") as f:
+        shutil.copyfileobj(file.file, f)
+    obj.imagen_url = f"/assets/menu/{filename}"
+    obj.actualizado = datetime.utcnow()
+    log_action(db, current.id, "subir_imagen", "menu_items", obj.id, {"archivo": filename})
+    db.commit()
+    return {"status": "ok", "imagen_url": obj.imagen_url}
+
+@app.put("/api/menu/precios/batch")
+async def batch_precios(data: BatchPrecioIn, db: Session = Depends(get_db),
+                         current: Admin = Depends(get_current_admin)):
+    q = db.query(MenuItem).filter_by(activo=True)
+    if data.categoria_id:
+        q = q.filter_by(categoria_id=data.categoria_id)
+    items = q.all()
+    factor = 1 + (data.porcentaje / 100)
+    for i in items:
+        i.precio_usd = round(i.precio_usd * factor, 2)
+        i.actualizado = datetime.utcnow()
+    log_action(db, current.id, "ajuste_precios_batch", "menu_items", None,
+               {"porcentaje": data.porcentaje, "categoria_id": data.categoria_id, "items": len(items)})
+    db.commit()
+    return {"status": "ok", "items_actualizados": len(items), "factor": factor}
+
+
+# ── Promociones ───────────────────────────────────────────────────────
+
+def _hydrate_promocion(p: Promocion) -> PromocionOut:
+    po = p.precio_original
+    pf = p.precio_final
+    
+    if po is None and pf is None and p.aplica_a == "item" and p.items_aplicados:
+        suma = sum((i.menu_item.precio_usd for i in p.items_aplicados if i.menu_item))
+        po = round(suma, 2)
+        if p.tipo == "porcentaje":
+            pf = round(suma * (1 - p.valor / 100), 2)
+        elif p.tipo == "precio_fijo":
+            pf = round(p.valor, 2)
+        else:
+            pf = round(suma - p.valor, 2)
+            if pf < 0: pf = 0.0
+
+    return PromocionOut(
+        id=p.id, nombre=p.nombre, descripcion=p.descripcion, tipo=p.tipo,
+        valor=p.valor, aplica_a=p.aplica_a, categoria_id=p.categoria_id,
+        fecha_inicio=p.fecha_inicio, fecha_fin=p.fecha_fin, activa=p.activa,
+        precio_original=po, precio_final=pf
+    )
+
+@app.get("/api/promociones", response_model=List[PromocionOut])
+async def public_promociones(db: Session = Depends(get_db)):
+    now = datetime.utcnow()
+    q = db.query(Promocion).filter_by(activa=True)
+    promos = []
+    for p in q.all():
+        if (not p.fecha_inicio or p.fecha_inicio <= now) and (not p.fecha_fin or p.fecha_fin >= now):
+            promos.append(_hydrate_promocion(p))
+    return promos
+
+@app.get("/api/promociones/admin", response_model=List[PromocionOut])
+async def admin_promociones(db: Session = Depends(get_db),
+                             current: Admin = Depends(get_current_admin)):
+    return [_hydrate_promocion(p) for p in db.query(Promocion).all()]
+
+@app.post("/api/promociones", response_model=PromocionOut)
+async def create_promo(promo: PromocionIn, db: Session = Depends(get_db),
+                        current: Admin = Depends(get_current_admin)):
+    item_ids = promo.item_ids
+    data = promo.model_dump(exclude={"item_ids"})
+    obj = Promocion(**data)
+    db.add(obj); db.flush()
+    for iid in item_ids:
+        db.add(PromocionItem(promocion_id=obj.id, menu_item_id=iid))
+    log_action(db, current.id, "crear_promocion", "promociones", obj.id, {"nombre": obj.nombre})
+    db.commit(); db.refresh(obj)
+    return obj
+
+@app.put("/api/promociones/{promo_id}", response_model=PromocionOut)
+async def update_promo(promo_id: int, promo: PromocionIn, db: Session = Depends(get_db),
+                        current: Admin = Depends(get_current_admin)):
+    obj = db.query(Promocion).filter_by(id=promo_id).first()
+    if not obj:
+        raise HTTPException(404, "Promoción no encontrada")
+    item_ids = promo.item_ids
+    for k, v in promo.model_dump(exclude={"item_ids"}).items():
+        setattr(obj, k, v)
+    db.query(PromocionItem).filter_by(promocion_id=promo_id).delete()
+    for iid in item_ids:
+        db.add(PromocionItem(promocion_id=promo_id, menu_item_id=iid))
+    log_action(db, current.id, "editar_promocion", "promociones", promo_id, {"nombre": obj.nombre})
+    db.commit(); db.refresh(obj)
+    return obj
+
+@app.delete("/api/promociones/{promo_id}")
+async def delete_promo(promo_id: int, db: Session = Depends(get_db),
+                        current: Admin = Depends(get_current_admin)):
+    obj = db.query(Promocion).filter_by(id=promo_id).first()
+    if not obj:
+        raise HTTPException(404, "Promoción no encontrada")
+    obj.activa = False
+    log_action(db, current.id, "desactivar_promocion", "promociones", promo_id, {"nombre": obj.nombre})
+    db.commit()
+    return {"status": "ok"}
+
+
+# ── Pedidos ───────────────────────────────────────────────────────────
+
+order_counter = 100  # contador en memoria, se sincroniza con BD al arrancar
+
+@app.on_event("startup")
+async def sync_counter():
+    global order_counter
+    db = next(get_db())
+    last = db.query(Pedido).order_by(Pedido.id.desc()).first()
+    if last:
+        try:
+            order_counter = int(last.order_ref.split("-")[-1])
+        except Exception:
+            pass
 
 @app.post("/api/orden")
-async def create_order(order: OrderRequest):
+async def create_order(order: OrderRequest, db: Session = Depends(get_db)):
     global order_counter
     order_counter += 1
-    order_id = f"#ORD-{order_counter}"
-    
-    # Build Telegram Message
-    items_text = "\n".join([f"• {item.qty}x {item.name} (${item.price * item.qty})" for item in order.items])
-    
-    message = (
-        f"🔔 <b>NUEVA ORDEN {order_id}</b>\n\n"
-        f"👤 <b>Cliente:</b> {order.customer_name}\n"
-        f"📞 <b>Teléfono:</b> {order.customer_phone}\n\n"
-        f"🛒 <b>PEDIDO:</b>\n"
-        f"{items_text}\n"
-        f"💰 <b>Total a Pagar:</b> ${order.total}\n\n"
-        f"💳 <b>MÉTODO PAGO:</b> {order.payment_method}\n"
-        f"📋 <b>REFERENCIA:</b> {order.payment_ref}\n\n"
-        f"⚠️ <i>Por favor verifiquen el pago antes de despachar.</i>"
+    ref = f"#ORD-{order_counter}"
+
+    # Obligamos a que exista la cuenta (para Mis Pedidos)
+    cliente = db.query(Cliente).filter_by(telefono=order.customer_phone).first()
+    if not cliente:
+        # Auto-crear si no existe por seguridad, aunque el front debería forzar el registro primero
+        cliente = Cliente(
+            nombre=order.customer_name,
+            telefono=order.customer_phone,
+            correo=order.correo,
+            direccion=order.direccion,
+            password_hash=pwd_ctx.hash(order.password) if order.password else None,
+        )
+        db.add(cliente); db.flush()
+    else:
+        # Actualizar datos de entrega si cambiaron
+        if order.direccion and order.tipo_entrega == "delivery":
+            cliente.direccion = order.direccion
+            db.flush()
+
+    pedido = Pedido(
+        order_ref=ref,
+        cliente_id=cliente.id,
+        cliente_nombre=cliente.nombre,
+        cliente_telefono=cliente.telefono,
+        metodo_pago=order.payment_method,
+        referencia_pago=order.payment_ref,
+        tipo_entrega=order.tipo_entrega,
+        direccion=order.direccion if order.tipo_entrega == "delivery" else None,
+        total=order.total,
+        tasa_bcv=order.tasa_bcv,
+        estado="pendiente",
     )
+    db.add(pedido); db.flush()
+
+    for it in order.items:
+        menu_item = db.query(MenuItem).filter_by(nombre=it.name).first()
+        db.add(PedidoItem(
+            pedido_id=pedido.id,
+            menu_item_id=menu_item.id if menu_item else None,
+            nombre=it.name,
+            precio_usd=it.price,
+            cantidad=it.qty,
+            subtotal=round(it.price * it.qty, 2),
+        ))
+
+    db.commit()
+
+    # Notificación Telegram ajustada
+    items_text = "\n".join([f"• {i.qty}x {i.name} (${i.price * i.qty:.2f})" for i in order.items])
+    entrega_txt = f"🛵 <b>Delivery a:</b> {order.direccion}" if order.tipo_entrega == "delivery" else "🏪 <b>Pick-Up en Tienda</b>"
     
-    success = send_telegram_message(message)
-    
-    if not success:
-        # We don't fail the user request if telegram fails, but log it
-        print("Failed to send Telegram message.")
+    msg = (
+        f"🔔 <b>NUEVA ORDEN {ref}</b>\n\n"
+        f"👤 <b>Cliente:</b> {cliente.nombre} ({cliente.telefono})\n"
+        f"{entrega_txt}\n\n"
+        f"🛒 <b>PEDIDO:</b>\n{items_text}\n"
+        f"💰 <b>Total:</b> ${order.total:.2f}\n\n"
+        f"💳 <b>Pago:</b> {order.payment_method}\n"
+        f"📋 <b>Ref:</b> {order.payment_ref}\n\n"
+        f"⚠️ <i>Verifiquen el pago antes de despachar.</i>"
+    )
+    send_telegram(msg)
+
+    return {"status": "success", "order_id": ref, "message": "Orden procesada y guardada."}
+
+@app.get("/api/rastreo/{order_ref}")
+async def rastrear_pedido(order_ref: str, db: Session = Depends(get_db)):
+    """Endpoint público para que los clientes vean el progreso de su orden"""
+    pedido = db.query(Pedido).filter_by(order_ref=order_ref).first()
+    if not pedido:
+        raise HTTPException(404, "Pedido no encontrado")
         
     return {
-        "status": "success", 
-        "order_id": order_id, 
-        "message": "Orden procesada y notificada a cocina."
+        "order_ref": pedido.order_ref,
+        "cliente_nombre": pedido.cliente_nombre,
+        "total": pedido.total,
+        "estado": pedido.estado,
+        "creado_en": pedido.creado_en.isoformat(),
+        "metodo_pago": pedido.metodo_pago,
+        "items": [{"nombre": i.nombre, "cantidad": i.cantidad, "subtotal": i.subtotal} for i in pedido.items]
     }
+
+@app.get("/api/pedidos")
+async def list_pedidos(skip: int = 0, limit: int = 50, estado: Optional[str] = None,
+                        db: Session = Depends(get_db),
+                        current: Admin = Depends(get_current_admin)):
+    q = db.query(Pedido).order_by(Pedido.creado_en.desc())
+    if estado:
+        q = q.filter_by(estado=estado)
+    pedidos = q.offset(skip).limit(limit).all()
+    result = []
+    for p in pedidos:
+        result.append({
+            "id": p.id, "order_ref": p.order_ref, "cliente_nombre": p.cliente_nombre,
+            "cliente_telefono": p.cliente_telefono, "metodo_pago": p.metodo_pago,
+            "total": p.total, "estado": p.estado,
+            "creado_en": p.creado_en.isoformat(),
+            "items": [{"nombre": i.nombre, "cantidad": i.cantidad, "subtotal": i.subtotal}
+                      for i in p.items],
+        })
+    return result
+
+@app.put("/api/pedidos/{pedido_id}/estado")
+async def update_estado(pedido_id: int, data: PedidoEstadoIn, db: Session = Depends(get_db),
+                         current: Admin = Depends(get_current_admin)):
+    p = db.query(Pedido).filter_by(id=pedido_id).first()
+    if not p:
+        raise HTTPException(404, "Pedido no encontrado")
+    estados_validos = {"pendiente", "preparando", "listo", "entregado", "cancelado"}
+    if data.estado not in estados_validos:
+        raise HTTPException(400, f"Estado inválido. Opciones: {estados_validos}")
+    p.estado = data.estado; p.actualizado = datetime.utcnow()
+    log_action(db, current.id, "cambiar_estado_pedido", "pedidos", pedido_id,
+               {"estado": data.estado})
+    db.commit()
+    return {"status": "ok", "order_ref": p.order_ref, "nuevo_estado": data.estado}
+
+@app.get("/api/stats")
+async def stats(db: Session = Depends(get_db), current: Admin = Depends(get_current_admin)):
+    today = datetime.utcnow().date()
+    start_of_today = datetime(today.year, today.month, today.day)
+    
+    # Obtener todos los pedidos de hoy
+    todos_hoy = db.query(Pedido).filter(Pedido.creado_en >= start_of_today).all()
+    
+    # Excluir cancelados para métricas positivas
+    validos_hoy = [p for p in todos_hoy if p.estado != "cancelado"]
+    ingresos_hoy = sum(p.total for p in validos_hoy)
+    
+    # Nuevas lógicas funcionales
+    ticket_promedio = (ingresos_hoy / len(validos_hoy)) if validos_hoy else 0.0
+    pendientes = db.query(Pedido).filter(Pedido.estado.in_(["pendiente", "preparando"])).count()
+    
+    total_platos  = db.query(MenuItem).filter_by(activo=True).count()
+    total_pedidos = db.query(Pedido).filter(Pedido.estado != "cancelado").count()
+    
+    return {
+        "pedidos_hoy":  len(validos_hoy),
+        "ingresos_hoy": round(ingresos_hoy, 2),
+        "total_platos": total_platos,
+        "total_pedidos": total_pedidos,
+        "pendientes": pendientes,
+        "ticket_promedio": round(ticket_promedio, 2)
+    }
+# ── Clientes ──────────────────────────────────────────────────────
+
+@app.post("/api/clientes/registro")
+async def cliente_registro(data: ClienteRegistroIn, db: Session = Depends(get_db)):
+    existente = db.query(Cliente).filter_by(telefono=data.telefono).first()
+    if existente:
+        raise HTTPException(400, "Ya existe una cuenta con este teléfono")
+    
+    nuevo_cliente = Cliente(
+        nombre=data.nombre,
+        telefono=data.telefono,
+        correo=data.correo,
+        direccion=data.direccion,
+        password_hash=pwd_ctx.hash(data.password)
+    )
+    db.add(nuevo_cliente); db.commit(); db.refresh(nuevo_cliente)
+    return {
+        "status": "ok",
+        "cliente": {
+            "id": nuevo_cliente.id, "nombre": nuevo_cliente.nombre,
+            "telefono": nuevo_cliente.telefono, "correo": nuevo_cliente.correo,
+            "direccion": nuevo_cliente.direccion
+        }
+    }
+
+@app.post("/api/clientes/login")
+async def cliente_login(data: ClienteLoginIn, db: Session = Depends(get_db)):
+    cliente = db.query(Cliente).filter_by(telefono=data.telefono).first()
+    if not cliente or not cliente.password_hash:
+        raise HTTPException(401, "Teléfono no registrado o sin contraseña")
+    if not pwd_ctx.verify(data.password, cliente.password_hash):
+        raise HTTPException(401, "Contraseña incorrecta")
+    return {
+        "status": "ok",
+        "cliente": {"id": cliente.id, "nombre": cliente.nombre,
+                    "telefono": cliente.telefono, "correo": cliente.correo,
+                    "direccion": cliente.direccion}
+    }
+
+@app.get("/api/clientes/{telefono}/pedidos")
+async def mis_pedidos(telefono: str, db: Session = Depends(get_db)):
+    """Retorna todo el historial de pedidos de este cliente"""
+    cliente = db.query(Cliente).filter_by(telefono=telefono).first()
+    if not cliente:
+        raise HTTPException(404, "Cliente no encontrado")
+    
+    pedidos = db.query(Pedido).filter_by(cliente_id=cliente.id).order_by(Pedido.creado_en.desc()).all()
+    resultado = []
+    for p in pedidos:
+        resultado.append({
+            "order_ref": p.order_ref,
+            "estado": p.estado,
+            "total": p.total,
+            "creado_en": p.creado_en.isoformat(),
+            "tipo_entrega": p.tipo_entrega,
+            "items_resumen": ", ".join([f"{i.cantidad}x {i.nombre}" for i in p.items])
+        })
+    return resultado
+
+@app.get("/api/clientes/buscar")
+async def buscar_cliente(telefono: str, db: Session = Depends(get_db)):
+    """Buscar datos de un cliente por teléfono (para autocompletado)"""
+    cliente = db.query(Cliente).filter_by(telefono=telefono).first()
+    if not cliente:
+        raise HTTPException(404, "Cliente no encontrado")
+    return {
+        "id": cliente.id, "nombre": cliente.nombre,
+        "telefono": cliente.telefono, "correo": cliente.correo,
+        "direccion": cliente.direccion
+    }
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SERVIR FRONTEND ESTÁTICO (debe ir al FINAL después de todas las rutas API)
+# ─────────────────────────────────────────────────────────────────────────────
+STATIC_DIR = os.path.join(os.path.dirname(__file__), "site", "public")
+app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="frontend")
+
 
 if __name__ == "__main__":
     import uvicorn
-    # To run: python backend.py
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run("backend:app", host="0.0.0.0", port=3000, reload=True)
