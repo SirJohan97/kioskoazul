@@ -47,6 +47,7 @@ class Cliente(Base):
     creado_en     = Column(DateTime, default=datetime.utcnow)
 
     pedidos = relationship("Pedido", back_populates="cliente")
+    direcciones = relationship("Direccion", back_populates="cliente")
 
 
 class Categoria(Base):
@@ -160,6 +161,35 @@ class AuditLog(Base):
     creado_en  = Column(DateTime, default=datetime.utcnow)
 
     admin = relationship("Admin", back_populates="logs")
+
+class DeliveryZona(Base):
+    __tablename__ = "delivery_zonas"
+    id     = Column(Integer, primary_key=True)
+    nombre = Column(String(100), nullable=False)
+    precio = Column(Float, default=0.0)
+    activa = Column(Boolean, default=True)
+
+class Direccion(Base):
+    __tablename__ = "direcciones"
+    id              = Column(Integer, primary_key=True)
+    cliente_id      = Column(Integer, ForeignKey("clientes.id"), nullable=False)
+    alias           = Column(String(50), nullable=True) # e.g. "Casa", "Trabajo"
+    direccion_texto = Column(Text, nullable=False)
+    
+    cliente = relationship("Cliente", back_populates="direcciones")
+
+class Config(Base):
+    __tablename__ = "config"
+    key   = Column(String(50), primary_key=True)
+    value = Column(String(255), nullable=True)
+
+class PwdReset(Base):
+    __tablename__ = "pwd_resets"
+    id        = Column(Integer, primary_key=True)
+    correo    = Column(String(120), nullable=False)
+    codigo    = Column(String(6), nullable=False)
+    creado_en = Column(DateTime, default=datetime.utcnow)
+    usado     = Column(Boolean, default=False)
 
 
 # ─────────────────────────────────────────────────────────────────────────────

@@ -625,8 +625,12 @@
   </div>
 
   <script>
+    let categorias = [];
+    let menuItems = [];
+    let promociones = [];
     let cart = [];
-    let bcvRate = 0; // Tasa oficial del BCV
+    let bcvRate = 0;
+    let deliveryZonas = []; // Tasa oficial del BCV
 
     async function fetchBCVRate() {
       try {
@@ -672,12 +676,12 @@
           fetch('/api/promociones')
         ]);
         
-        const categorias = await catsRes.json();
-        const menuItems = await itemsRes.json();
-        const promos = await promosRes.json();
+        categorias = await catsRes.json();
+        menuItems = await itemsRes.json();
+        promociones = await promosRes.json();
 
         // 1. Render Promociones
-        renderPromos(promos);
+        renderPromos(promociones);
         
         // 2. Render Categorías (Tabs)
         const tabsContainer = document.getElementById('dynamic-tabs');
@@ -744,6 +748,17 @@
         console.error("Error al cargar menú:", e);
         document.getElementById('dynamic-tabs').innerHTML = '<p style="color:#C0392B;">Error conectando con el servidor.</p>';
       }
+
+      // Cargar zonas
+      fetch('/api/zonas').then(r=>r.json()).then(zs => {
+        deliveryZonas = zs;
+        const combo = document.getElementById('zona-delivery');
+        if(zs.length === 0) {
+          combo.innerHTML = '<option value="">Sin zonas configuradas (Gratis)</option>';
+          return;
+        }
+        combo.innerHTML = zs.map(z => `<option value="${z.id}" data-precio="${z.precio}">${z.nombre} (+$${z.precio.toFixed(2)})</option>`).join('');
+      }).catch(e=>console.log(e));
     }
 
     function renderPromos(promos) {
@@ -943,8 +958,24 @@
         </select>
 
         <div id="direccion-container" style="display:none; margin-bottom:1rem;">
-          <label>Dirección de Delivery (Obligatorio)</label>
+          <label>Zona de Delivery</label>
+          <select id="zona-delivery" onchange="updateCheckoutTotal()" style="margin-bottom:0.5rem;"></select>
+          
+          <div id="mis-direcciones-container" style="margin: 0.8rem 0; display:none;">
+            <label style="font-size:0.75rem;">Mis Direcciones Guardadas:</label>
+            <div id="lista-mis-direcciones" style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-top:0.3rem;"></div>
+          </div>
+
+          <label>Dirección Exacta (Obligatorio)</label>
           <input type="text" id="order-address" placeholder="Ej: Res. Las Palmeras, Apto 4B" />
+
+          <div style="margin-top: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+            <input type="checkbox" id="save-address-check" style="width: auto;">
+            <label for="save-address-check" style="margin:0; font-size: 0.85rem; cursor: pointer;">Guardar esta dirección para futuros pedidos</label>
+          </div>
+          <div id="save-address-alias-container" style="display:none; margin-top: 0.5rem;">
+            <input type="text" id="save-address-alias" placeholder="Alias de la dirección (Ej: Casa, Oficina)" style="padding: 0.4rem; font-size: 0.8rem;">
+          </div>
         </div>
 
         <label>Método de Pago</label>
@@ -973,7 +1004,18 @@
   <script>
     let cliente = null;
 
-    function openCheckout() {
+    document.getElementById('save-address-check')?.addEventListener('change', (e) => {
+      document.getElementById('save-address-alias-container').style.display = e.target.checked ? 'block' : 'none';
+    });
+
+    async function openCheckout() {
+      // Validar horario 08:00 a 20:00 localmente
+      // const horaActual = new Date().getHours();
+      // if(horaActual < 8 || horaActual >= 20) {
+      //   alert("¡Hola! Nuestro horario de atención para pedidos es de 08:00 AM a 08:00 PM. Por favor, regresa dentro del horario. Te esperamos.");
+      //   return;
+      // }
+
       const saved = localStorage.getItem('kb_cliente');
       if (!saved) {
         window.location.href = 'login.html';
@@ -986,12 +1028,51 @@
         return;
       }
 
+      document.getElementById('logged-client-name').textContent = cliente.nombre;
+      if (cliente.direccion) document.getElementById('order-address').value = cliente.direccion;
+
+      // Cargar mis direcciones
+      try {
+        const r = await fetch(`/api/clientes/${encodeURIComponent(cliente.telefono)}/direcciones`);
+        if(r.ok) {
+          const dirs = await r.json();
+          const cont = document.getElementById('mis-direcciones-container');
+          const list = document.getElementById('lista-mis-direcciones');
+          if(dirs.length > 0) {
+            cont.style.display = 'block';
+            list.innerHTML = dirs.map(d => `<span class="badge badge-gold" style="cursor:pointer;" onclick="setAddress('${d.direccion_texto}')"><i class="fas fa-map-marker-alt"></i> ${d.alias || 'Guardada'}</span>`).join('');
+          }
+        }
+      } catch(e) {}
+
+      toggleCart();
+      toggleCheckout();
+      updateCheckoutTotal(); // Calcula total y actualiza UI/Pagos
+    }
+
+    function setAddress(txt) {
+      document.getElementById('order-address').value = txt;
+    }
+
+    function updateCheckoutTotal() {
       let total = 0;
       let count = 0;
       cart.forEach(item => {
         total += item.price * item.qty;
         count += item.qty;
       });
+
+      const tipo = document.getElementById('tipo-entrega').value;
+      let zonaDesc = "";
+      if (tipo === 'delivery') {
+        const combo = document.getElementById('zona-delivery');
+        if (combo.options.length > 0 && combo.value) {
+          const opt = combo.options[combo.selectedIndex];
+          const recargo = parseFloat(opt.getAttribute('data-precio') || 0);
+          total += recargo;
+          zonaDesc = `<div style="font-size:0.8rem; color:#e67e22; margin-top:0.2rem;">+ Delivery Incluido ($${recargo.toFixed(2)})</div>`;
+        }
+      }
 
       const totalVes = bcvRate > 0 ? (total * bcvRate).toFixed(2) : '0.00';
 
@@ -1004,18 +1085,13 @@
           <span>Total a Pagar:</span>
           <div style="text-align: right;">
             <span style="color: var(--gold);">$${total.toFixed(2)}</span>
-            <div style="font-size: 0.75rem; color: var(--pearl); font-weight: 300; font-family: 'Inter', sans-serif; margin-top: 0.2rem;">Bs. ${totalVes}</div>
+            ${zonaDesc}
+            <div style="font-size: 0.75rem; color: var(--pearl); font-weight: 300; margin-top: 0.2rem;">Bs. ${totalVes}</div>
           </div>
         </div>
       `;
       document.getElementById('checkout-summary').innerHTML = summaryHTML;
-      
-      document.getElementById('logged-client-name').textContent = cliente.nombre;
-      if (cliente.direccion) document.getElementById('order-address').value = cliente.direccion;
-
-      toggleCart();
-      toggleCheckout();
-      updatePaymentInfo(); // Forzar actualización de info de pago al abrir
+      updatePaymentInfo(total);
     }
 
     function toggleDireccion() {
@@ -1023,6 +1099,7 @@
       const c = document.getElementById('direccion-container');
       if (tipo === 'delivery') c.style.display = 'block';
       else c.style.display = 'none';
+      updateCheckoutTotal();
     }
 
     function toggleCheckout() {
@@ -1036,12 +1113,23 @@
       }
     }
 
-    function updatePaymentInfo() {
+    function updatePaymentInfo(forceTotal = null) {
       const method = document.getElementById('payment-method').value;
       const infoBox = document.getElementById('payment-info');
 
-      let totalUsd = 0;
-      cart.forEach(item => totalUsd += item.price * item.qty);
+      let totalUsd = forceTotal;
+      if (totalUsd === null) {
+         totalUsd = 0;
+         cart.forEach(item => totalUsd += item.price * item.qty);
+         const tipo = document.getElementById('tipo-entrega').value;
+         if (tipo === 'delivery') {
+           const combo = document.getElementById('zona-delivery');
+           if (combo.options.length > 0 && combo.value) {
+             totalUsd += parseFloat(combo.options[combo.selectedIndex].getAttribute('data-precio') || 0);
+           }
+         }
+      }
+
       const totalVes = bcvRate > 0 ? (totalUsd * bcvRate).toFixed(2) : '0.00';
 
       let amountTxt = '';
@@ -1085,15 +1173,24 @@
       let total = 0;
       cart.forEach(item => total += item.price * item.qty);
 
+      let zonaId = null;
+      if (tipo === 'delivery') {
+        const combo = document.getElementById('zona-delivery');
+        if (combo.options.length > 0 && combo.value) {
+          zonaId = parseInt(combo.value);
+        }
+      }
+
       const orderPayload = {
         customer_name: cliente.nombre,
         customer_phone: cliente.telefono,
         payment_method: method,
         payment_ref: ref,
         tipo_entrega: tipo,
+        zona_id: zonaId,
         direccion: tipo === 'delivery' ? direc : null,
         items: cart,
-        total: total,
+        total: total, // El server hace la re-suma de zona por seguridad
         tasa_bcv: bcvRate > 0 ? bcvRate : null
       };
 
@@ -1102,6 +1199,17 @@
       btn.disabled = true;
 
       try {
+        // ¿Guardar nueva dirección?
+        const chk = document.getElementById('save-address-check');
+        if (tipo === 'delivery' && chk && chk.checked) {
+          const alias = document.getElementById('save-address-alias').value.trim() || 'Principal';
+          await fetch(`/api/clientes/${encodeURIComponent(cliente.telefono)}/direcciones`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ alias: alias, direccion_texto: direc })
+          });
+        }
+
         const response = await fetch('/api/orden', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

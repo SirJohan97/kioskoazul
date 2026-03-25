@@ -6,6 +6,11 @@ import os
 import shutil
 from datetime import datetime, timedelta
 from typing import Optional, List
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+import random
+import string
 
 from fastapi import FastAPI, HTTPException, Depends, status, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
@@ -13,6 +18,8 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 import requests
+import asyncio
+import concurrent.futures
 
 from jose import JWTError, jwt
 from passlib.context import CryptContext
@@ -21,7 +28,7 @@ from sqlalchemy.orm import Session
 from database import (
     get_db, create_tables,
     Admin, Cliente, Categoria, MenuItem, Promocion, PromocionItem,
-    Pedido, PedidoItem, AuditLog
+    Pedido, PedidoItem, AuditLog, DeliveryZona, Direccion, PwdReset
 )
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -33,6 +40,9 @@ TOKEN_HOURS = 24
 
 TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "8741738690:AAG_ONxfjhzIQ6NA0RrzMJ9AhW61_cdA-wY")
 TELEGRAM_CHAT_ID   = os.environ.get("TELEGRAM_CHAT_ID", "6526066600")
+
+SMTP_EMAIL    = os.environ.get("SMTP_EMAIL", "tucorreo@gmail.com")
+SMTP_PASSWORD = os.environ.get("SMTP_PASSWORD", "tu-app-password")
 
 UPLOAD_DIR = os.path.join(os.path.dirname(__file__), "site", "public", "assets", "menu")
 os.makedirs(UPLOAD_DIR, exist_ok=True)
@@ -122,7 +132,17 @@ class OrderRequest(BaseModel):
     crear_cuenta:   bool = False
     correo:         Optional[str] = None
     direccion:      Optional[str] = None
+    zona_id:        Optional[int] = None
     password:       Optional[str] = None
+
+class ZonaIn(BaseModel):
+    nombre: str
+    precio: float
+
+class ZonaOut(ZonaIn):
+    id: int
+    activa: bool
+    class Config: from_attributes = True
 
 class PedidoEstadoIn(BaseModel):
     estado: str   # pendiente | preparando | listo | entregado | cancelado
@@ -147,6 +167,22 @@ class ClienteOut(BaseModel):
     correo: Optional[str]; direccion: Optional[str]
     class Config: from_attributes = True
 
+class DireccionIn(BaseModel):
+    alias: str
+    direccion_texto: str
+
+class DireccionOut(DireccionIn):
+    id: int
+    class Config: from_attributes = True
+
+class RecuperarInfo(BaseModel):
+    correo: str
+
+class ResetInfo(BaseModel):
+    correo: str
+    codigo: str
+    nueva_password: str
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Auth helpers
@@ -159,6 +195,29 @@ def create_token(data: dict) -> str:
     payload = data.copy()
     payload["exp"] = datetime.utcnow() + timedelta(hours=TOKEN_HOURS)
     return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+
+def send_recovery_email(destinatario: str, codigo: str):
+    if SMTP_EMAIL == "tucorreo@gmail.com":
+        print(f"⚠️ SIMULACIÓN SMTP: Código enviado a {destinatario} -> {codigo}")
+        return
+        
+    try:
+        msg = MIMEMultipart()
+        msg['From'] = SMTP_EMAIL
+        msg['To'] = destinatario
+        msg['Subject'] = "Kiosko Azul - Código de Recuperación"
+        
+        body = f"Hola,\n\nHas solicitado recuperar tu contraseña.\nTu código es: {codigo}\n\nEs válido por 15 minutos. Si no fuiste tú, ignora este correo."
+        msg.attach(MIMEText(body, 'plain'))
+        
+        server = smtplib.SMTP('smtp.gmail.com', 587)
+        server.starttls()
+        server.login(SMTP_EMAIL, SMTP_PASSWORD)
+        server.send_message(msg)
+        server.quit()
+        print(f"✉️ Correo de recuperación enviado a {destinatario}")
+    except Exception as e:
+        print(f"❌ Error SMTP enviando correo a {destinatario}: {e}")
 
 def get_current_admin(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> Admin:
     cred_exc = HTTPException(status_code=401, detail="Token inválido o expirado",
@@ -185,13 +244,73 @@ def log_action(db: Session, admin_id: int, accion: str, tabla: str,
 # Telegram
 # ─────────────────────────────────────────────────────────────────────────────
 
-def send_telegram(message: str):
+telegram_executor = concurrent.futures.ThreadPoolExecutor(max_workers=2)
+
+def send_telegram(message: str, reply_markup: dict = None):
     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+    payload = {"chat_id": TELEGRAM_CHAT_ID, "text": message, "parse_mode": "HTML"}
+    if reply_markup:
+        payload["reply_markup"] = reply_markup
     try:
-        r = requests.post(url, json={"chat_id": TELEGRAM_CHAT_ID, "text": message, "parse_mode": "HTML"}, timeout=5)
+        r = requests.post(url, json=payload, timeout=5)
         return r.ok
     except Exception:
         return False
+
+async def telegram_polling_loop():
+    offset = 0
+    url_base = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}"
+    
+    while True:
+        try:
+            loop = asyncio.get_running_loop()
+            resp = await loop.run_in_executor(
+                telegram_executor, 
+                lambda: requests.get(f"{url_base}/getUpdates?offset={offset}&timeout=20", timeout=25)
+            )
+            data = resp.json()
+            if "result" in data:
+                for update in data["result"]:
+                    offset = update["update_id"] + 1
+                    if "callback_query" in update:
+                        cb = update["callback_query"]
+                        cb_id = cb["id"]
+                        cb_data = cb.get("data", "")
+                        
+                        if cb_data.startswith("verify_") or cb_data.startswith("reject_"):
+                            action, order_ref = cb_data.split("_", 1)
+                            
+                            db = next(get_db())
+                            pedido = db.query(Pedido).filter_by(order_ref=order_ref).first()
+                            text_answer = "Error. Pedido no encontrado."
+                            
+                            if pedido and pedido.estado == "pendiente":
+                                if action == "verify":
+                                    pedido.estado = "preparando"
+                                    text_answer = "✅ Pago Verificado. Pedido en Preparación."
+                                else:
+                                    pedido.estado = "cancelado"
+                                    text_answer = "❌ Pedido Cancelado (Pago Rechazado)."
+                                db.commit()
+                            
+                                # Edit message reply markup to remove buttons
+                                chat_id = cb["message"]["chat"]["id"]
+                                msg_id = cb["message"]["message_id"]
+                                await loop.run_in_executor(telegram_executor, lambda: requests.post(f"{url_base}/editMessageReplyMarkup", json={"chat_id": chat_id, "message_id": msg_id, "reply_markup": {"inline_keyboard": []}}, timeout=5))
+                                
+                                # Confirm in chat if successful
+                                estado_str = "PREPARANDO 🍳✅" if action == "verify" else "CANCELADO ❌"
+                                await loop.run_in_executor(telegram_executor, lambda: requests.post(f"{url_base}/sendMessage", json={"chat_id": chat_id, "text": f"✅ Orden {order_ref} actualizada a: {estado_str}"}, timeout=5))
+                            
+                            elif pedido and pedido.estado != "pendiente":
+                                text_answer = "Ya fue procesado."
+                            
+                            # Answer callback at the end
+                            await loop.run_in_executor(telegram_executor, lambda: requests.post(f"{url_base}/answerCallbackQuery", json={"callback_query_id": cb_id, "text": text_answer, "show_alert": True}, timeout=5))
+                                
+        except Exception as e:
+            pass
+        await asyncio.sleep(2)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -421,9 +540,15 @@ async def sync_counter():
             order_counter = int(last.order_ref.split("-")[-1])
         except Exception:
             pass
+    asyncio.create_task(telegram_polling_loop())
 
 @app.post("/api/orden")
 async def create_order(order: OrderRequest, db: Session = Depends(get_db)):
+    # BLOQUEO HORARIO (08:00 - 20:00)
+    # hora_actual = datetime.now().hour
+    # if hora_actual < 8 or hora_actual >= 20:
+    #     raise HTTPException(status_code=403, detail="El horario de recepción de pedidos es de 08:00 AM a 08:00 PM.")
+
     global order_counter
     order_counter += 1
     ref = f"#ORD-{order_counter}"
@@ -446,6 +571,15 @@ async def create_order(order: OrderRequest, db: Session = Depends(get_db)):
             cliente.direccion = order.direccion
             db.flush()
 
+    # Calcular costo de delivery si aplica
+    costo_delivery = 0.0
+    if order.tipo_entrega == "delivery" and order.zona_id:
+        zona = db.query(DeliveryZona).filter_by(id=order.zona_id).first()
+        if zona:
+            costo_delivery = zona.precio
+
+    total_final = order.total + costo_delivery
+
     pedido = Pedido(
         order_ref=ref,
         cliente_id=cliente.id,
@@ -455,7 +589,7 @@ async def create_order(order: OrderRequest, db: Session = Depends(get_db)):
         referencia_pago=order.payment_ref,
         tipo_entrega=order.tipo_entrega,
         direccion=order.direccion if order.tipo_entrega == "delivery" else None,
-        total=order.total,
+        total=total_final,
         tasa_bcv=order.tasa_bcv,
         estado="pendiente",
     )
@@ -477,20 +611,35 @@ async def create_order(order: OrderRequest, db: Session = Depends(get_db)):
     # Notificación Telegram ajustada
     items_text = "\n".join([f"• {i.qty}x {i.name} (${i.price * i.qty:.2f})" for i in order.items])
     entrega_txt = f"🛵 <b>Delivery a:</b> {order.direccion}" if order.tipo_entrega == "delivery" else "🏪 <b>Pick-Up en Tienda</b>"
+    if costo_delivery > 0:
+        entrega_txt += f" (+${costo_delivery:.2f} zona de envío)"
     
+    total_bs = order.total * order.tasa_bcv if hasattr(order, 'tasa_bcv') and order.tasa_bcv else 0.0
+
     msg = (
         f"🔔 <b>NUEVA ORDEN {ref}</b>\n\n"
         f"👤 <b>Cliente:</b> {cliente.nombre} ({cliente.telefono})\n"
         f"{entrega_txt}\n\n"
         f"🛒 <b>PEDIDO:</b>\n{items_text}\n"
-        f"💰 <b>Total:</b> ${order.total:.2f}\n\n"
+        f"💰 <b>Total:</b> ${order.total:.2f} (Bs. {total_bs:.2f})\n\n"
         f"💳 <b>Pago:</b> {order.payment_method}\n"
         f"📋 <b>Ref:</b> {order.payment_ref}\n\n"
-        f"⚠️ <i>Verifiquen el pago antes de despachar.</i>"
+        f"⚠️ <i>Toca un botón para verificar el pago y procesar orden:</i>"
     )
-    send_telegram(msg)
+    
+    markup = {
+        "inline_keyboard": [
+            [
+                {"text": "✅ Recibido (Preparar)", "callback_data": f"verify_{ref}"}
+            ],
+            [
+                {"text": "❌ Falta Pago (Cancelar)", "callback_data": f"reject_{ref}"}
+            ]
+        ]
+    }
+    send_telegram(msg, markup)
 
-    return {"status": "success", "order_id": ref, "message": "Orden procesada y guardada."}
+    return {"status": "success", "order_id": ref, "message": "Orden en verificación."}
 
 @app.get("/api/rastreo/{order_ref}")
 async def rastrear_pedido(order_ref: str, db: Session = Depends(get_db)):
@@ -571,7 +720,74 @@ async def stats(db: Session = Depends(get_db), current: Admin = Depends(get_curr
         "pendientes": pendientes,
         "ticket_promedio": round(ticket_promedio, 2)
     }
+
+@app.get("/api/admin/analytics/ventas")
+async def analytics_ventas(db: Session = Depends(get_db), current: Admin = Depends(get_current_admin)):
+    hoy = datetime.utcnow().date()
+    hace_7_dias = hoy - timedelta(days=6)
+    
+    pedidos = db.query(Pedido).filter(Pedido.creado_en >= datetime(hace_7_dias.year, hace_7_dias.month, hace_7_dias.day)).all()
+    
+    dias_labels = []
+    ventas_dict = {}
+    for i in range(7):
+        d = hoy - timedelta(days=6 - i)
+        str_d = d.strftime("%d/%m")
+        dias_labels.append(str_d)
+        ventas_dict[str_d] = 0.0
+
+    for p in pedidos:
+        if p.estado != "cancelado":
+            str_d = p.creado_en.strftime("%d/%m")
+            if str_d in ventas_dict:
+                ventas_dict[str_d] += p.total
+
+    return {
+        "labels": dias_labels,
+        "data": [round(ventas_dict[lbl], 2) for lbl in dias_labels]
+    }
+# ── Zonas de Delivery ──────────────────────────────────────────────────
+@app.get("/api/zonas", response_model=List[ZonaOut])
+async def get_zonas(db: Session = Depends(get_db)):
+    return db.query(DeliveryZona).filter_by(activa=True).all()
+
+@app.post("/api/zonas", response_model=ZonaOut)
+async def create_zona(data: ZonaIn, db: Session = Depends(get_db), current: Admin = Depends(get_current_admin)):
+    obj = DeliveryZona(**data.model_dump())
+    db.add(obj); db.commit(); db.refresh(obj)
+    return obj
+
+@app.put("/api/zonas/{id}", response_model=ZonaOut)
+async def update_zona(id: int, data: ZonaIn, db: Session = Depends(get_db), current: Admin = Depends(get_current_admin)):
+    obj = db.query(DeliveryZona).filter_by(id=id).first()
+    if not obj: raise HTTPException(404)
+    for k, v in data.model_dump().items(): setattr(obj, k, v)
+    db.commit(); db.refresh(obj)
+    return obj
+
+@app.delete("/api/zonas/{id}")
+async def delete_zona(id: int, db: Session = Depends(get_db), current: Admin = Depends(get_current_admin)):
+    obj = db.query(DeliveryZona).filter_by(id=id).first()
+    if not obj: raise HTTPException(404)
+    obj.activa = False
+    db.commit()
+    return {"status": "ok"}
+
 # ── Clientes ──────────────────────────────────────────────────────
+
+@app.get("/api/clientes/{telefono}/direcciones", response_model=List[DireccionOut])
+async def get_direcciones(telefono: str, db: Session = Depends(get_db)):
+    cliente = db.query(Cliente).filter_by(telefono=telefono).first()
+    if not cliente: raise HTTPException(404, "Cliente no encontrado")
+    return cliente.direcciones
+
+@app.post("/api/clientes/{telefono}/direcciones", response_model=DireccionOut)
+async def add_direccion(telefono: str, data: DireccionIn, db: Session = Depends(get_db)):
+    cliente = db.query(Cliente).filter_by(telefono=telefono).first()
+    if not cliente: raise HTTPException(404, "Cliente no encontrado")
+    obj = Direccion(cliente_id=cliente.id, alias=data.alias, direccion_texto=data.direccion_texto)
+    db.add(obj); db.commit(); db.refresh(obj)
+    return obj
 
 @app.post("/api/clientes/registro")
 async def cliente_registro(data: ClienteRegistroIn, db: Session = Depends(get_db)):
@@ -609,6 +825,51 @@ async def cliente_login(data: ClienteLoginIn, db: Session = Depends(get_db)):
                     "telefono": cliente.telefono, "correo": cliente.correo,
                     "direccion": cliente.direccion}
     }
+
+@app.post("/api/auth/recuperar-password")
+async def recuperar_password(data: RecuperarInfo, db: Session = Depends(get_db)):
+    cliente = db.query(Cliente).filter_by(correo=data.correo).first()
+    if not cliente:
+        # Previene enumeración de correos
+        return {"status": "ok", "msg": "Si el correo está registrado, recibirás un código."}
+        
+    # Inactivar códigos viejos
+    db.query(PwdReset).filter_by(correo=data.correo, usado=False).update({"usado": True})
+    
+    codigo = ''.join(random.choices(string.digits, k=6))
+    nuevo_reset = PwdReset(correo=data.correo, codigo=codigo)
+    db.add(nuevo_reset)
+    db.commit()
+    
+    send_recovery_email(data.correo, codigo)
+    return {"status": "ok", "msg": "Si el correo está registrado, recibirás un código."}
+
+@app.post("/api/auth/reset-password")
+async def reset_password(data: ResetInfo, db: Session = Depends(get_db)):
+    ahora = datetime.utcnow()
+    bloque = db.query(PwdReset).filter(
+        PwdReset.correo == data.correo,
+        PwdReset.codigo == data.codigo,
+        PwdReset.usado == False
+    ).first()
+    
+    if not bloque:
+        raise HTTPException(400, "Código inválido o ya expirado.")
+        
+    # Verificar 15 minutos de caducidad
+    if (ahora - bloque.creado_en).total_seconds() > 900:
+        bloque.usado = True
+        db.commit()
+        raise HTTPException(400, "El código ha expirado tras 15 minutos.")
+        
+    cliente = db.query(Cliente).filter_by(correo=data.correo).first()
+    if not cliente:
+        raise HTTPException(404, "Usuario no encontrado")
+        
+    cliente.password_hash = pwd_ctx.hash(data.nueva_password)
+    bloque.usado = True
+    db.commit()
+    return {"status": "ok", "msg": "Contraseña restablecida exitosamente."}
 
 @app.get("/api/clientes/{telefono}/pedidos")
 async def mis_pedidos(telefono: str, db: Session = Depends(get_db)):

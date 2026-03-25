@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — Kiosko Azul Admin</title>
+  <link rel="icon" href="assets/logo.png" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="css/admin.css" />
+</head>
+<body>
+<div class="admin-layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <img src="assets/logo.png" alt="Logo" onerror="this.style.display='none'">
+      <div><span>Kiosko Azul</span><small>Admin Panel</small></div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">Principal</div>
+      <a href="admin.html" class="nav-link active"><i class="fas fa-chart-line"></i> Dashboard</a>
+      <a href="admin-pedidos.html" class="nav-link"><i class="fas fa-receipt"></i> Pedidos</a>
+      <div class="nav-section">Gestión</div>
+      <a href="admin-menu.html" class="nav-link"><i class="fas fa-utensils"></i> Menú</a>
+      <a href="admin-promociones.html" class="nav-link"><i class="fas fa-tag"></i> Promociones</a>
+      <div class="nav-section">Ajustes</div>
+      <a href="admin-config.html" class="nav-link active"><i class="fas fa-cog"></i> Configuración</a>
+      <div class="nav-section">Sitio</div>
+      <a href="index.html" target="_blank" class="nav-link"><i class="fas fa-globe"></i> Ver Sitio</a>
+      <a href="menu.html" target="_blank" class="nav-link"><i class="fas fa-book-open"></i> Ver Menú</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="admin-badge">
+        <div class="avatar" id="admin-avatar">A</div>
+        <div class="info">
+          <div class="name" id="admin-name">Admin</div>
+          <div class="rol" id="admin-rol">superadmin</div>
+        </div>
+      </div>
+      <button class="btn btn-outline btn-sm btn-w100" style="margin-top:0.75rem;" onclick="logout()">
+        <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="admin-main">
+    <header class="admin-topbar">
+      <div style="display:flex;align-items:center;gap:1rem;">
+        <button class="btn btn-outline btn-sm" id="menu-toggle" style="display:none;" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+        <span class="topbar-title">Configuración de Delivery</span>
+      </div>
+      <div class="topbar-actions">
+        <span id="fecha-hoy" style="font-size:0.8rem;color:var(--pearl);"></span>
+        <button class="btn btn-gold btn-sm" onclick="openZonaModal()"><i class="fas fa-plus"></i> Nueva Zona</button>
+      </div>
+    </header>
+
+    <div class="admin-content">
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title"><i class="fas fa-motorcycle" style="color:var(--gold);margin-right:0.5rem;"></i>Zonas de Envío</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Nombre de la Zona</th><th>Recargo (USD)</th><th>Estado</th><th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="table-zonas">
+              <tr><td colspan="4" style="text-align:center;color:var(--pearl);padding:2rem;">Cargando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Modal Zonas -->
+<div class="modal-overlay" id="zona-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modal-titulo">Nueva Zona de Envío</h3>
+      <button class="modal-close" onclick="closeZonaModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="z-id">
+      <div class="form-group">
+        <label>Nombre de la Zona</label>
+        <input type="text" id="z-nombre" class="form-control" placeholder="Ej: Zona Norte, Las Palmeras...">
+      </div>
+      <div class="form-group">
+        <label>Precio de Envío ($)</label>
+        <input type="number" id="z-precio" class="form-control" step="0.01" placeholder="Ej: 2.50">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeZonaModal()">Cancelar</button>
+      <button class="btn btn-gold" onclick="saveZona()">Guardar Zona</button>
+    </div>
+  </div>
+</div>
+      <div class="stats-grid" id="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon gold"><i class="fas fa-receipt"></i></div>
+          <div><div class="stat-value" id="stat-pedidos-hoy">—</div><div class="stat-label">Pedidos Hoy</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green"><i class="fas fa-dollar-sign"></i></div>
+          <div><div class="stat-value" id="stat-ingresos">—</div><div class="stat-label">Ingresos Hoy</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon orange"><i class="fas fa-clock"></i></div>
+          <div><div class="stat-value" id="stat-pendientes">—</div><div class="stat-label">Pendientes / Prep.</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon blue"><i class="fas fa-chart-pie"></i></div>
+          <div><div class="stat-value" id="stat-ticket">—</div><div class="stat-label">Ticket Promedio</div></div>
+        </div>
+      </div>
+
+      <!-- Últimos Pedidos -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title"><i class="fas fa-receipt" style="color:var(--gold);margin-right:0.5rem;"></i>Últimos Pedidos</span>
+          <a href="admin-pedidos.html" class="btn btn-outline btn-sm">Ver todos</a>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Ref</th><th>Cliente</th><th>Total</th><th>Método</th><th>Estado</th><th>Hora</th><th>Acción</th>
+              </tr>
+            </thead>
+            <tbody id="table-pedidos">
+              <tr><td colspan="7" style="text-align:center;color:var(--pearl);padding:2rem;">Cargando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+
+<script>
+  const API = '';
+
+  // ── Auth guard ──────────────────────────────────────────────
+  let authToken = null;
+  (function(){
+    const saved = localStorage.getItem('kb_admin');
+    if (!saved) return window.location.href = 'admin-login.html';
+    try {
+      const { token, admin } = JSON.parse(saved);
+      authToken = token;
+      document.getElementById('admin-name').textContent = admin.nombre || admin.username;
+      document.getElementById('admin-rol').textContent  = admin.rol;
+      document.getElementById('admin-avatar').textContent = (admin.nombre || admin.username)[0].toUpperCase();
+    } catch(e) { localStorage.removeItem('kb_admin'); window.location.href = 'admin-login.html'; }
+  })();
+
+  function logout() {
+    localStorage.removeItem('kb_admin');
+    window.location.href = 'admin-login.html';
+  }
+
+  function authHeaders() {
+    return { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' };
+  }
+
+  // ── Toast ───────────────────────────────────────────────────
+  function toast(msg, type='success') {
+    const c = document.getElementById('toast-container');
+    const t = document.createElement('div');
+    t.className = `toast ${type}`;
+    t.innerHTML = `<i class="toast-icon fas fa-${type==='success'?'check-circle':'exclamation-circle'}"></i><span class="toast-msg">${msg}</span>`;
+    c.appendChild(t);
+    setTimeout(() => t.remove(), 4000);
+  }
+
+  // ── Fechas ──────────────────────────────────────────────────
+  document.getElementById('fecha-hoy').textContent = new Date().toLocaleDateString('es-VE', { weekday:'long', day:'numeric', month:'long' });
+
+  // ── Zonas CRUD ──────────────────────────────────────────────
+  let zonasData = [];
+
+  async function loadZonas() {
+    try {
+      const r = await fetch(`${API}/api/zonas`, { headers: authHeaders() });
+      zonasData = await r.json();
+      const tbody = document.getElementById('table-zonas');
+
+      if (!zonasData.length) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--pearl);padding:2rem;">No hay zonas de envío configuradas</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = zonasData.map(z => `
+        <tr>
+          <td><b>${z.nombre}</b></td>
+          <td style="color:var(--green);font-weight:600;">$${z.precio.toFixed(2)}</td>
+          <td><span class="badge badge-green">Activa</span></td>
+          <td>
+            <button class="btn btn-outline btn-sm" onclick="editZona(${z.id})"><i class="fas fa-edit"></i></button>
+            <button class="btn btn-outline btn-sm" style="color:var(--red); border-color:var(--red);" onclick="deleteZona(${z.id})"><i class="fas fa-trash"></i></button>
+          </td>
+        </tr>
+      `).join('');
+    } catch(e) { console.warn('Error cargando zonas', e); }
+  }
+
+  function openZonaModal(z = null) {
+    document.getElementById('z-id').value = z ? z.id : '';
+    document.getElementById('z-nombre').value = z ? z.nombre : '';
+    document.getElementById('z-precio').value = z ? z.precio : '';
+    document.getElementById('modal-titulo').textContent = z ? 'Editar Zona' : 'Nueva Zona de Envío';
+    document.getElementById('zona-modal').classList.add('active');
+  }
+
+  function closeZonaModal() {
+    document.getElementById('zona-modal').classList.remove('active');
+  }
+
+  function editZona(id) {
+    const z = zonasData.find(x => x.id === id);
+    if(z) openZonaModal(z);
+  }
+
+  async function saveZona() {
+    const id = document.getElementById('z-id').value;
+    const nombre = document.getElementById('z-nombre').value;
+    const precio = parseFloat(document.getElementById('z-precio').value || 0);
+
+    if(!nombre) return alert('El nombre es requerido');
+
+    try {
+      const url = id ? `${API}/api/zonas/${id}` : `${API}/api/zonas`;
+      const method = id ? 'PUT' : 'POST';
+      
+      const r = await fetch(url, {
+        method, headers: authHeaders(),
+        body: JSON.stringify({ nombre, precio })
+      });
+
+      if(!r.ok) throw new Error();
+      toast(id ? 'Zona actualizada' : 'Zona creada exitosamente');
+      closeZonaModal();
+      loadZonas();
+    } catch(e) {
+      toast('Error al guardar zona', 'error');
+    }
+  }
+
+  async function deleteZona(id) {
+    if(!confirm('¿Seguro de que deseas eliminar esta zona de delivery?')) return;
+    try {
+      const r = await fetch(`${API}/api/zonas/${id}`, { method: 'DELETE', headers: authHeaders() });
+      if(!r.ok) throw new Error();
+      toast('Zona eliminada');
+      loadZonas();
+    } catch(e) {
+      toast('Error al eliminar', 'error');
+    }
+  }
+
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+  }
+
+  loadZonas();
+</script>
+</body>
+</html>

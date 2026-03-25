@@ -152,6 +152,31 @@
     }
 
     .btn-back:hover { opacity: 1; color: var(--gold); }
+
+    /* Recovery Modal */
+    .modal-overlay {
+      position: fixed; top:0; left:0; width:100%; height:100%;
+      background:rgba(0,0,0,0.8); backdrop-filter:blur(5px);
+      display:none; align-items:center; justify-content:center;
+      z-index: 1000;
+    }
+    .modal-content {
+      background: var(--glass-bg); padding:2.5rem; border-radius:15px;
+      border:1px solid var(--gold); width:90%; max-width:400px;
+      position:relative; animation: slideUp 0.3s ease;
+    }
+    .modal-close {
+      position:absolute; top:1rem; right:1.5rem; color:white;
+      cursor:pointer; font-size:1.5rem; background:none; border:none;
+    }
+    .otp-inputs {
+      display:flex; gap:0.5rem; justify-content:center; margin: 1.5rem 0;
+    }
+    .otp-inputs input {
+      width: 45px; height: 50px; text-align:center; font-size:1.5rem;
+      font-weight:bold; border-radius:8px; border:1px solid var(--gold);
+      background: rgba(0,0,0,0.5); color:var(--gold);
+    }
   </style>
 </head>
 <body>
@@ -175,6 +200,10 @@
         <input type="password" id="password" class="form-control" required placeholder="••••••••" />
       </div>
 
+      <div style="text-align: right; margin-top:-0.5rem; margin-bottom: 1.5rem;">
+        <a href="#" class="auth-link" style="font-size: 0.85rem;" onclick="openRecoveryModal(event)">¿Olvidaste tu contraseña?</a>
+      </div>
+
       <button type="submit" class="btn-submit" id="submit-btn">Ingresar <i class="fas fa-sign-in-alt"></i></button>
     </form>
 
@@ -184,7 +213,111 @@
     </div>
   </div>
 
+  <!-- Modal Recuperación -->
+  <div class="modal-overlay" id="recovery-modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeRecoveryModal()">&times;</button>
+      <h2 style="color:var(--gold); margin-bottom:1rem; font-family:'Outfit';">Recuperar Acceso</h2>
+      
+      <!-- Paso 1: Pedir Correo -->
+      <div id="rec-step-1">
+        <p style="font-size:0.9rem; margin-bottom:1rem; opacity:0.8;">Ingresa el correo electrónico asociado a tu cuenta. Te enviaremos un código de 6 dígitos.</p>
+        <div class="form-group">
+          <input type="email" id="rec-email" class="form-control" placeholder="tu@correo.com" required>
+        </div>
+        <button class="btn-submit" id="btn-request-code" onclick="requestCode()">Enviar Código <i class="fas fa-paper-plane"></i></button>
+      </div>
+
+      <!-- Paso 2: Digitar Código -->
+      <div id="rec-step-2" style="display:none;">
+        <p style="font-size:0.9rem; text-align:center; opacity:0.8;">Ingresa el código enviado a tu correo.</p>
+        <div class="otp-inputs" id="otp-container">
+          <input type="text" maxlength="1" onkeyup="moveOtp(this, 1)">
+          <input type="text" maxlength="1" onkeyup="moveOtp(this, 2)">
+          <input type="text" maxlength="1" onkeyup="moveOtp(this, 3)">
+          <input type="text" maxlength="1" onkeyup="moveOtp(this, 4)">
+          <input type="text" maxlength="1" onkeyup="moveOtp(this, 5)">
+          <input type="text" maxlength="1" onkeyup="moveOtp(this, 6)">
+        </div>
+        <div class="form-group">
+          <label>Nueva Contraseña</label>
+          <input type="password" id="rec-new-pwd" class="form-control" placeholder="••••••••">
+        </div>
+        <button class="btn-submit" id="btn-reset-pwd" onclick="resetPassword()">Confirmar Cambio <i class="fas fa-check"></i></button>
+      </div>
+    </div>
+  </div>
+
   <script>
+    function openRecoveryModal(e) { e.preventDefault(); document.getElementById('recovery-modal').style.display = 'flex'; }
+    function closeRecoveryModal() { document.getElementById('recovery-modal').style.display = 'none'; }
+    
+    function moveOtp(el, next) {
+      if(el.value.length === 1) {
+        let inputs = document.getElementById('otp-container').querySelectorAll('input');
+        if(next <= inputs.length) inputs[next-1].focus();
+      }
+    }
+
+    async function requestCode() {
+      const email = document.getElementById('rec-email').value.trim();
+      if(!email) return alert("Ingresa tu correo");
+      
+      const btn = document.getElementById('btn-request-code');
+      btn.innerHTML = 'Enviando...'; btn.disabled = true;
+
+      try {
+        const r = await fetch('/api/auth/recuperar-password', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({correo: email})
+        });
+        const d = await r.json();
+        alert(d.msg);
+        if(r.ok) {
+          document.getElementById('rec-step-1').style.display = 'none';
+          document.getElementById('rec-step-2').style.display = 'block';
+        }
+      } catch(e) {
+        alert("Error de conexión");
+      }
+      btn.innerHTML = 'Enviar Código <i class="fas fa-paper-plane"></i>'; btn.disabled = false;
+    }
+
+    async function resetPassword() {
+      const email = document.getElementById('rec-email').value.trim();
+      const pwd = document.getElementById('rec-new-pwd').value;
+      const inputs = document.getElementById('otp-container').querySelectorAll('input');
+      let code = "";
+      inputs.forEach(i => code += i.value);
+
+      if(code.length !== 6 || !pwd) return alert("Completa todos los campos");
+
+      const btn = document.getElementById('btn-reset-pwd');
+      btn.innerHTML = 'Validando...'; btn.disabled = true;
+
+      try {
+        const r = await fetch('/api/auth/reset-password', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({correo: email, codigo: code, nueva_password: pwd})
+        });
+        const d = await r.json();
+        
+        if(!r.ok) {
+          alert(d.detail || "Error validando código");
+        } else {
+          alert("¡Contraseña actualizada con éxito! Ya puedes iniciar sesión.");
+          closeRecoveryModal();
+          document.getElementById('rec-step-2').style.display = 'none';
+          document.getElementById('rec-step-1').style.display = 'block';
+        }
+      } catch(e) {
+        alert("Error de conexión");
+      }
+      btn.innerHTML = 'Confirmar Cambio <i class="fas fa-check"></i>'; btn.disabled = false;
+    }
+
     document.getElementById('login-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const t = document.getElementById('telefono').value.trim();

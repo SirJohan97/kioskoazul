@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard — Kiosko Azul Admin</title>
+  <meta charset="UTF-8">
+  <title>Admin - Kiosko Azul</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" href="assets/logo.png" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-  <link rel="stylesheet" href="css/admin.css" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/admin.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 <div class="admin-layout">
@@ -24,6 +26,8 @@
       <div class="nav-section">Gestión</div>
       <a href="admin-menu.html" class="nav-link"><i class="fas fa-utensils"></i> Menú</a>
       <a href="admin-promociones.html" class="nav-link"><i class="fas fa-tag"></i> Promociones</a>
+      <div class="nav-section">Ajustes</div>
+      <a href="admin-config.html" class="nav-link"><i class="fas fa-cog"></i> Configuración</a>
       <div class="nav-section">Sitio</div>
       <a href="index.html" target="_blank" class="nav-link"><i class="fas fa-globe"></i> Ver Sitio</a>
       <a href="menu.html" target="_blank" class="nav-link"><i class="fas fa-book-open"></i> Ver Menú</a>
@@ -74,6 +78,16 @@
         <div class="stat-card">
           <div class="stat-icon blue"><i class="fas fa-chart-pie"></i></div>
           <div><div class="stat-value" id="stat-ticket">—</div><div class="stat-label">Ticket Promedio</div></div>
+        </div>
+      </div>
+
+      <!-- Analytics Chart -->
+      <div class="card" style="margin-bottom: 2rem;">
+        <div class="card-header">
+          <span class="card-title"><i class="fas fa-chart-line" style="color:var(--gold);margin-right:0.5rem;"></i>Ventas Últimos 7 Días</span>
+        </div>
+        <div style="padding: 1rem; height: 300px;">
+          <canvas id="salesChart"></canvas>
         </div>
       </div>
 
@@ -199,6 +213,7 @@
   // Auto-refresco cada 15 segundos
   setInterval(loadStats, 15000);
   setInterval(loadPedidos, 15000);
+  setInterval(loadChart, 15000);
 
   async function cambiarEstado(id, estado) {
     try {
@@ -217,6 +232,45 @@
     document.getElementById('sidebar').classList.toggle('open');
   }
 
+  let salesChartObj = null;
+  async function loadChart() {
+    try {
+      const r = await fetch(`${API}/api/admin/analytics/ventas`, { headers: authHeaders() });
+      if(!r.ok) return;
+      const data = await r.json();
+
+      const ctx = document.getElementById('salesChart').getContext('2d');
+      if (salesChartObj) salesChartObj.destroy();
+      
+      salesChartObj = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: data.labels,
+          datasets: [{
+            label: 'Ingresos ($)',
+            data: data.data,
+            borderColor: '#D4AF37',
+            backgroundColor: 'rgba(212, 175, 55, 0.2)',
+            borderWidth: 2,
+            pointBackgroundColor: '#FFF',
+            pointBorderColor: '#D4AF37',
+            fill: true,
+            tension: 0.3
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#E8E5DF' } },
+            x: { grid: { display: false }, ticks: { color: '#E8E5DF' } }
+          }
+        }
+      });
+    } catch(e) { console.warn("Error cargando gráfica"); }
+  }
+
   // ── Responsive ──────────────────────────────────────────────
   if (window.innerWidth < 769) {
     document.getElementById('menu-toggle').style.display = 'flex';
@@ -224,6 +278,7 @@
 
   loadStats();
   loadPedidos();
+  loadChart();
 </script>
 </body>
 </html>
