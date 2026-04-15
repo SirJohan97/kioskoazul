@@ -225,6 +225,7 @@ class OrderRequest(BaseModel):
     crear_cuenta:   bool = False
     correo:         Optional[str] = None
     direccion:      Optional[str] = None
+    google_maps_link: Optional[str] = None
     zona_id:        Optional[int] = None
     password:       Optional[str] = None
 
@@ -713,7 +714,18 @@ async def create_order(order: OrderRequest, db: Session = Depends(get_db)):
     if costo_delivery > 0:
         entrega_txt += f" (+${costo_delivery:.2f} zona de envío)"
     
+    # Añadir link de Google Maps si existe
+    if order.tipo_entrega == "delivery" and order.google_maps_link:
+        entrega_txt += f"\n📍 <a href=\"{order.google_maps_link}\">Ver ubicación en Maps</a>"
+    
     total_bs = order.total * order.tasa_bcv if hasattr(order, 'tasa_bcv') and order.tasa_bcv else 0.0
+
+    # Mostrar info de pago según tipo
+    if order.payment_method == "Divisa":
+        pago_info = f"💵 <b>Pago en Divisa:</b> ${order.payment_ref} USD (efectivo)"
+    else:
+        total_bs = order.total * order.tasa_bcv if hasattr(order, 'tasa_bcv') and order.tasa_bcv else 0.0
+        pago_info = f"💳 <b>Pago:</b> {order.payment_method}\n📋 <b>Ref:</b> {order.payment_ref}"
 
     msg = (
         f"🔔 <b>NUEVA ORDEN {ref}</b>\n\n"
@@ -721,8 +733,7 @@ async def create_order(order: OrderRequest, db: Session = Depends(get_db)):
         f"{entrega_txt}\n\n"
         f"🛒 <b>PEDIDO:</b>\n{items_text}\n"
         f"💰 <b>Total:</b> ${order.total:.2f} (Bs. {total_bs:.2f})\n\n"
-        f"💳 <b>Pago:</b> {order.payment_method}\n"
-        f"📋 <b>Ref:</b> {order.payment_ref}\n\n"
+        f"{pago_info}\n\n"
         f"⚠️ <i>Toca un botón para verificar el pago y procesar orden:</i>"
     )
     

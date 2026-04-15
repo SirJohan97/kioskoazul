@@ -969,6 +969,15 @@
           <label>Dirección Exacta (Obligatorio)</label>
           <input type="text" id="order-address" placeholder="Ej: Res. Las Palmeras, Apto 4B" />
 
+          <label style="margin-top:0.8rem; display:block;">Ubicación en Google Maps (Opcional)</label>
+          <div style="display:flex; gap:0.5rem; margin-top:0.3rem;">
+            <input type="text" id="google-maps-link" placeholder="https://maps.app.goo.gl/..." style="flex:1;">
+            <button type="button" class="btn btn-outline" onclick="openGoogleMapsPicker()" style="padding:0.5rem 1rem;">
+              <i class="fas fa-map-marker-alt"></i> Buscar
+            </button>
+          </div>
+          <small style="color:var(--pearl);">Añade el link de Google Maps para una ubicación precisa</small>
+
           <div style="margin-top: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
             <input type="checkbox" id="save-address-check" style="width: auto;">
             <label for="save-address-check" style="margin:0; font-size: 0.85rem; cursor: pointer;">Guardar esta dirección para futuros pedidos</label>
@@ -984,16 +993,23 @@
           <option value="Pago Movil Provincial">Pago Móvil (Provincial)</option>
           <option value="Pago Movil Mercantil">Pago Móvil (Mercantil)</option>
           <option value="Pago Movil Venezuela">Pago Móvil (BDV)</option>
-          <option value="Zelle">Zelle</option>
-          <option value="Binance Pay">Binance Pay USDT</option>
+          <option value="Divisa">Divisa (Efectivo)</option>
         </select>
+
+        <div id="divisa-container" style="display:none; margin-bottom:1rem;">
+          <label>Monto en Efectivo (USD)</label>
+          <input type="number" id="monto-divisa" placeholder="Ej: 25.00" step="0.01" min="0">
+          <small style="color:var(--gold);">El cliente entrega este monto en dólares físicos al repartidor</small>
+        </div>
 
         <div id="payment-info" class="payment-info">
           <!-- autocompletado -->
         </div>
 
-        <label>Número de Referencia del Pago</label>
-        <input type="text" id="order-ref" placeholder="Ej: 854721" required>
+<div id="ref-container">
+          <label>Número de Referencia del Pago</label>
+          <input type="text" id="order-ref" placeholder="Ej: 854721" required>
+        </div>
 
         <button class="btn-submit-order" onclick="submitOrder()"><i class="fas fa-paper-plane"></i> Enviar Orden al Restaurante</button>
       </div>
@@ -1094,6 +1110,13 @@
       updatePaymentInfo(total);
     }
 
+    function openGoogleMapsPicker() {
+      const link = prompt("Copia y pega aquí el enlace de Google Maps de la ubicación:\n\nEjemplo: https://maps.app.goo.gl/...");
+      if (link) {
+        document.getElementById('google-maps-link').value = link.trim();
+      }
+    }
+
     function toggleDireccion() {
       const tipo = document.getElementById('tipo-entrega').value;
       const c = document.getElementById('direccion-container');
@@ -1147,10 +1170,23 @@
         infoBox.innerHTML = amountTxt + '<strong>Pago Móvil Banesco </strong><br>Teléfono: 0412-6071753<br>CI: V-9960373<br><em>Realice el pago y coloque el monto exacto y la referencia abajo.</em>';
       } else if (method === 'Pago Movil Venezuela') {
         infoBox.innerHTML = amountTxt + '<strong>Pago Móvil BDV </strong><br>Teléfono: 0412-6071753<br>CI: V-9960373<br><em>Realice el pago y coloque el monto exacto y la referencia abajo.</em>';
-      } else if (method === 'Zelle') {
-        infoBox.innerHTML = amountTxt + '<strong>$</strong><br><em>Coloque el número de confirmación o el nombre del titular de la cuenta que envió.</em>';
-      } else if (method === 'Binance Pay') {
-        infoBox.innerHTML = amountTxt + '<strong>Binance Pay (ID)</strong><br>Pay ID: 123456789<br><em>Envíe USDT y coloque el Pay ID de la transferencia abajo.</em>';
+      } else if (method === 'Divisa') {
+        const montoDivisa = document.getElementById('monto-divisa').value || 0;
+        const infoDivisa = montoDivisa > 0 
+          ? `<div style="color:var(--success); margin-top:0.5rem;">💵 El cliente pagará <strong>$${parseFloat(montoDivisa).toFixed(2)} USD</strong> en efectivo al repartidor</div>`
+          : `<div style="color:#e74c3c; margin-top:0.5rem;">Por favor ingrese el monto en dólares que el clienteará entregar</div>`;
+        infoBox.innerHTML = '<strong>Pago en Divisa (Efectivo)</strong><br><em>El cliente paga en dólares físicos al momento de la entrega.</em>' + infoDivisa;
+      }
+      
+      // Mostrar/ocultar contenedor de divisa
+      const divisaContainer = document.getElementById('divisa-container');
+      const refContainer = document.getElementById('ref-container');
+      if (method === 'Divisa') {
+        divisaContainer.style.display = 'block';
+        refContainer.style.display = 'none';
+      } else {
+        divisaContainer.style.display = 'none';
+        refContainer.style.display = 'block';
       }
     }
 
@@ -1161,8 +1197,12 @@
       const tipo = document.getElementById('tipo-entrega').value;
       const direc = document.getElementById('order-address').value;
 
-      if (!ref) {
+      if (method !== 'Divisa' && !ref) {
         alert("Por favor inserta tu número de referencia de pago.");
+        return;
+      }
+      if (method === 'Divisa' && !document.getElementById('monto-divisa').value) {
+        alert("Por favor ingresa el monto en dólares que pagarás en efectivo.");
         return;
       }
       if (tipo === 'delivery' && !direc.trim()) {
@@ -1185,10 +1225,11 @@
         customer_name: cliente.nombre,
         customer_phone: cliente.telefono,
         payment_method: method,
-        payment_ref: ref,
+        payment_ref: method === 'Divisa' ? document.getElementById('monto-divisa').value : ref,
         tipo_entrega: tipo,
         zona_id: zonaId,
         direccion: tipo === 'delivery' ? direc : null,
+        google_maps_link: tipo === 'delivery' ? document.getElementById('google-maps-link').value : null,
         items: cart,
         total: total, // El server hace la re-suma de zona por seguridad
         tasa_bcv: bcvRate > 0 ? bcvRate : null
