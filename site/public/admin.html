@@ -143,6 +143,24 @@
     return { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' };
   }
 
+  // WebSocket para actualizaciones en tiempo real
+  let ws = null;
+  function initWebSocket() {
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    ws = new WebSocket(`${protocol}//${window.location.host}/ws/pedidos`);
+    ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.type === 'nuevo_pedido' || data.type === 'pedido_actualizado') {
+          loadPedidos();
+          loadStats();
+        }
+      } catch(e) {}
+    };
+    ws.onclose = () => { setTimeout(initWebSocket, 3000); };
+  }
+  initWebSocket();
+
   // ── Toast ───────────────────────────────────────────────────
   function toast(msg, type='success') {
     const c = document.getElementById('toast-container');
@@ -179,7 +197,8 @@
   async function loadPedidos() {
     try {
       const r = await fetch(`${API}/api/pedidos?limit=10`, { headers: authHeaders() });
-      const pedidos = await r.json();
+      const response = await r.json();
+      const pedidos = response.data || [];
       const tbody = document.getElementById('table-pedidos');
 
       if (!pedidos.length) {

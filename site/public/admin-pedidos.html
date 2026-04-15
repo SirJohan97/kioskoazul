@@ -121,6 +121,24 @@
   function openModal(id)  { document.getElementById(id).classList.add('open'); }
   function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
+  // WebSocket para actualizaciones en tiempo real
+  let ws = null;
+  function initWebSocket() {
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    ws = new WebSocket(`${protocol}//${window.location.host}/ws/pedidos`);
+    ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.type === 'nuevo_pedido' || data.type === 'pedido_actualizado') {
+          console.log('Actualización de pedido recibida:', data);
+          loadPedidos();
+        }
+      } catch(e) {}
+    };
+    ws.onclose = () => { setTimeout(initWebSocket, 3000); };
+  }
+  initWebSocket();
+
   function toast(msg, type='success') {
     const c = document.getElementById('toast-container');
     const t = document.createElement('div');
@@ -141,8 +159,15 @@
     if (estado) url += `&estado=${estado}`;
     try {
       const r  = await fetch(url, { headers: authHeaders() });
-      const ps = await r.json();
+      if (!r.ok) {
+        toast('Error cargando pedidos: ' + r.status, 'error');
+        return;
+      }
+      const response = await r.json();
+      console.log('API response:', response);
+      const ps = response.data || [];
       
+      console.log('Pedidos loaded:', ps.length);
       const activos = ps.filter(p => p.estado !== 'cancelado');
       const sumatoria = activos.reduce((acc, p) => acc + p.total, 0);
       

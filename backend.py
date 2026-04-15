@@ -4,6 +4,7 @@ API FastAPI con autenticación JWT, CRUD de menú, promociones, pedidos e imáge
 """
 import os
 import shutil
+import logging
 from datetime import datetime, timedelta
 from typing import Optional, List
 import smtplib
@@ -12,10 +13,12 @@ from email.mime.multipart import MIMEMultipart
 import random
 import string
 
-from fastapi import FastAPI, HTTPException, Depends, status, UploadFile, File, Form
+from fastapi import FastAPI, HTTPException, Depends, status, UploadFile, File, Form, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import JSONResponse
+from fastapi.websockets import WebSocket
 from pydantic import BaseModel
 import requests
 import asyncio
@@ -32,11 +35,16 @@ from database import (
 )
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Configuración
+# Configuración con Variables de Entorno
 # ─────────────────────────────────────────────────────────────────────────────
-SECRET_KEY  = os.environ.get("SECRET_KEY", "kioskoazul-secret-2025-xK9mPqR")
+SECRET_KEY  = os.environ.get("SECRET_KEY")
+if not SECRET_KEY:
+    raise ValueError("SECRET_KEY debe estar definida en variable de entorno")
+
 ALGORITHM   = "HS256"
-TOKEN_HOURS = 24
+TOKEN_HOURS = int(os.environ.get("TOKEN_HOURS", "24"))
+
+ALLOWED_ORIGINS = os.environ.get("ALLOWED_ORIGINS", "").split(",") if os.environ.get("ALLOWED_ORIGINS") else ["http://localhost:3000"]
 
 TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "8741738690:AAG_ONxfjhzIQ6NA0RrzMJ9AhW61_cdA-wY")
 TELEGRAM_CHAT_ID   = os.environ.get("TELEGRAM_CHAT_ID", "6526066600")
@@ -50,15 +58,100 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 pwd_ctx = CryptContext(schemes=["sha256_crypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Logging estructurado
+# ─────────────────────────────────────────────────────────────────────────────
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger("kioskoazul")
+
+def log_admin_action(action: str, details: dict):
+    logger.info(f"[ADMIN] {action} | {details}")
+
+def log_api_request(endpoint: str, method: str, ip: str):
+    logger.info(f"[API] {method} {endpoint} | IP: {ip}")
+
+def log_error(error: str, details: dict):
+    logger.error(f"[ERROR] {error} | {details}")
+
 app = FastAPI(title="Kiosko Azul API", version="2.0.0")
 
+# ─────────────────────────────────────────────────────────────────────────────
+# WebSocket para actualizaciones en tiempo real
+# ─────────────────────────────────────────────────────────────────────────────
+class ConnectionManager:
+    def __init__(self):
+        self.active_connections: list[WebSocket] = []
+
+    async def connect(self, websocket: WebSocket):
+        await websocket.accept()
+        self.active_connections.append(websocket)
+        log_admin_action("ws_connect", {"total_connections": len(self.active_connections)})
+
+    def disconnect(self, websocket: WebSocket):
+        self.active_connections.remove(websocket)
+
+    async def broadcast_pedido(self, message: dict):
+        for connection in self.active_connections:
+            try:
+                await connection.send_json(message)
+            except Exception as e:
+                log_error("ws_broadcast_error", {"error": str(e)})
+
+ws_manager = ConnectionManager()
+
+@app.websocket("/ws/pedidos")
+async def websocket_endpoint(websocket: WebSocket):
+    await ws_manager.connect(websocket)
+    try:
+        while True:
+            data = await websocket.receive_text()
+    except Exception:
+        ws_manager.disconnect(websocket)
+
+# ─────────────────────────────────────────────────────────────────────────────
+# CORS con dominios específicos
+# ─────────────────────────────────────────────────────────────────────────────
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Rate Limiting simple (memoria en memoria)
+# ─────────────────────────────────────────────────────────────────────────────
+from collections import defaultdict
+from time import time
+
+rate_limit_store = defaultdict(lambda: {"count": 0, "reset": 0})
+
+def check_rate_limit(ip: str, max_requests: int = 100, window_seconds: int = 60) -> bool:
+    now = time()
+    if rate_limit_store[ip]["reset"] < now:
+        rate_limit_store[ip] = {"count": 0, "reset": now + window_seconds}
+    
+    rate_limit_store[ip]["count"] += 1
+    return rate_limit_store[ip]["count"] <= max_requests
+
+@app.middleware("http")
+async def rate_limit_middleware(request: Request, call_next):
+    ip = request.client.host if request.client else "unknown"
+    
+    if not check_rate_limit(ip):
+        log_error("rate_limit_exceeded", {"ip": ip, "path": request.url.path})
+        return JSONResponse(
+            status_code=429,
+            content={"detail": "Demasiadas solicitudes. Intenta más tarde."}
+        )
+    
+    log_api_request(str(request.url.path), request.method, ip)
+    response = await call_next(request)
+    return response
 
 # Crear tablas al arrancar
 create_tables()
@@ -278,11 +371,17 @@ async def telegram_polling_loop():
                         cb_data = cb.get("data", "")
                         
                         if cb_data.startswith("verify_") or cb_data.startswith("reject_"):
-                            action, order_ref = cb_data.split("_", 1)
-                            
-                            db = next(get_db())
-                            pedido = db.query(Pedido).filter_by(order_ref=order_ref).first()
-                            text_answer = "Error. Pedido no encontrado."
+                            parts = cb_data.split("_", 1)
+                            if len(parts) < 2:
+                                text_answer = "Error. Formato inválido."
+                            else:
+                                action, order_ref = parts
+                                log_admin_action("telegram_callback", {"action": action, "order_ref": order_ref})
+                                
+                                db = next(get_db())
+                                pedido = db.query(Pedido).filter_by(order_ref=order_ref).first()
+                                log_admin_action("telegram_query", {"order_ref": order_ref, "found": pedido is not None})
+                                text_answer = "Error. Pedido no encontrado."
                             
                             if pedido and pedido.estado == "pendiente":
                                 if action == "verify":
@@ -639,6 +738,14 @@ async def create_order(order: OrderRequest, db: Session = Depends(get_db)):
     }
     send_telegram(msg, markup)
 
+    await ws_manager.broadcast_pedido({
+        "type": "nuevo_pedido",
+        "order_ref": ref,
+        "cliente_nombre": cliente.nombre,
+        "total": total_final,
+        "creado_en": pedido.creado_en.isoformat()
+    })
+
     return {"status": "success", "order_id": ref, "message": "Orden en verificación."}
 
 @app.get("/api/rastreo/{order_ref}")
@@ -662,9 +769,11 @@ async def rastrear_pedido(order_ref: str, db: Session = Depends(get_db)):
 async def list_pedidos(skip: int = 0, limit: int = 50, estado: Optional[str] = None,
                         db: Session = Depends(get_db),
                         current: Admin = Depends(get_current_admin)):
+    logger.info(f"[API] list_pedidos called by {current.username}")
     q = db.query(Pedido).order_by(Pedido.creado_en.desc())
     if estado:
         q = q.filter_by(estado=estado)
+    total = q.count()
     pedidos = q.offset(skip).limit(limit).all()
     result = []
     for p in pedidos:
@@ -676,7 +785,16 @@ async def list_pedidos(skip: int = 0, limit: int = 50, estado: Optional[str] = N
             "items": [{"nombre": i.nombre, "cantidad": i.cantidad, "subtotal": i.subtotal}
                       for i in p.items],
         })
-    return result
+    logger.info(f"[API] Returning {len(result)} pedidos")
+    return {
+        "data": result,
+        "pagination": {
+            "total": total,
+            "skip": skip,
+            "limit": limit,
+            "pages": (total + limit - 1) // limit if limit > 0 else 0
+        }
+    }
 
 @app.put("/api/pedidos/{pedido_id}/estado")
 async def update_estado(pedido_id: int, data: PedidoEstadoIn, db: Session = Depends(get_db),
@@ -691,6 +809,14 @@ async def update_estado(pedido_id: int, data: PedidoEstadoIn, db: Session = Depe
     log_action(db, current.id, "cambiar_estado_pedido", "pedidos", pedido_id,
                {"estado": data.estado})
     db.commit()
+    
+    await ws_manager.broadcast_pedido({
+        "type": "pedido_actualizado",
+        "order_ref": p.order_ref,
+        "estado": data.estado,
+        "actualizado": datetime.utcnow().isoformat()
+    })
+    
     return {"status": "ok", "order_ref": p.order_ref, "nuevo_estado": data.estado}
 
 @app.get("/api/stats")
@@ -872,13 +998,18 @@ async def reset_password(data: ResetInfo, db: Session = Depends(get_db)):
     return {"status": "ok", "msg": "Contraseña restablecida exitosamente."}
 
 @app.get("/api/clientes/{telefono}/pedidos")
-async def mis_pedidos(telefono: str, db: Session = Depends(get_db)):
-    """Retorna todo el historial de pedidos de este cliente"""
+async def mis_pedidos(telefono: str, skip: int = 0, limit: int = 20, db: Session = Depends(get_db)):
+    """Retorna el historial de pedidos de este cliente con paginación"""
+    logger.info(f"[API] mis_pedidos called for telefono: {telefono}")
     cliente = db.query(Cliente).filter_by(telefono=telefono).first()
     if not cliente:
+        logger.warning(f"[API] Cliente no encontrado: {telefono}")
         raise HTTPException(404, "Cliente no encontrado")
     
-    pedidos = db.query(Pedido).filter_by(cliente_id=cliente.id).order_by(Pedido.creado_en.desc()).all()
+    q = db.query(Pedido).filter_by(cliente_id=cliente.id).order_by(Pedido.creado_en.desc())
+    total = q.count()
+    pedidos = q.offset(skip).limit(limit).all()
+    logger.info(f"[API] Found {total} pedidos for cliente {telefono}")
     resultado = []
     for p in pedidos:
         resultado.append({
@@ -889,7 +1020,15 @@ async def mis_pedidos(telefono: str, db: Session = Depends(get_db)):
             "tipo_entrega": p.tipo_entrega,
             "items_resumen": ", ".join([f"{i.cantidad}x {i.nombre}" for i in p.items])
         })
-    return resultado
+    return {
+        "data": resultado,
+        "pagination": {
+            "total": total,
+            "skip": skip,
+            "limit": limit,
+            "pages": (total + limit - 1) // limit if limit > 0 else 0
+        }
+    }
 
 @app.get("/api/clientes/buscar")
 async def buscar_cliente(telefono: str, db: Session = Depends(get_db)):
@@ -902,6 +1041,43 @@ async def buscar_cliente(telefono: str, db: Session = Depends(get_db)):
         "telefono": cliente.telefono, "correo": cliente.correo,
         "direccion": cliente.direccion
     }
+
+
+from fastapi.responses import JSONResponse, PlainTextResponse
+
+@app.get("/sitemap.xml", response_class=PlainTextResponse)
+async def sitemap():
+    """Sitemap dinámico para SEO"""
+    base_url = os.environ.get("BASE_URL", "https://kioskoazul.com")
+    sitemap_xml = f"""<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>{base_url}/</loc>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>{base_url}/menu.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>{base_url}/reservas.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>{base_url}/galeria.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>{base_url}/login.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+</urlset>"""
+    return sitemap_xml
 
 
 # ─────────────────────────────────────────────────────────────────────────────

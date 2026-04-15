@@ -245,6 +245,23 @@
       window.location.href = 'index.html';
     }
 
+    // WebSocket para actualizaciones en tiempo real
+    let ws = null;
+    function initWebSocket() {
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      ws = new WebSocket(`${protocol}//${window.location.host}/ws/pedidos`);
+      ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.type === 'pedido_actualizado' && data.order_ref) {
+            loadPedidos();
+          }
+        } catch(e) {}
+      };
+      ws.onclose = () => { setTimeout(initWebSocket, 3000); };
+    }
+    if (cliente) initWebSocket();
+
     const badgeMap = {
       pendiente: 'badge-orange',
       preparando: 'badge-blue',
@@ -256,8 +273,12 @@
     async function loadPedidos() {
       try {
         const r = await fetch(`/api/clientes/${cliente.telefono}/pedidos`);
-        if(!r.ok) throw new Error();
-        const pedidos = await r.json();
+        console.log('Response status:', r.status);
+        if(!r.ok) throw new Error('Status: ' + r.status);
+        const response = await r.json();
+        console.log('API response:', response);
+        const pedidos = response.data || [];
+        console.log('Pedidos:', pedidos.length);
         const container = document.getElementById('orders-container');
 
         if(pedidos.length === 0) {
@@ -314,7 +335,8 @@
         }
 
       } catch(e) {
-        document.getElementById('orders-container').innerHTML = `<p style="color:#e74c3c;text-align:center;">Error cargando el historial.</p>`;
+        console.error('Error cargando pedidos:', e);
+        document.getElementById('orders-container').innerHTML = `<p style="color:#e74c3c;text-align:center;">Error cargando el historial: ${e.message || 'Sin conexión o sesión expirada'}</p>`;
       }
     }
 
