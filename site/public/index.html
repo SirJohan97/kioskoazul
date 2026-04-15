@@ -90,6 +90,9 @@
     <video id="video-noche" class="video-bg" autoplay loop muted playsinline>
       <source src="assets/video_noche.mp4" type="video/mp4">
     </video>
+    <video id="video-tarde" class="video-bg" autoplay loop muted playsinline>
+      <source src="assets/video_tarde.mp4" type="video/mp4">
+    </video>
   </div>
 
   <div id="bg-canvas"></div>
@@ -380,23 +383,36 @@
       // VIDEO LOGIC (Independiente de los segmentos de comida)
       const videoDia = document.getElementById('video-dia');
       const videoNoche = document.getElementById('video-noche');
+      const videoTarde = document.getElementById('video-tarde');
       const currentHour = new Date().getHours();
       
-      // Desde las 6AM (6) hasta las 5:59PM (17:59), es de Día
-      // Desde las 6PM (18) hasta las 5:59AM (5:59), es de Noche
-      if (currentHour >= 18 || currentHour < 6) {
-        // Es de noche
-        videoDia.classList.remove('active');
-        videoNoche.classList.add('active');
-        // Opcional: pausar el video oculto para ahorrar recursos
-        setTimeout(() => { if(!videoDia.classList.contains('active')) videoDia.pause(); }, 1500);
-        videoNoche.play().catch(e => console.log("Auto-play prevented"));
-      } else {
+      // 6AM - 3:59PM = Día
+      // 4PM - 6:59PM = Tarde
+      // 7PM - 5:59AM = Noche
+      if (currentHour >= 6 && currentHour < 16) {
         // Es de día
         videoNoche.classList.remove('active');
+        videoTarde.classList.remove('active');
         videoDia.classList.add('active');
         setTimeout(() => { if(!videoNoche.classList.contains('active')) videoNoche.pause(); }, 1500);
+        setTimeout(() => { if(!videoTarde.classList.contains('active')) videoTarde.pause(); }, 1500);
         videoDia.play().catch(e => console.log("Auto-play prevented"));
+      } else if (currentHour >= 16 && currentHour < 19) {
+        // Es tarde
+        videoDia.classList.remove('active');
+        videoNoche.classList.remove('active');
+        videoTarde.classList.add('active');
+        setTimeout(() => { if(!videoDia.classList.contains('active')) videoDia.pause(); }, 1500);
+        setTimeout(() => { if(!videoNoche.classList.contains('active')) videoNoche.pause(); }, 1500);
+        videoTarde.play().catch(e => console.log("Auto-play prevented"));
+      } else {
+        // Es de noche (19-6)
+        videoDia.classList.remove('active');
+        videoTarde.classList.remove('active');
+        videoNoche.classList.add('active');
+        setTimeout(() => { if(!videoDia.classList.contains('active')) videoDia.pause(); }, 1500);
+        setTimeout(() => { if(!videoTarde.classList.contains('active')) videoTarde.pause(); }, 1500);
+        videoNoche.play().catch(e => console.log("Auto-play prevented"));
       }
 
       // Remove animation class after it plays
