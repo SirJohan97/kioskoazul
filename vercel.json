@@ -1,0 +1,47 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/index.py",
+      "use": "@vercel/python"
+    },
+    {
+      "src": "site/public/**",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "api/index.py"
+    },
+    {
+      "src": "/ws/(.*)",
+      "dest": "api/index.py"
+    },
+    {
+      "src": "/assets/(.*)",
+      "dest": "site/public/assets/$1"
+    },
+    {
+      "src": "/css/(.*)",
+      "dest": "site/public/css/$1"
+    },
+    {
+      "src": "/js/(.*)",
+      "dest": "site/public/js/$1"
+    },
+    {
+      "src": "/(.*\\.html)",
+      "dest": "site/public/$1"
+    },
+    {
+      "src": "/",
+      "dest": "site/public/index.html"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "site/public/$1"
+    }
+  ]
+}

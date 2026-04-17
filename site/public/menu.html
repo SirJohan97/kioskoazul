@@ -526,8 +526,8 @@
     </svg>
   </div>
 
-  <!-- Background layers injected by immersion.js -->
-  <div id="bg-overlay" style="position:fixed; inset:0; z-index:1; background:rgba(4,7,14,0.65); pointer-events:none;"></div>
+  <!-- Background overlay: opacidad reducida ya que el menu no tiene video de fondo -->
+  <div id="bg-overlay" style="position:fixed; inset:0; z-index:1; background:rgba(4,7,14,0.10); pointer-events:none;"></div>
   <nav id="navbar">
     <a href="index.html" class="nav-logo">
       <img src="assets/logo.png" alt="Kiosko Azul Logo"
@@ -539,7 +539,8 @@
       </div>
     </a>
 
-    <button class="nav-toggle" id="nav-toggle" aria-label="Menú">
+    <!-- nav-toggle oculto: en móvil se usa el dock inferior -->
+    <button class="nav-toggle" id="nav-toggle" aria-label="Menú" style="display:none;">
       <i class="fas fa-bars"></i>
     </button>
 

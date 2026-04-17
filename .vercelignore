@@ -1,0 +1,22 @@
+# Archivos a ignorar en el deploy de Vercel
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+.env
+*.db
+*.sqlite
+.git/
+.vscode/
+.agents/
+.stitch/
+start.bat
+update.py
+init_db.py
+
+# No subir la base de datos SQLite (no es persistente en Vercel)
+kioskoazul.db
+
+# Logs
+*.log

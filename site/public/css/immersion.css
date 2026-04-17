@@ -11,12 +11,12 @@
   --cream: #F8F9FA;
   --pearl: #8c9dae;
   
-  --glass-bg: rgba(10, 17, 31, 0.45);
-  --glass-hover: rgba(10, 17, 31, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.08);
-  --glass-border-gold: rgba(212, 175, 55, 0.15);
-  --glass-blur: blur(28px);
-  --glass-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
+  --glass-bg: rgba(10, 17, 31, 0.78);
+  --glass-hover: rgba(10, 17, 31, 0.92);
+  --glass-border: rgba(255, 255, 255, 0.14);
+  --glass-border-gold: rgba(212, 175, 55, 0.28);
+  --glass-blur: blur(32px);
+  --glass-shadow: 0 16px 48px rgba(0, 0, 0, 0.45);
   
   --radius-pill: 100px;
   --radius-card: 24px;
@@ -303,16 +303,9 @@
     pointer-events: auto;
   }
 
+  /* Botón hamburguesa oculto: el dock inferior reemplaza la navegación en móvil */
   .nav-toggle {
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
-    width: 44px;
-    height: 44px;
-    background: rgba(255,255,255,0.05);
-    border-radius: 12px;
-    color: var(--gold);
-    cursor: pointer;
+    display: none !important;
   }
 }
 

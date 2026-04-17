@@ -158,7 +158,17 @@ input, select, textarea {
      MOBILE NAVIGATION DOCK
      ===================================== */
   #navbar {
-    display: none !important; /* Hide classic top bar */
+    display: none !important; /* Hide classic top bar - mobile uses bottom dock */
+  }
+
+  /* Ocultar el botón hamburguesa en móvil - no es necesario con el dock inferior */
+  .nav-toggle {
+    display: none !important;
+  }
+
+  /* Ocultar links de navegación del top bar en móvil */
+  .nav-links {
+    display: none !important;
   }
 
   /* Padding at bottom of body to ensure nothing hides behind dock */
