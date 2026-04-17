@@ -1,0 +1,229 @@
+/* =====================================
+   Kiosko Azul - Responsive Utilities
+   ===================================== */
+
+/* Mobile First - Base styles for all */
+
+/* Container responsive */
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* Grid responsive */
+.grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.grid-2 { grid-template-columns: repeat(2, 1fr); }
+.grid-3 { grid-template-columns: repeat(3, 1fr); }
+.grid-4 { grid-template-columns: repeat(4, 1fr); }
+
+/* Flex responsive */
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.flex-wrap { flex-wrap: wrap; }
+.items-center { align-items: center; }
+.justify-center { justify-content: center; }
+.justify-between { justify-content: space-between; }
+.gap-1 { gap: 0.5rem; }
+.gap-2 { gap: 1rem; }
+.gap-3 { gap: 1.5rem; }
+
+/* Spacing */
+.p-1 { padding: 0.5rem; }
+.p-2 { padding: 1rem; }
+.p-3 { padding: 1.5rem; }
+.p-4 { padding: 2rem; }
+.m-1 { margin: 0.5rem; }
+.m-2 { margin: 1rem; }
+.m-3 { margin: 1.5rem; }
+.mt-1 { margin-top: 0.5rem; }
+.mt-2 { margin-top: 1rem; }
+.mb-1 { margin-bottom: 0.5rem; }
+.mb-2 { margin-bottom: 1rem; }
+
+/* Text */
+.text-center { text-align: center; }
+.text-sm { font-size: 0.875rem; }
+.text-lg { font-size: 1.125rem; }
+.text-xl { font-size: 1.5rem; }
+
+/* Width */
+.w-full { width: 100%; }
+.max-w-sm { max-width: 24rem; }
+.max-w-md { max-width: 28rem; }
+.max-w-lg { max-width: 32rem; }
+
+/* Hide on mobile */
+.hide-mobile { display: none; }
+
+/* Buttons responsive */
+.btn {
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  width: 100%;
+}
+
+.btn-sm {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+}
+
+/* Forms responsive */
+input, select, textarea {
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 1rem;
+  border-radius: 8px;
+}
+
+/* Cards responsive */
+.card {
+  padding: 1rem;
+  border-radius: 12px;
+}
+
+/* =====================================
+   Tablet (768px+)
+   ===================================== */
+@media (min-width: 768px) {
+  .container {
+    padding: 0 2rem;
+  }
+  
+  .grid-2 { grid-template-columns: repeat(2, 1fr); }
+  .grid-3 { grid-template-columns: repeat(3, 1fr); }
+  
+  .hide-tablet { display: none; }
+  .show-tablet { display: block; }
+  
+  .btn {
+    width: auto;
+  }
+  
+  .text-tablet-left { text-align: left; }
+  .text-tablet-center { text-align: center; }
+}
+
+/* =====================================
+   Desktop (1024px+)
+   ===================================== */
+@media (min-width: 1024px) {
+  .container {
+    padding: 0 3rem;
+  }
+  
+  .grid-2 { grid-template-columns: repeat(2, 1fr); }
+  .grid-3 { grid-template-columns: repeat(3, 1fr); }
+  .grid-4 { grid-template-columns: repeat(4, 1fr); }
+  
+  .hide-desktop { display: none; }
+  .show-desktop { display: block; }
+}
+
+/* =====================================
+   Mobile Only (under 768px)
+   ===================================== */
+@media (max-width: 767px) {
+  html {
+    font-size: 14px;
+  }
+  
+  .show-mobile { display: block; }
+  .hide-mobile { display: none; }
+  
+  .p-mobile-1 { padding: 0.5rem; }
+  .p-mobile-2 { padding: 1rem; }
+  .p-mobile-3 { padding: 1.5rem; }
+  
+  .text-mobile-center { text-align: center; }
+  
+  /* Stack flex on mobile */
+  .flex-mobile-col {
+    flex-direction: column;
+  }
+  
+  /* Full width buttons on mobile */
+  .btn-mobile-full {
+    width: 100%;
+  }
+
+  /* =====================================
+     MOBILE NAVIGATION DOCK
+     ===================================== */
+  #navbar {
+    display: none !important; /* Hide classic top bar */
+  }
+
+  /* Padding at bottom of body to ensure nothing hides behind dock */
+  body {
+    padding-bottom: 80px; 
+  }
+
+  .mobile-dock {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 70px;
+    background: rgba(10, 20, 40, 0.85); /* Deep transparent navy */
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(212, 175, 55, 0.2); /* Gold accent */
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 9999;
+    padding-bottom: env(safe-area-inset-bottom); /* iPhone X+ safe area */
+    box-shadow: 0 -5px 20px rgba(0,0,0,0.5);
+  }
+
+  .dock-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.5);
+    text-decoration: none;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.65rem;
+    gap: 0.3rem;
+    width: 25%;
+    height: 100%;
+    transition: all 0.3s ease;
+  }
+
+  .dock-item i {
+    font-size: 1.2rem;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .dock-item.active {
+    color: var(--gold);
+  }
+  .dock-item.active i {
+    transform: translateY(-3px) scale(1.1);
+    color: var(--gold);
+    text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+  }
+
+  /* Improve typography on mobile */
+  h1 { font-size: 2.2rem !important; }
+  h2.section-title { font-size: 1.8rem !important; }
+
+}
+
+/* =====================================
+   Large Desktop (1440px+)
+   ===================================== */
+@media (min-width: 1440px) {
+  .container {
+    max-width: 1400px;
+  }
+}

@@ -11,6 +11,26 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+<script>
+// Sidebar toggle - inline (works immediately on click)
+function toggleSidebar() {
+  var sb = document.getElementById('sidebar');
+  var ov = document.getElementById('sidebar-overlay');
+  if (!sb) return;
+  var open = sb.classList.toggle('open');
+  if (ov) ov.classList.toggle('show', open);
+  document.body.style.overflow = open ? 'hidden' : '';
+}
+document.addEventListener('DOMContentLoaded', function() {
+  if (!document.getElementById('sidebar-overlay')) {
+    var ov = document.createElement('div');
+    ov.id = 'sidebar-overlay';
+    ov.className = 'sidebar-overlay';
+    ov.onclick = function() { toggleSidebar(); };
+    document.body.appendChild(ov);
+  }
+});
+</script>
 <div class="admin-layout">
 
   <!-- Sidebar -->
@@ -26,6 +46,7 @@
       <div class="nav-section">Gestión</div>
       <a href="admin-menu.html" class="nav-link"><i class="fas fa-utensils"></i> Menú</a>
       <a href="admin-promociones.html" class="nav-link"><i class="fas fa-tag"></i> Promociones</a>
+      <a href="admin-recomendaciones.html" class="nav-link"><i class="fas fa-star"></i> Recomendaciones</a>
       <div class="nav-section">Ajustes</div>
       <a href="admin-config.html" class="nav-link"><i class="fas fa-cog"></i> Configuración</a>
       <div class="nav-section">Sitio</div>
@@ -49,13 +70,13 @@
   <!-- Main -->
   <div class="admin-main">
     <header class="admin-topbar">
-      <div style="display:flex;align-items:center;gap:1rem;">
-        <button class="btn btn-outline btn-sm" id="menu-toggle" style="display:none;" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+      <div style="display:flex;align-items:center;gap:0.75rem;">
+        <button class="admin-hamburger btn-outline btn-sm" id="menu-toggle" onclick="toggleSidebar()" aria-label="Menú"><i class="fas fa-bars"></i></button>
         <span class="topbar-title">Dashboard</span>
       </div>
       <div class="topbar-actions">
         <span id="fecha-hoy" style="font-size:0.8rem;color:var(--pearl);"></span>
-        <button class="btn btn-gold btn-sm" onclick="window.location='admin-menu.html'"><i class="fas fa-plus"></i> Nuevo Plato</button>
+        <button class="btn btn-gold btn-sm" onclick="window.location='admin-menu.html'"><i class="fas fa-plus"></i> <span class="btn-text">Nuevo Plato</span></button>
       </div>
     </header>
 
@@ -218,7 +239,7 @@
           <td><span class="badge ${cls}">${p.estado}</span></td>
           <td>${hora}</td>
           <td>
-            <select onchange="cambiarEstado(${p.id}, this.value)" class="form-control" style="padding:0.3rem 0.5rem;border-radius:6px;font-size:0.8rem;">
+            <select onchange="cambiarEstado(${p.id}, this.value)" class="form-control" style="padding:0.3rem 0.5rem;border-radius:6px;font-size:0.8rem;width:auto;">
               ${['pendiente','preparando','listo','entregado','cancelado'].map(s =>
                 `<option value="${s}" ${s===p.estado?'selected':''}>${s}</option>`
               ).join('')}
@@ -245,10 +266,6 @@
       toast(`Estado actualizado: ${estado}`);
       loadStats();
     } catch(e) { toast('Error actualizando estado', 'error'); }
-  }
-
-  function toggleSidebar() {
-    document.getElementById('sidebar').classList.toggle('open');
   }
 
   let salesChartObj = null;
@@ -290,14 +307,11 @@
     } catch(e) { console.warn("Error cargando gráfica"); }
   }
 
-  // ── Responsive ──────────────────────────────────────────────
-  if (window.innerWidth < 769) {
-    document.getElementById('menu-toggle').style.display = 'flex';
-  }
-
   loadStats();
   loadPedidos();
   loadChart();
 </script>
+
+  <script src="js/admin-shared.js"></script>
 </body>
 </html>

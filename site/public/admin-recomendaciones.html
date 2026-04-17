@@ -1,0 +1,316 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Recomendaciones — Kiosko Azul Admin</title>
+  <link rel="icon" href="assets/logo.png" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="css/admin.css" />
+</head>
+<body>
+<script>
+// Sidebar toggle - inline fallback (works immediately on click)
+function toggleSidebar() {
+  var sb = document.getElementById('sidebar');
+  var ov = document.getElementById('sidebar-overlay');
+  if (!sb) return;
+  var open = sb.classList.toggle('open');
+  if (ov) ov.classList.toggle('show', open);
+  document.body.style.overflow = open ? 'hidden' : '';
+}
+document.addEventListener('DOMContentLoaded', function() {
+  // Create overlay if not yet injected by admin-shared.js
+  if (!document.getElementById('sidebar-overlay')) {
+    var ov = document.createElement('div');
+    ov.id = 'sidebar-overlay';
+    ov.className = 'sidebar-overlay';
+    ov.onclick = function() { toggleSidebar(); };
+    document.body.appendChild(ov);
+  }
+});
+</script>
+<div class="admin-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <img src="assets/logo.png" alt="Logo" onerror="this.style.display='none'">
+      <div><span>Kiosko Azul</span><small>Admin Panel</small></div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">Principal</div>
+      <a href="admin.html" class="nav-link"><i class="fas fa-chart-line"></i> Dashboard</a>
+      <a href="admin-pedidos.html" class="nav-link"><i class="fas fa-receipt"></i> Pedidos</a>
+      <div class="nav-section">Gestión</div>
+      <a href="admin-menu.html" class="nav-link"><i class="fas fa-utensils"></i> Menú</a>
+      <a href="admin-promociones.html" class="nav-link"><i class="fas fa-tag"></i> Promociones</a>
+      <a href="admin-recomendaciones.html" class="nav-link active"><i class="fas fa-star"></i> Recomendaciones</a>
+      <div class="nav-section">Ajustes</div>
+      <a href="admin-config.html" class="nav-link"><i class="fas fa-cog"></i> Configuración</a>
+      <div class="nav-section">Sitio</div>
+      <a href="index.html" target="_blank" class="nav-link"><i class="fas fa-globe"></i> Ver Sitio</a>
+      <a href="menu.html" target="_blank" class="nav-link"><i class="fas fa-book-open"></i> Ver Menú</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="admin-badge">
+        <div class="avatar" id="admin-avatar">A</div>
+        <div class="info"><div class="name" id="admin-name">Admin</div><div class="rol" id="admin-rol">superadmin</div></div>
+      </div>
+      <button class="btn btn-outline btn-sm btn-w100" style="margin-top:0.75rem;" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button>
+    </div>
+  </aside>
+
+  <div class="admin-main">
+    <header class="admin-topbar">
+      <button class="admin-hamburger" id="menu-toggle" onclick="toggleSidebar()" aria-label="Menu"><i class="fas fa-bars"></i></button>
+      <span class="topbar-title"><i class="fas fa-star" style="color:var(--gold);margin-right:0.5rem;"></i>Recomendaciones del Menú</span>
+      <button class="btn btn-gold btn-sm" onclick="openRecModal()"><i class="fas fa-plus"></i> Nueva Recomendación</button>
+    </header>
+    <div class="admin-content">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Recomendaciones por Segmento (Página Principal)</span>
+          <small style="color:var(--pearl);display:block;margin-top:0.5rem;">Estas recomendaciones aparecen en la página de inicio según la hora del día.</small>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Segmento</th><th>Posición</th><th>Tag</th><th>Título</th><th>Imagen</th><th>Estado</th><th>Acciones</th></tr>
+            </thead>
+            <tbody id="rec-tbody">
+              <tr><td colspan="7" style="text-align:center;color:var(--pearl);padding:2rem;">Cargando…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Recomendación -->
+<div class="modal-overlay" id="rec-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="modal-rec-title">Nueva Recomendación</span>
+      <button class="modal-close" onclick="closeModal('rec-modal')"><i class="fas fa-times"></i></button>
+    </div>
+    <form id="rec-form">
+      <input type="hidden" id="rec-id" />
+      <div class="form-row">
+        <div class="form-group">
+          <label>Segmento *</label>
+          <select class="form-control" id="rec-segmento" required>
+            <option value="manana">Mañana (6am - 11am)</option>
+            <option value="mediodia">Mediodía (11am - 4pm)</option>
+            <option value="atardecer">Atardecer (4pm - 8pm)</option>
+            <option value="noche">Noche (8pm - 6am)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Posición *</label>
+          <select class="form-control" id="rec-posicion" required>
+            <option value="1">Posición 1 (Izquierda)</option>
+            <option value="2">Posición 2 (Derecha)</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Tag (Etiqueta)</label>
+        <input type="text" class="form-control" id="rec-tag" placeholder="Ej: Destacado, Nuevo, Popular" />
+      </div>
+      <div class="form-group">
+        <label>Título *</label>
+        <input type="text" class="form-control" id="rec-titulo" required placeholder="Ej: Empanadas de Cazón" />
+      </div>
+      <div class="form-group">
+        <label>Descripción</label>
+        <textarea class="form-control" id="rec-desc" rows="2" placeholder="Descripción breve del plato..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>Precio (USD) *</label>
+        <input type="number" step="0.01" class="form-control" id="rec-precio" required placeholder="Ej: 5.50" value="0.00" />
+      </div>
+      <div class="form-group">
+        <label>URL de Imagen</label>
+        <input type="text" class="form-control" id="rec-imagen" placeholder="https://..." />
+        <div style="margin-top:0.5rem;">
+          <span style="color:var(--pearl);font-size:0.8rem;">O subir imagen:</span>
+          <div style="display:flex; gap:0.5rem; margin-top:0.3rem;">
+            <input type="file" id="rec-imagen-file" accept="image/*" style="flex:1;" />
+            <button type="button" class="btn btn-outline btn-sm" onclick="uploadRecImage()"><i class="fas fa-upload"></i></button>
+          </div>
+        </div>
+        <img id="rec-imagen-preview" style="max-width:120px; max-height:80px; margin-top:0.5rem; display:none; border-radius:8px;" />
+      </div>
+      <div class="form-group">
+        <label>Activa</label>
+        <label class="toggle" style="margin-top:0.4rem;"><input type="checkbox" id="rec-activa" checked><span class="slider"></span></label>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeModal('rec-modal')">Cancelar</button>
+        <button type="submit" class="btn btn-gold"><i class="fas fa-save"></i> Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+
+<script>
+  const API = '';
+  let authToken = null;
+  let allRecs = [];
+
+  (function(){
+    const saved = localStorage.getItem('kb_admin');
+    if (!saved) return window.location.href = 'admin-login.html';
+    try {
+      const { token, admin } = JSON.parse(saved);
+      authToken = token;
+      document.getElementById('admin-name').textContent = admin.nombre || admin.username;
+      document.getElementById('admin-rol').textContent  = admin.rol;
+      document.getElementById('admin-avatar').textContent = (admin.nombre||admin.username)[0].toUpperCase();
+    } catch(e) { localStorage.removeItem('kb_admin'); window.location.href = 'admin-login.html'; }
+  })();
+
+  function logout() { localStorage.removeItem('kb_admin'); window.location.href = 'admin-login.html'; }
+  function authHeaders() { return { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' }; }
+  function openModal(id)  { document.getElementById(id).classList.add('open'); }
+  function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+  function toast(msg, type='success') {
+    const c = document.getElementById('toast-container');
+    const t = document.createElement('div');
+    t.className = `toast ${type}`;
+    t.innerHTML = `<i class="toast-icon fas fa-${type==='success'?'check-circle':'exclamation-circle'}"></i><span class="toast-msg">${msg}</span>`;
+    c.appendChild(t);
+    setTimeout(() => t.remove(), 4000);
+  }
+
+  async function loadData() {
+    try {
+      const r = await fetch(`${API}/api/recomendaciones/admin`, { headers: authHeaders() });
+      allRecs = await r.json();
+      renderRecs();
+    } catch(e) { toast('Error cargando recomendaciones', 'error'); }
+  }
+
+  function renderRecs() {
+    const tbody = document.getElementById('rec-tbody');
+    if (!allRecs.length) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--pearl);padding:2rem;">Sin recomendaciones aún</td></tr>';
+      return;
+    }
+    const segmentoNames = { manana: 'Mañana', mediodia: 'Mediodía', atardecer: 'Atardecer', noche: 'Noche' };
+    tbody.innerHTML = allRecs.map(r => `
+      <tr>
+        <td><span class="badge badge-gold">${segmentoNames[r.segmento] || r.segmento}</span></td>
+        <td>${r.posicion}</td>
+        <td>${r.tag || '—'}</td>
+        <td><div style="font-weight:600;">${r.titulo}</div><div style="font-size:0.75rem;color:var(--pearl)">${r.descripcion?.substring(0,50)}...</div></td>
+        <td>${r.imagen_url ? `<img src="${r.imagen_url}" style="width:50px;height:35px;object-fit:cover;border-radius:4px;" />` : '—'}</td>
+        <td><span class="badge ${r.activa ? 'badge-green' : 'badge-red'}">${r.activa ? 'Activa' : 'Inactiva'}</span></td>
+        <td>
+          <div style="display:flex;gap:0.4rem;">
+            <button class="btn btn-outline btn-sm" onclick='openRecModal(${JSON.stringify(r).replace(/'/g, "&#39;")})'><i class="fas fa-edit"></i></button>
+            <button class="btn btn-outline btn-sm" onclick="deleteRec(${r.id}, '${r.titulo.replace(/'/g, "\\'")}')"><i class="fas fa-trash"></i></button>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  function openRecModal(r = null) {
+    document.getElementById('rec-form').reset();
+    document.getElementById('rec-id').value = r?.id || '';
+    document.getElementById('rec-imagen-preview').style.display = 'none';
+    if (r) {
+      document.getElementById('modal-rec-title').textContent = 'Editar Recomendación';
+      document.getElementById('rec-segmento').value = r.segmento;
+      document.getElementById('rec-posicion').value = r.posicion;
+      document.getElementById('rec-tag').value = r.tag || '';
+      document.getElementById('rec-titulo').value = r.titulo;
+      document.getElementById('rec-desc').value = r.descripcion || '';
+      document.getElementById('rec-precio').value = r.precio_usd || 0.0;
+      document.getElementById('rec-imagen').value = r.imagen_url || '';
+      document.getElementById('rec-activa').checked = r.activa;
+      if (r.imagen_url) {
+        document.getElementById('rec-imagen-preview').src = r.imagen_url;
+        document.getElementById('rec-imagen-preview').style.display = 'block';
+      }
+    } else {
+      document.getElementById('modal-rec-title').textContent = 'Nueva Recomendación';
+    }
+    openModal('rec-modal');
+  }
+
+  document.getElementById('rec-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const id = document.getElementById('rec-id').value;
+    const payload = {
+      segmento: document.getElementById('rec-segmento').value,
+      posicion: parseInt(document.getElementById('rec-posicion').value),
+      tag: document.getElementById('rec-tag').value || null,
+      titulo: document.getElementById('rec-titulo').value,
+      descripcion: document.getElementById('rec-desc').value || null,
+      precio_usd: parseFloat(document.getElementById('rec-precio').value) || 0.0,
+      imagen_url: document.getElementById('rec-imagen').value || null,
+      activa: document.getElementById('rec-activa').checked
+    };
+    const url = id ? `${API}/api/recomendaciones/${id}` : `${API}/api/recomendaciones`;
+    const method = id ? 'PUT' : 'POST';
+    try {
+      const r = await fetch(url, { method, headers: authHeaders(), body: JSON.stringify(payload) });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.detail || 'Error');
+      toast(id ? 'Recomendación actualizada' : 'Recomendación creada');
+      closeModal('rec-modal');
+      loadData();
+    } catch(ex) { toast(ex.message, 'error'); }
+  });
+
+  async function deleteRec(id, titulo) {
+    if (!confirm(`¿Desactivar la recomendación "${titulo}"?`)) return;
+    const r = await fetch(`${API}/api/recomendaciones/${id}`, { method:'DELETE', headers: authHeaders() });
+    if (r.ok) { toast('Recomendación desactivada'); loadData(); }
+    else toast('Error', 'error');
+  }
+
+  async function uploadRecImage() {
+    const file = document.getElementById('rec-imagen-file').files[0];
+    if (!file) return toast('Selecciona una imagen primero', 'error');
+    const id = document.getElementById('rec-id').value;
+    if (!id) { toast('Guarda la recomendación primero para añadir imagen', 'error'); return; }
+    const formData = new FormData();
+    formData.append('file', file);
+    try {
+      const headers = { 'Authorization': `Bearer ${authToken}` };
+      const r = await fetch(`${API}/api/recomendaciones/${id}/imagen`, { method: 'POST', headers: headers, body: formData });
+      const d = await r.json();
+      if (r.ok) {
+        document.getElementById('rec-imagen').value = d.imagen_url;
+        document.getElementById('rec-imagen-preview').src = d.imagen_url;
+        document.getElementById('rec-imagen-preview').style.display = 'block';
+        toast('Imagen subida');
+      } else toast(d.detail || 'Error subiendo imagen', 'error');
+    } catch(ex) { toast(ex.message, 'error'); }
+  }
+
+  // Toggle sidebar mobile
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+  }
+  document.addEventListener('click', (e) => {
+    if (window.innerWidth <= 768) {
+      const sidebar = document.getElementById('sidebar');
+      const toggle = document.getElementById('menu-toggle');
+      if (sidebar.classList.contains('open') && !sidebar.contains(e.target) && (!toggle || !toggle.contains(e.target))) {
+        sidebar.classList.remove('open');
+      }
+    }
+  });
+
+  loadData();
+</script>
+
+  <script src="js/admin-shared.js"></script>
+</body>
+</html>

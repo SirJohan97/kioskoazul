@@ -1,0 +1,377 @@
+/* =====================================
+   Kiosko Azul - Global Immersion System
+   ===================================== */
+
+:root {
+  --base-dark: #05080f;
+  --navy: #0a111f;
+  --gold: #D4AF37;
+  --gold-glow: rgba(212, 175, 55, 0.25);
+  --teal: #102636;
+  --cream: #F8F9FA;
+  --pearl: #8c9dae;
+  
+  --glass-bg: rgba(10, 17, 31, 0.45);
+  --glass-hover: rgba(10, 17, 31, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-border-gold: rgba(212, 175, 55, 0.15);
+  --glass-blur: blur(28px);
+  --glass-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
+  
+  --radius-pill: 100px;
+  --radius-card: 24px;
+  --transition-liquid: 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-fast: 0.3s ease;
+  
+  --deep-blue: #02040a;
+}
+
+/* =====================================
+   BACKGROUND LAYERS
+   ===================================== */
+
+/* Grain Overlay */
+.grain-texture {
+  position: fixed;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+}
+
+/* Water Caustics */
+.water-caustics {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+.water-caustics::before,
+.water-caustics::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(100,180,255,0.07) 0%, transparent 70%);
+  animation: causticsFloat 18s ease-in-out infinite;
+  transition: transform 0.3s ease-out; /* For JS interaction */
+}
+.water-caustics::before {
+  width: 80vw; height: 80vw;
+  top: -20%; left: -20%;
+  animation-duration: 22s;
+}
+.water-caustics::after {
+  width: 60vw; height: 60vw;
+  bottom: -10%; right: -10%;
+  animation-direction: reverse;
+  animation-duration: 16s;
+  background: radial-gradient(circle, rgba(212,175,55,0.05) 0%, transparent 70%);
+}
+
+@keyframes causticsFloat {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%  { transform: translate(5%, 8%) scale(1.1); }
+  66%  { transform: translate(-4%, -5%) scale(0.95); }
+}
+
+/* Sea Foam Particles Container */
+#sea-foam-container {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.sea-foam-particle {
+  position: absolute;
+  background: white;
+  border-radius: 50%;
+  filter: blur(2px);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.5s ease-out, opacity 0.5s;
+}
+
+/* =====================================
+   THE SURFACING PRELOADER
+   ===================================== */
+#preloader {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: var(--deep-blue);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition: opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1), visibility 1.2s;
+}
+
+#preloader.fade-out {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.preloader-content {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.breathing-logo {
+  width: 100px; height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  animation: logoBreath 4s ease-in-out infinite;
+  margin-bottom: 24px;
+}
+
+@keyframes logoBreath {
+  0%, 100% { transform: scale(1); filter: drop-shadow(0 0 10px rgba(212,175,55,0.2)); }
+  50% { transform: scale(1.08); filter: drop-shadow(0 0 30px rgba(212,175,55,0.6)); }
+}
+
+.loader-text {
+  font-family: 'Inter', sans-serif;
+  color: var(--gold);
+  font-size: 0.75rem;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  animation: fadePulse 2s infinite;
+}
+
+@keyframes fadePulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
+.preloader-bubbles {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+}
+
+.p-bubble {
+  position: absolute;
+  bottom: -20px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  animation: floatUp linear infinite;
+}
+
+@keyframes floatUp {
+  0% { transform: translateY(0) scale(1); opacity: 0; }
+  20% { opacity: 0.6; }
+  80% { opacity: 0.6; }
+  100% { transform: translateY(-110vh) scale(1.8); opacity: 0; }
+}
+
+/* Wipe Wave */
+.preloader-wipe {
+  position: absolute;
+  bottom: -200px;
+  left: 0;
+  width: 100%;
+  height: 300px;
+  fill: var(--base-dark);
+  z-index: 20;
+  transform: translateY(100%);
+  transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+#preloader.fade-out .preloader-wipe {
+  transform: translateY(-200vh);
+}
+
+/* =====================================
+   TIDE WAVE (FOOTER DIVIDER)
+   ===================================== */
+.wave-divider {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  line-height: 0;
+}
+.wave-divider svg {
+  display: block;
+  width: 200%;
+  height: 80px;
+  fill: rgba(212, 175, 55, 0.05);
+  animation: waveDrift 15s linear infinite;
+}
+
+@keyframes waveDrift {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* =====================================
+   MOBILE NAVIGATION DOCK (Ultra-Premium)
+   ===================================== */
+@media (max-width: 900px) {
+  /* Hide standard navbar on mobile if needed, 
+     or just adjust it to work with the dock. */
+  
+  body {
+    padding-bottom: 85px !important; /* Space for dock */
+  }
+
+  .mobile-dock {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 92%;
+    height: 70px;
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 10000;
+    box-shadow: var(--glass-shadow);
+    transition: transform 0.5s var(--transition-liquid);
+  }
+
+  .dock-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--pearl);
+    text-decoration: none;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.65rem;
+    gap: 0.4rem;
+    width: 20%;
+    height: 100%;
+    transition: all 0.3s ease;
+    opacity: 0.6;
+  }
+
+  .dock-item i {
+    font-size: 1.25rem;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .dock-item:hover, .dock-item.active {
+    color: var(--gold);
+    opacity: 1;
+  }
+
+  .dock-item.active i {
+    transform: translateY(-4px) scale(1.1);
+    filter: drop-shadow(0 0 8px var(--gold-glow));
+  }
+
+  /* Mobile Dropdown (Hamburger) Styles */
+  .nav-links {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    margin-top: 15px;
+    background: var(--glass-hover);
+    backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    flex-direction: column;
+    padding: 1.5rem;
+    gap: 1rem;
+    transform: translateY(-20px) scale(0.95);
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.4s var(--transition-liquid);
+    z-index: 1001;
+  }
+
+  .nav-links.mobile-open {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .nav-toggle {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 12px;
+    color: var(--gold);
+    cursor: pointer;
+  }
+}
+
+.hide-tablet {
+  display: none;
+}
+@media (max-width: 900px) {
+  .hide-tablet { display: flex; }
+}
+
+/* --- WhatsApp Nav Button --- */
+.btn-whatsapp-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 1.2rem;
+  background: rgba(39, 174, 96, 0.15);
+  border: 1px solid rgba(39, 174, 96, 0.4);
+  border-radius: 999px;
+  color: #2ecc71;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-decoration: none;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+  position: relative;
+  z-index: 10;
+  backdrop-filter: blur(5px);
+}
+
+.btn-whatsapp-nav:hover {
+  background: #2ecc71;
+  color: #050c1a;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(46, 204, 113, 0.2);
+  border-color: #2ecc71;
+}
+
+.btn-whatsapp-nav i {
+  font-size: 1.1rem;
+}
+
+@media (max-width: 900px) {
+  .btn-whatsapp-nav {
+    display: none; /* Mobile Dock handles navigation in underwater view */
+  }
+}
+
+/* --- Utilities --- */
+.text-gold { color: var(--gold) !important; }
+.text-pearl { color: var(--pearl) !important; }
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-up {
+  opacity: 0;
+  animation: fade-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}

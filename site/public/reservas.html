@@ -6,28 +6,34 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Reservas — Kiosko Azul</title>
   <meta name="description" content="Reserva tu mesa en Kiosko Azul. Experiencia costera premium frente al mar." />
+  
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Inter:wght@300;400;500&family=Playfair+Display:ital,wght@1,700&display=swap"
-    rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@1,700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  
+  <!-- Centralized Immersion CSS -->
+  <link rel="stylesheet" href="css/immersion.css" />
+  <link rel="stylesheet" href="css/index.css" />
   <link rel="stylesheet" href="css/reservas.css" />
   <link rel="icon" href="assets/logo.png" />
-
-  </head>
-
+</head>
 
 <body>
-  
-      <div class="wave"></div>
-      <div class="wave"></div>
-      <div class="wave"></div>
-      <div class="wave"></div>
+  <!-- "The Surfacing" Preloader (Skeleton) -->
+  <div id="preloader">
+    <div class="preloader-content">
+      <img src="assets/logo.png" alt="Kiosko Azul" class="breathing-logo">
+      <div class="loader-text">Preparando tu mesa...</div>
     </div>
+    <div class="preloader-bubbles"></div>
+    <svg class="preloader-wipe" preserveAspectRatio="none" viewBox="0 0 100 100">
+      <path d="M0 0 C 20 40, 80 40, 100 0 L 100 100 L 0 100 Z" />
+    </svg>
   </div>
 
-  <!-- Background layers -->
-  <nav>
+  <div id="bg-overlay" style="position:fixed; inset:0; z-index:1; background:rgba(4,7,14,0.65); pointer-events:none;"></div>
+  
+  <nav id="navbar">
     <a href="index.html" class="nav-logo">
       <img src="assets/logo.png" alt="Kiosko Azul Logo" style="height:40px;width:40px;border-radius:50%;object-fit:cover;border:1px solid var(--glass-border-gold);">
       <div>
@@ -35,14 +41,25 @@
         <small style="font-family:'Inter',sans-serif;color:var(--gold);font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;">Restaurant</small>
       </div>
     </a>
-    <ul class="nav-links">
-      <li><a href="index.html">Inicio</a></li>
-      <li><a href="menu.html">Menú</a></li>
-      <li><a href="galeria.html">Galería</a></li>
+
+    <button class="nav-toggle" id="nav-toggle" aria-label="Menú">
+      <i class="fas fa-bars"></i>
+    </button>
+
+    <ul class="nav-links" id="nav-links">
+      <li><a href="menu.html"><i class="fas fa-utensils"></i> Menú</a></li>
+      <li><a href="mis-pedidos.html"><i class="fas fa-receipt"></i> Mis Pedidos</a></li>
     </ul>
+
+    <div class="nav-right">
+      <a href="https://wa.me/+584126071753?text=Hola,%20quiero%20hacer%20un%20pedido%20en%20Kiosko%20Azul"
+        class="btn-whatsapp-nav" target="_blank" rel="noopener">
+        <i class="fab fa-whatsapp"></i> Pedir Ahora
+      </a>
+    </div>
   </nav>
 
-  <main>
+  <main id="app">
     <header class="page-header">
       <p class="eyebrow">📅 Reservaciones</p>
       <h1 class="page-title">Reserva tu Mesa</h1>
@@ -52,17 +69,17 @@
     <div class="contact-grid">
       <div class="contact-card">
         <div class="contact-icon"><i class="fab fa-whatsapp"></i></div>
-        <h3>Reserva por WhatsApp</h3>
-        <p>Rápido y fácil. Escríbenos directamente y te confirmamos en minutos.</p>
+        <h3>WhatsApp Directo</h3>
+        <p>Confirmación inmediata. Escríbenos y nuestro equipo te atenderá en segundos.</p>
         <a href="https://wa.me/+584126071753?text=Hola!%20Quisiera%20reservar%20una%20mesa%20en%20Kiosko%20Azul."
           class="btn-action btn-wa" target="_blank" rel="noopener">
           Reservar Ahora
         </a>
       </div>
       <div class="contact-card">
-        <div class="contact-icon"><i class="fas fa-phone"></i></div>
-        <h3>Llámanos Directamente</h3>
-        <p>Nuestro equipo está disponible de 8am a 11pm para atender tu llamada.</p>
+        <div class="contact-icon"><i class="fas fa-phone-volume"></i></div>
+        <h3>Atención Telefónica</h3>
+        <p>¿Prefieres hablar con nosotros? Llámanos de Lunes a Domingo de 8am a 11pm.</p>
         <a href="tel:+584126071753" class="btn-action btn-tel">
           <i class="fas fa-phone"></i> 0412 607 1753
         </a>
@@ -70,30 +87,30 @@
     </div>
 
     <div class="form-card">
-      <h2><i class="fas fa-calendar-check" style="color:var(--gold);margin-right:0.5rem;"></i> Formulario de Reserva
-      </h2>
-      <p class="sub">Completa el formulario y te confirmaremos tu mesa en las próximas horas.</p>
+      <h2><i class="fas fa-compass" style="color:var(--gold); font-size: 1.8rem;"></i> Datos de Reserva</h2>
+      <p class="sub">Completa el formulario y te confirmaremos en las próximas horas.</p>
 
       <form id="reservation-form" onsubmit="submitForm(event)">
         <div class="form-row">
           <div class="form-group">
-            <label for="nombre">Nombre Completo *</label>
-            <input type="text" id="nombre" placeholder="Tu nombre" required />
+            <label for="nombre">Nombre Completo</label>
+            <input type="text" id="nombre" placeholder="Nombre completo" required />
           </div>
           <div class="form-group">
-            <label for="telefono">Teléfono / WhatsApp *</label>
-            <input type="tel" id="telefono" placeholder="+58 412 000 0000" required />
+            <label for="telefono">WhatsApp / Teléfono</label>
+            <input type="tel" id="telefono" placeholder="+58 412..." required />
           </div>
         </div>
+        
         <div class="form-row">
           <div class="form-group">
-            <label for="fecha">Fecha *</label>
+            <label for="fecha">Fecha de Visita</label>
             <input type="date" id="fecha" required />
           </div>
           <div class="form-group">
-            <label for="hora">Hora *</label>
+            <label for="hora">Hora aproximada</label>
             <select id="hora" required>
-              <option value="">Selecciona la hora</option>
+              <option value="">Seleccione hora</option>
               <option value="08:00">8:00 AM — Desayuno</option>
               <option value="12:00">12:00 PM — Almuerzo</option>
               <option value="13:30">1:30 PM — Almuerzo tardío</option>
@@ -103,30 +120,34 @@
             </select>
           </div>
         </div>
+        
         <div class="form-group">
-          <label for="personas">Número de Personas *</label>
+          <label for="personas">Número de Comensales</label>
           <select id="personas" required>
             <option value="">¿Cuántos serán?</option>
             <option>1 persona</option>
             <option>2 personas</option>
             <option>3–4 personas</option>
             <option>5–6 personas</option>
-            <option>7–10 personas (grupo)</option>
-            <option>Más de 10 (evento privado)</option>
+            <option>7–10 personas</option>
+            <option>Más de 10 (Evento)</option>
           </select>
         </div>
+        
         <div class="form-group">
-          <label for="notas">Notas especiales (opcional)</label>
-          <textarea id="notas" placeholder="Alergias, ocasión especial, mesa preferida..."></textarea>
+          <label for="notas">Requerimientos especiales</label>
+          <textarea id="notas" placeholder="Alergias, cumpleaños, mesa preferida..."></textarea>
         </div>
-        <button type="submit" class="btn-submit"><i class="fas fa-paper-plane"></i> Enviar Reserva</button>
+        
+        <button type="submit" class="btn-submit">
+          Confirmar Vía WhatsApp <i class="fab fa-whatsapp"></i>
+        </button>
       </form>
 
       <div class="success-msg" id="success-msg">
-        <i class="fas fa-check-circle"></i>
-        <h3>¡Reserva Enviada!</h3>
-        <p>Gracias por elegir El restaurant Kiosko Azul. Te contactaremos pronto para confirmar tu mesa. ¡Nos vemos en
-          el mar!</p>
+        <i class="fas fa-anchor"></i>
+        <h3>¡Ancla Echada!</h3>
+        <p>Tu solicitud ha sido enviada. Estamos abriendo WhatsApp para la confirmación final. ¡Te esperamos en Kiosko Azul!</p>
       </div>
     </div>
 
@@ -134,25 +155,37 @@
       <div class="info-item">
         <i class="fas fa-clock"></i>
         <h4>Horarios</h4>
-        <p>Lunes a Domingo<br>8:00 AM — 11:00 PM</p>
+        <p>Lun a Dom<br>8:00 AM — 11:00 PM</p>
       </div>
       <div class="info-item">
-        <i class="fas fa-map-marker-alt"></i>
+        <i class="fas fa-map-marked-alt"></i>
         <h4>Ubicación</h4>
         <p>Playa Bahia Marina, tercer kiosko(Azul)<br>Catia La Mar</p>
       </div>
       <div class="info-item">
-        <i class="fas fa-parking"></i>
-        <h4>Estacionamiento</h4>
-        <p>Estacionamiento gratuito<br>para nuestros clientes</p>
+        <i class="fas fa-ship"></i>
+        <h4>Acceso</h4>
+        <p>Fácil acceso y<br>estacionamiento privado</p>
       </div>
     </div>
+
+    <!-- Wave footer divider -->
+    <div class="wave-divider" style="margin-top: 5rem;">
+      <svg viewBox="0 0 2400 80" preserveAspectRatio="none">
+        <path d="M0,40 C300,80 900,0 1200,40 C1500,80 2100,0 2400,40 L2400,80 L0,80 Z" />
+      </svg>
+    </div>
+
+    <footer>
+      <p>© 2026 Kiosko Azul — Experiencia Inmersiva</p>
+      <div style="margin-top: 1rem;">
+        <a href="index.html">Inicio</a> · <a href="menu.html">Menú</a> · <a href="admin-login.html">Admin</a>
+      </div>
+    </footer>
   </main>
 
-  <footer>
-    <p>© 2026 Kiosko Azul — <a href="index.html">Inicio</a> · <a href="menu.html">Menú</a></p>
-  </footer>
-
+  <!-- Shared Immersion Logic -->
+  <script src="js/immersion.js"></script>
   <script>
     function submitForm(e) {
       e.preventDefault();
@@ -162,23 +195,55 @@
       const personas = document.getElementById('personas').value;
       const notas = document.getElementById('notas').value;
 
-      // Build WhatsApp message
-      const msg = `Hola! Quiero reservar una mesa en Kiosko Azul.\n\n Nombre: ${nombre}\n Fecha: ${fecha}\n Hora: ${hora}\n Personas: ${personas}${notas ? '\n Notas: ' + notas : ''}`;
+      const msg = `Hola! Quiero reservar una mesa en Kiosko Azul.\n\n🚢 *Reserva Inmersiva*\n- Nombre: ${nombre}\n- Fecha: ${fecha}\n- Hora: ${hora}\n- Personas: ${personas}${notas ? '\n- Notas: ' + notas : ''}`;
       const waUrl = `https://wa.me/+584126071753?text=${encodeURIComponent(msg)}`;
 
-      // Show success
       document.getElementById('reservation-form').style.display = 'none';
       document.getElementById('success-msg').style.display = 'block';
 
-      // Open WhatsApp
-      setTimeout(() => window.open(waUrl, '_blank'), 800);
+      setTimeout(() => window.open(waUrl, '_blank'), 1500);
     }
 
-    // Set min date to today
+    // Set min date
     document.getElementById('fecha').min = new Date().toISOString().split('T')[0];
-  
-    
-</script>
-</body>
+  </script>
 
+
+  <script>
+    // Robust Mobile Nav Toggle
+    const navToggle = document.getElementById('nav-toggle');
+    const navLinks = document.getElementById('nav-links');
+    if (navToggle && navLinks) {
+      navToggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        navLinks.classList.toggle('mobile-open');
+      });
+      document.addEventListener('click', (e) => {
+        if (navLinks.classList.contains('mobile-open') && !navLinks.contains(e.target) && e.target !== navToggle) {
+          navLinks.classList.remove('mobile-open');
+        }
+      });
+    }
+  </script>
+
+  <!-- Mobile Bottom Dock (App-like Navigation) -->
+  <div class="mobile-dock">
+    <a href="index.html" class="dock-item">
+      <i class="fas fa-home"></i>
+      <span>Inicio</span>
+    </a>
+    <a href="menu.html" class="dock-item">
+      <i class="fas fa-utensils"></i>
+      <span>Menú</span>
+    </a>
+    <a href="reservas.html" class="dock-item active">
+      <i class="fas fa-calendar-alt"></i>
+      <span>Reservas</span>
+    </a>
+    <a href="mis-pedidos.html" class="dock-item">
+      <i class="fas fa-box"></i>
+      <span>Pedidos</span>
+    </a>
+  </div>
+</body>
 </html>

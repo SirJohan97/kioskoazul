@@ -62,6 +62,7 @@
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
+  <link rel="stylesheet" href="css/immersion.css" />
   <link rel="stylesheet" href="css/index.css" />
   <link rel="icon" href="assets/logo.png" />
   <style>
@@ -74,7 +75,7 @@
     .video-bg-container {
       position: fixed;
       inset: 0;
-      z-index: 0;
+      z-index: -1;
       overflow: hidden;
       background: #000;
     }
@@ -111,17 +112,20 @@
 </head>
 
 <body>
-    <!-- Loader Animado -->
+  <!-- "The Surfacing" Preloader (Skeleton) -->
   <div id="preloader">
-    <img src="assets/logo.png" alt="Kiosko Azul" class="loader-logo">
-    <div class="loader-waves">
-      <div class="wave"></div>
-      <div class="wave"></div>
-      <div class="wave"></div>
-      <div class="wave"></div>
-      <div class="wave"></div>
+    <div class="preloader-content">
+      <img src="assets/logo.png" alt="Kiosko Azul" class="breathing-logo">
+      <div class="loader-text">Emergiendo...</div>
     </div>
+    <div class="preloader-bubbles"></div>
+    <svg class="preloader-wipe" preserveAspectRatio="none" viewBox="0 0 100 100">
+      <path d="M0 0 C 20 40, 80 40, 100 0 L 100 100 L 0 100 Z" />
+    </svg>
   </div>
+
+  <!-- Scroll progress bar -->
+  <div id="scroll-progress"></div>
 
   <!-- Background layers -->
 
@@ -141,6 +145,10 @@
 
   <div id="bg-canvas"></div>
   <div id="bg-overlay"></div>
+  <!-- Immersion layers injected by immersion.js: .grain-texture, .water-caustics, #sea-foam-container -->
+  <button id="audio-toggle" onclick="toggleOceanAudio()" title="Sonido del mar">
+    🐚
+  </button>
 
   <!-- App wrapper -->
   <div id="app">
@@ -160,10 +168,9 @@
       </button>
 
       <ul class="nav-links" id="nav-links">
-        <li><a href="menu.html#menu"><i class="fas fa-book-open"></i> Explorar Menú</a></li>
-        <li><a href="menu.html#promociones"><i class="fas fa-tags"></i> Promociones</a></li>
-        <li><a href="mis-pedidos.html" id="link-pedidos"><i class="fas fa-search-location"></i> Mis Pedidos</a></li>
-        <li><a href="reservas.html"><i class="fas fa-calendar-check"></i> Reservas</a></li>
+        <li><a href="menu.html"><i class="fas fa-utensils"></i> Menú</a></li>
+        <li><a href="mis-pedidos.html" id="link-pedidos"><i class="fas fa-receipt"></i> Mis Pedidos</a></li>
+        <li><a href="reservas.html"><i class="fas fa-calendar-alt"></i> Reservas</a></li>
       </ul>
 
       <div class="nav-right">
@@ -192,7 +199,12 @@
       </div>
     </section>
 
-    <hr class="nautical-divider">
+    <!-- Wave Divider -->
+    <div class="wave-divider">
+      <svg viewBox="0 0 2400 90" preserveAspectRatio="none">
+        <path d="M0,45 C200,90 400,0 600,45 C800,90 1000,0 1200,45 C1400,90 1600,0 1800,45 C2000,90 2200,0 2400,45 L2400,90 L0,90 Z"/>
+      </svg>
+    </div>
     <!-- RECOMMENDATIONS -->
     <section id="recommendations">
       <p class="section-eyebrow fade-up" id="rec-eyebrow">✨ Para Este Momento</p>
@@ -204,7 +216,12 @@
       </div>
     </section>
 
-    <hr class="nautical-divider">
+    <!-- Wave Divider (Bottom of Recommendations) -->
+    <div class="wave-divider">
+      <svg viewBox="0 0 2400 90" preserveAspectRatio="none">
+        <path d="M0,0 C400,80 800,0 1200,60 C1600,0 2000,80 2400,20 L2400,90 L0,90 Z"/>
+      </svg>
+    </div>
     <!-- ABOUT STRIP -->
     <div id="about-strip">
       <div class="about-inner">
@@ -226,12 +243,17 @@
       </div>
     </div>
 
+    <!-- Tide Wave (Footer Transition) -->
+    <div class="tide-wave">
+      <svg viewBox="0 0 1200 60" preserveAspectRatio="none">
+        <path d="M0,60 C300,10 900,110 1200,60 L1200,120 L0,120 Z"/>
+      </svg>
+    </div>
     <!-- FOOTER -->
     <footer>
       <div class="footer-logo">Kiosko Azul</div>
       <ul class="footer-links">
         <li><a href="menu.html">Menú Completo</a></li>
-        <li><a href="galeria.html">Galería</a></li>
         <li><a href="reservas.html">Reservas</a></li>
         <li><a href="https://wa.me/+584126071753" target="_blank">WhatsApp</a></li>
       </ul>
@@ -249,10 +271,30 @@
       </p>
     </footer>
 
+  </div> <!-- End App wrapper -->
+
+  <!-- Mobile Bottom Dock -->
+  <div class="mobile-dock hide-tablet">
+    <a href="index.html" class="dock-item active">
+      <i class="fas fa-home"></i>
+      <span>Inicio</span>
+    </a>
+    <a href="menu.html" class="dock-item">
+      <i class="fas fa-book-open"></i>
+      <span>Menú</span>
+    </a>
+    <a href="mis-pedidos.html" class="dock-item">
+      <i class="fas fa-receipt"></i>
+      <span>Pedidos</span>
+    </a>
+    <a href="reservas.html" class="dock-item">
+      <i class="fas fa-calendar-check"></i>
+      <span>Reserva</span>
+    </a>
   </div><!-- /#app -->
 
   <!-- Floating WhatsApp -->
-  <a id="whatsapp-float" href="https://wa.me/+584126071753?text=Hola,%20quiero%20hacer%20un%20pedido" target="_blank"
+  <a id="whatsapp-float" class="hide-mobile" href="https://wa.me/+584126071753?text=Hola,%20quiero%20hacer%20un%20pedido" target="_blank"
     rel="noopener" aria-label="Pedir por WhatsApp">
     <i class="fab fa-whatsapp"></i>
   </a>
@@ -378,7 +420,8 @@
 
     // ---- Build dish card HTML ----
     function buildCard(dish) {
-      const waMsg = encodeURIComponent(`Hola! Quiero pedir: ${dish.title}`);
+      const p = dish.precio || 0;
+      const priceHtml = p > 0 ? `<div style="font-size: 1.1rem; color: var(--gold); font-weight: 700; margin-bottom: 0.8rem;">$${p.toFixed(2)}</div>` : '';
       return `
         <div class="dish-card fade-up">
           <div class="dish-card-image">
@@ -388,28 +431,70 @@
             <span class="dish-card-tag">${dish.tag}</span>
             <h3 class="dish-card-title">${dish.title}</h3>
             <p class="dish-card-desc">${dish.desc}</p>
-            <a href="https://wa.me/+584126071753?text=${waMsg}" class="btn-order" target="_blank" rel="noopener">
-              Solicitar <i class="fas fa-arrow-right"></i>
-            </a>
+            ${priceHtml}
+            <button onclick="addToCartRedirect(this, '${dish.title.replace(/'/g, "\\'")}', ${p})" class="btn-order" style="border:none; cursor:pointer; width:100%;">
+              Añadir al Carrito <i class="fas fa-shopping-cart"></i>
+            </button>
           </div>
         </div>
       `;
     }
 
+    function addToCartRedirect(btn, name, price) {
+      if (!price || price <= 0) {
+        alert("Precio no configurado para esta recomendación. Entra al Panel de Admin e ingrésale un precio antes de poder agregarlo al carrito.");
+        return;
+      }
+      let cart;
+      try {
+        cart = JSON.parse(localStorage.getItem('kb_cart')) || [];
+        if (!Array.isArray(cart)) cart = [];
+      } catch (e) {
+        cart = [];
+      }
+
+      const existing = cart.find(item => item.name === name);
+      if (existing) {
+        existing.qty++;
+        existing.price = price; // Fix corrupt items
+      } else {
+        cart.push({ name, price, qty: 1 });
+      }
+      
+      // Limpiar items corruptos globalmente
+      cart = cart.filter(i => i && i.name && typeof i.price === 'number');
+      localStorage.setItem('kb_cart', JSON.stringify(cart));
+      
+      // Mostrar notificacion bonita y redirigir
+      btn.innerHTML = '<i class="fas fa-check"></i> ¡Agregado!';
+      btn.style.background = '#27ae60';
+      
+      setTimeout(() => {
+        window.location.href = 'menu.html?showCart=1';
+      }, 700);
+    }
+
     // ---- Apply segment to DOM ----
     function applySegment(seg) {
       // Body class
-      document.body.className = '';
+      document.body.classList.remove('manana', 'mediodia', 'atardecer', 'noche', 'segment-fade');
       document.body.classList.add(seg.bodyClass, 'segment-fade');
 
       // Badge
       const badge = document.getElementById('time-badge-text');
-      badge.textContent = `${seg.badgeIcon} ${seg.badgeLabel} — ${getTimeString()}`;
+      if (badge) {
+        badge.textContent = `${seg.badgeIcon} ${seg.badgeLabel} — ${getTimeString()}`;
+      }
 
       // Badge icon update
       const badgeEl = document.getElementById('time-badge');
-      badgeEl.querySelector('i').className = '';
-      badgeEl.querySelector('i').style.display = 'none'; // using emoji in text
+      if (badgeEl) {
+        const icon = badgeEl.querySelector('i');
+        if (icon) {
+          icon.className = '';
+          icon.style.display = 'none'; // using emoji in text
+        }
+      }
 
       // Hero copy
       document.getElementById('hero-greeting').textContent = seg.greeting;
@@ -424,41 +509,6 @@
       row.innerHTML = seg.dishes.map(buildCard).join('');
 
       
-      // VIDEO LOGIC (Independiente de los segmentos de comida)
-      const videoDia = document.getElementById('video-dia');
-      const videoNoche = document.getElementById('video-noche');
-      const videoTarde = document.getElementById('video-tarde');
-      const currentHour = new Date().getHours();
-      
-      // 6AM - 3:59PM = Día
-      // 4PM - 6:59PM = Tarde
-      // 7PM - 5:59AM = Noche
-      if (currentHour >= 6 && currentHour < 16) {
-        // Es de día
-        videoNoche.classList.remove('active');
-        videoTarde.classList.remove('active');
-        videoDia.classList.add('active');
-        setTimeout(() => { if(!videoNoche.classList.contains('active')) videoNoche.pause(); }, 1500);
-        setTimeout(() => { if(!videoTarde.classList.contains('active')) videoTarde.pause(); }, 1500);
-        videoDia.play().catch(e => console.log("Auto-play prevented"));
-      } else if (currentHour >= 16 && currentHour < 19) {
-        // Es tarde
-        videoDia.classList.remove('active');
-        videoNoche.classList.remove('active');
-        videoTarde.classList.add('active');
-        setTimeout(() => { if(!videoDia.classList.contains('active')) videoDia.pause(); }, 1500);
-        setTimeout(() => { if(!videoNoche.classList.contains('active')) videoNoche.pause(); }, 1500);
-        videoTarde.play().catch(e => console.log("Auto-play prevented"));
-      } else {
-        // Es de noche (19-6)
-        videoDia.classList.remove('active');
-        videoTarde.classList.remove('active');
-        videoNoche.classList.add('active');
-        setTimeout(() => { if(!videoDia.classList.contains('active')) videoDia.pause(); }, 1500);
-        setTimeout(() => { if(!videoTarde.classList.contains('active')) videoTarde.pause(); }, 1500);
-        videoNoche.play().catch(e => console.log("Auto-play prevented"));
-      }
-
       // Remove animation class after it plays
       setTimeout(() => document.body.classList.remove('segment-fade'), 900);
     }
@@ -466,22 +516,7 @@
     
     // ---- SCROLL ANIMATIONS & NAVBAR ----
     
-    // Remover Preloader al cargar (Solo 1 vez por sesión)
-    window.addEventListener('load', () => {
-      const loader = document.getElementById('preloader');
-      if(loader) {
-        if (!sessionStorage.getItem('kiosko_loaded')) {
-          // Primera vez
-          setTimeout(() => {
-            loader.classList.add('fade-out');
-            sessionStorage.setItem('kiosko_loaded', 'true');
-          }, 1200); 
-        } else {
-          // Ya cargó antes en esta sesión
-          loader.style.display = 'none';
-        }
-      }
-    });
+    // Preloader is now handled globally by immersion.js
 
     function initScrollFeatures() {
       const navbar = document.getElementById('navbar');
@@ -525,14 +560,69 @@
     }
 
     // ---- Mobile nav toggle ----
-    document.getElementById('nav-toggle').addEventListener('click', () => {
-      document.getElementById('nav-links').classList.toggle('open');
-    });
+    const navToggle = document.getElementById('nav-toggle');
+    const navLinks = document.getElementById('nav-links');
+    if (navToggle && navLinks) {
+      navToggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        navLinks.classList.toggle('mobile-open');
+      });
+      // Close menu when clicking outside
+      document.addEventListener('click', (e) => {
+        if (navLinks.classList.contains('mobile-open') && !navLinks.contains(e.target) && e.target !== navToggle) {
+          navLinks.classList.remove('mobile-open');
+        }
+      });
+    }
+
+    // ---- Fetch dynamic recommendations ----
+    async function fetchRecomendaciones() {
+      try {
+        const res = await fetch('/api/recomendaciones/public');
+        if (!res.ok) throw new Error("API error");
+        const docs = await res.json();
+        
+        // Save backups in case a segment gets 0 from API
+        const backups = {};
+        Object.keys(SEGMENTS).forEach(k => { backups[k] = [...SEGMENTS[k].dishes]; SEGMENTS[k].dishes = []; });
+        
+        docs.forEach(doc => {
+           const segKey = doc.segmento;
+           if (SEGMENTS[segKey]) {
+               SEGMENTS[segKey].dishes.push({
+                  tag: doc.tag || 'Recomendado',
+                  bgImage: doc.imagen_url || backups[segKey]?.[0]?.bgImage || 'https://images.unsplash.com/photo-1541592106381-b31e9677c0e5?q=80&w=2070',
+                  title: doc.titulo,
+                  desc: doc.descripcion || '',
+                  precio: doc.precio_usd || 0.0
+               });
+           }
+        });
+
+        // Restore backups if empty
+        Object.keys(SEGMENTS).forEach(k => {
+          if (SEGMENTS[k].dishes.length === 0) SEGMENTS[k].dishes = backups[k];
+        });
+
+      } catch (e) {
+        console.error("Error cargando recomendaciones dinámicas", e);
+      }
+    }
 
     // ---- Init ----
-    function init() {
-      const seg = getSegment();
-      applySegment(seg);
+    async function init() {
+      try {
+        // First, show current time/segment immediately based on local clock
+        const initialSeg = getSegment();
+        applySegment(initialSeg);
+
+        // Then fetch and update recommendations
+        await fetchRecomendaciones();
+        const updatedSeg = getSegment();
+        applySegment(updatedSeg);
+      } catch (e) {
+        console.error("Init sequence error:", e);
+      }
 
       // Init scroll animations
       initScrollFeatures();
@@ -552,7 +642,110 @@
     }
 
     document.addEventListener('DOMContentLoaded', init);
+
+    // ---- Scroll Progress Bar ----
+    window.addEventListener('scroll', () => {
+      const scrollTop = document.documentElement.scrollTop;
+      const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const pct = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
+      document.getElementById('scroll-progress').style.width = pct + '%';
+    });
+
+    // ---- Ocean Audio Toggle (Web Audio API Procedural Ocean) ----
+    let audioCtx;
+    let oceanNoiseNode;
+    let oceanGain;
+    let isPlayingOcean = false;
+    let isFadingIn = false;
+
+    function initProceduralOcean() {
+      if(audioCtx) return;
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      
+      const bufferSize = audioCtx.sampleRate * 5; // 5 seconds of noise
+      const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        data[i] = Math.random() * 2 - 1; // White noise
+      }
+
+      oceanNoiseNode = audioCtx.createBufferSource();
+      oceanNoiseNode.buffer = buffer;
+      oceanNoiseNode.loop = true;
+
+      // Filter to shape noise into low rumble and mid crash
+      const filter = audioCtx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.value = 400; // Deep rumble
+      
+      oceanGain = audioCtx.createGain();
+      oceanGain.gain.value = 0;
+
+      oceanNoiseNode.connect(filter);
+      filter.connect(oceanGain);
+      oceanGain.connect(audioCtx.destination);
+      
+      oceanNoiseNode.start(0);
+
+      // Procedural wave swell animation logic
+      setInterval(() => {
+        if(!isPlayingOcean) return;
+        const now = audioCtx.currentTime;
+        // Surge up
+        filter.frequency.exponentialRampToValueAtTime(1200, now + 2);
+        oceanGain.gain.linearRampToValueAtTime(0.15, now + 2);
+        // Crash down
+        filter.frequency.exponentialRampToValueAtTime(300, now + 5);
+        oceanGain.gain.linearRampToValueAtTime(0.02, now + 5);
+      }, 5000);
+    }
+
+    function toggleOceanAudio() {
+      const btn = document.getElementById('audio-toggle');
+      if (!audioCtx) initProceduralOcean();
+      
+      if (!isPlayingOcean) {
+        audioCtx.resume();
+        const now = audioCtx.currentTime;
+        oceanGain.gain.cancelScheduledValues(now);
+        oceanGain.gain.linearRampToValueAtTime(0.1, now + 1);
+        isPlayingOcean = true;
+        btn.classList.add('playing');
+        btn.title = 'Silenciar el mar';
+      } else {
+        const now = audioCtx.currentTime;
+        oceanGain.gain.cancelScheduledValues(now);
+        oceanGain.gain.linearRampToValueAtTime(0, now + 1);
+        setTimeout(() => audioCtx.suspend(), 1000);
+        isPlayingOcean = false;
+        btn.classList.remove('playing');
+        btn.title = 'Sonido del mar';
+      }
+    }
   </script>
+
+  <!-- JS: Global Immersion & Audio -->
+  <script src="js/immersion.js"></script>
+
+  <!-- Mobile Bottom Dock (App-like Navigation) -->
+  <div class="mobile-dock">
+    <a href="index.html" class="dock-item active">
+      <i class="fas fa-home"></i>
+      <span>Inicio</span>
+    </a>
+    <a href="menu.html" class="dock-item">
+      <i class="fas fa-utensils"></i>
+      <span>Menú</span>
+    </a>
+    <a href="reservas.html" class="dock-item">
+      <i class="fas fa-calendar-alt"></i>
+      <span>Reservas</span>
+    </a>
+    <a href="mis-pedidos.html" class="dock-item">
+      <i class="fas fa-box"></i>
+      <span>Pedidos</span>
+    </a>
+  </div>
 </body>
 
 </html>

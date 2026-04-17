@@ -3,6 +3,8 @@ backend.py — Kiosko Azul
 API FastAPI con autenticación JWT, CRUD de menú, promociones, pedidos e imágenes.
 """
 import os
+from dotenv import load_dotenv
+load_dotenv()
 import shutil
 import logging
 from datetime import datetime, timedelta
@@ -31,7 +33,8 @@ from sqlalchemy.orm import Session
 from database import (
     get_db, create_tables,
     Admin, Cliente, Categoria, MenuItem, Promocion, PromocionItem,
-    Pedido, PedidoItem, AuditLog, DeliveryZona, Direccion, PwdReset
+    Pedido, PedidoItem, AuditLog, DeliveryZona, Direccion, PwdReset,
+    Recomendacion
 )
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -206,6 +209,7 @@ class PromocionOut(BaseModel):
     fecha_fin: Optional[datetime]; activa: bool
     precio_original: Optional[float] = None
     precio_final: Optional[float] = None
+    imagen_url: Optional[str] = None
     class Config: from_attributes = True
 
 class CartItem(BaseModel):
@@ -276,6 +280,20 @@ class ResetInfo(BaseModel):
     correo: str
     codigo: str
     nueva_password: str
+
+class RecomendacionIn(BaseModel):
+    segmento: str
+    posicion: int
+    tag: Optional[str] = None
+    titulo: str
+    descripcion: Optional[str] = None
+    precio_usd: float = 0.0
+    imagen_url: Optional[str] = None
+    activa: bool = True
+
+class RecomendacionOut(RecomendacionIn):
+    id: int
+    class Config: from_attributes = True
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -616,7 +634,7 @@ async def update_promo(promo_id: int, promo: PromocionIn, db: Session = Depends(
 
 @app.delete("/api/promociones/{promo_id}")
 async def delete_promo(promo_id: int, db: Session = Depends(get_db),
-                        current: Admin = Depends(get_current_admin)):
+                         current: Admin = Depends(get_current_admin)):
     obj = db.query(Promocion).filter_by(id=promo_id).first()
     if not obj:
         raise HTTPException(404, "Promoción no encontrada")
@@ -624,6 +642,86 @@ async def delete_promo(promo_id: int, db: Session = Depends(get_db),
     log_action(db, current.id, "desactivar_promocion", "promociones", promo_id, {"nombre": obj.nombre})
     db.commit()
     return {"status": "ok"}
+
+@app.post("/api/promociones/{promo_id}/imagen")
+async def upload_promo_imagen(promo_id: int, file: UploadFile = File(...),
+                              db: Session = Depends(get_db),
+                              current: Admin = Depends(get_current_admin)):
+    obj = db.query(Promocion).filter_by(id=promo_id).first()
+    if not obj:
+        raise HTTPException(404, "Promoción no encontrada")
+    ext = file.filename.rsplit(".", 1)[-1].lower()
+    if ext not in ("jpg", "jpeg", "png", "webp"):
+        raise HTTPException(400, "Solo se permiten imágenes JPG, PNG o WEBP")
+    filename = f"promo_{promo_id}.{ext}"
+    dest = os.path.join(UPLOAD_DIR, filename)
+    with open(dest, "wb") as f:
+        shutil.copyfileobj(file.file, f)
+    obj.imagen_url = f"/assets/menu/{filename}"
+    log_action(db, current.id, "subir_imagen_promo", "promociones", obj.id, {"archivo": filename})
+    db.commit()
+    return {"status": "ok", "imagen_url": obj.imagen_url}
+
+
+# ── Recomendaciones ───────────────────────────────────────────────────
+
+@app.get("/api/recomendaciones/admin", response_model=List[RecomendacionOut])
+async def admin_recomendaciones(db: Session = Depends(get_db), current: Admin = Depends(get_current_admin)):
+    return db.query(Recomendacion).all()
+
+@app.get("/api/recomendaciones/public", response_model=List[RecomendacionOut])
+async def public_recomendaciones(db: Session = Depends(get_db)):
+    return db.query(Recomendacion).filter_by(activa=True).order_by(Recomendacion.posicion).all()
+
+@app.post("/api/recomendaciones", response_model=RecomendacionOut)
+async def create_recomendacion(rec: RecomendacionIn, db: Session = Depends(get_db), current: Admin = Depends(get_current_admin)):
+    obj = Recomendacion(**rec.model_dump())
+    db.add(obj)
+    db.commit()
+    db.refresh(obj)
+    log_action(db, current.id, "crear_recomendacion", "recomendaciones", obj.id, {"titulo": obj.titulo})
+    db.commit()
+    return obj
+
+@app.put("/api/recomendaciones/{rec_id}", response_model=RecomendacionOut)
+async def update_recomendacion(rec_id: int, rec: RecomendacionIn, db: Session = Depends(get_db), current: Admin = Depends(get_current_admin)):
+    obj = db.query(Recomendacion).filter_by(id=rec_id).first()
+    if not obj:
+        raise HTTPException(404, "Recomendación no encontrada")
+    for k, v in rec.model_dump().items():
+        setattr(obj, k, v)
+    db.commit()
+    db.refresh(obj)
+    log_action(db, current.id, "editar_recomendacion", "recomendaciones", obj.id, {"titulo": obj.titulo})
+    db.commit()
+    return obj
+
+@app.delete("/api/recomendaciones/{rec_id}")
+async def delete_recomendacion(rec_id: int, db: Session = Depends(get_db), current: Admin = Depends(get_current_admin)):
+    obj = db.query(Recomendacion).filter_by(id=rec_id).first()
+    if not obj:
+        raise HTTPException(404, "Recomendación no encontrada")
+    obj.activa = False
+    db.commit()
+    log_action(db, current.id, "desactivar_recomendacion", "recomendaciones", obj.id, {"titulo": obj.titulo})
+    db.commit()
+    return {"status": "ok"}
+
+@app.post("/api/recomendaciones/{rec_id}/imagen")
+async def upload_rec_imagen(rec_id: int, file: UploadFile = File(...), db: Session = Depends(get_db), current: Admin = Depends(get_current_admin)):
+    obj = db.query(Recomendacion).filter_by(id=rec_id).first()
+    if not obj:
+        raise HTTPException(404, "Recomendación no encontrada")
+    ext = file.filename.rsplit(".", 1)[-1].lower()
+    if ext not in ("jpg", "jpeg", "png", "webp"):
+        raise HTTPException(400, "Solo se permiten imágenes JPG, PNG o WEBP")
+    filename = f"rec_{rec_id}.{ext}"
+    dest = os.path.join(UPLOAD_DIR, filename)
+    with open(dest, "wb") as f:
+        shutil.copyfileobj(file.file, f)
+    obj.imagen_url = f"/assets/menu/{filename}"
+    db.commit()
+    return {"status": "ok", "imagen_url": obj.imagen_url}
 
 
 # ── Pedidos ───────────────────────────────────────────────────────────
@@ -883,6 +981,81 @@ async def analytics_ventas(db: Session = Depends(get_db), current: Admin = Depen
         "labels": dias_labels,
         "data": [round(ventas_dict[lbl], 2) for lbl in dias_labels]
     }
+
+# ── Recomendaciones del Menú (Página Principal) ───────────────────────────
+class RecomendacionIn(BaseModel):
+    segmento: str
+    posicion: int = 1
+    tag: Optional[str] = None
+    titulo: str
+    descripcion: Optional[str] = None
+    imagen_url: Optional[str] = None
+    activa: bool = True
+
+class RecomendacionOut(BaseModel):
+    id: int; segmento: str; posicion: int; tag: Optional[str]
+    titulo: str; descripcion: Optional[str]; imagen_url: Optional[str]; activa: bool
+    class Config: from_attributes = True
+
+@app.get("/api/recomendaciones")
+async def get_recomendaciones(segmento: Optional[str] = None, db: Session = Depends(get_db)):
+    q = db.query(Recomendacion).filter_by(activa=True)
+    if segmento:
+        q = q.filter_by(segmento=segmento)
+    return q.order_by(Recomendacion.segmento, Recomendacion.posicion).all()
+
+@app.get("/api/recomendaciones/admin", response_model=List[RecomendacionOut])
+async def admin_recomendaciones(db: Session = Depends(get_db),
+                                current: Admin = Depends(get_current_admin)):
+    return db.query(Recomendacion).order_by(Recomendacion.segmento, Recomendacion.posicion).all()
+
+@app.post("/api/recomendaciones", response_model=RecomendacionOut)
+async def create_recomendacion(data: RecomendacionIn, db: Session = Depends(get_db),
+                                current: Admin = Depends(get_current_admin)):
+    obj = Recomendacion(**data.model_dump())
+    db.add(obj); db.commit(); db.refresh(obj)
+    log_action(db, current.id, "crear_recomendacion", "recomendaciones", obj.id, {"titulo": obj.titulo})
+    return obj
+
+@app.put("/api/recomendaciones/{rec_id}", response_model=RecomendacionOut)
+async def update_recomendacion(rec_id: int, data: RecomendacionIn, db: Session = Depends(get_db),
+                                 current: Admin = Depends(get_current_admin)):
+    obj = db.query(Recomendacion).filter_by(id=rec_id).first()
+    if not obj:
+        raise HTTPException(404, "Recomendación no encontrada")
+    for k, v in data.model_dump().items():
+        setattr(obj, k, v)
+    db.commit(); db.refresh(obj)
+    return obj
+
+@app.delete("/api/recomendaciones/{rec_id}")
+async def delete_recomendacion(rec_id: int, db: Session = Depends(get_db),
+                               current: Admin = Depends(get_current_admin)):
+    obj = db.query(Recomendacion).filter_by(id=rec_id).first()
+    if not obj:
+        raise HTTPException(404, "Recomendación no encontrada")
+    obj.activa = False
+    db.commit()
+    return {"status": "ok"}
+
+@app.post("/api/recomendaciones/{rec_id}/imagen")
+async def upload_rec_imagen(rec_id: int, file: UploadFile = File(...),
+                            db: Session = Depends(get_db),
+                            current: Admin = Depends(get_current_admin)):
+    obj = db.query(Recomendacion).filter_by(id=rec_id).first()
+    if not obj:
+        raise HTTPException(404, "Recomendación no encontrada")
+    ext = file.filename.rsplit(".", 1)[-1].lower()
+    if ext not in ("jpg", "jpeg", "png", "webp"):
+        raise HTTPException(400, "Solo JPG, PNG o WEBP")
+    filename = f"rec_{rec_id}.{ext}"
+    dest = os.path.join(UPLOAD_DIR, filename)
+    with open(dest, "wb") as f:
+        shutil.copyfileobj(file.file, f)
+    obj.imagen_url = f"/assets/menu/{filename}"
+    db.commit()
+    return {"status": "ok", "imagen_url": obj.imagen_url}
+
 # ── Zonas de Delivery ──────────────────────────────────────────────────
 @app.get("/api/zonas", response_model=List[ZonaOut])
 async def get_zonas(db: Session = Depends(get_db)):

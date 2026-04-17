@@ -12,6 +12,8 @@
     href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Inter:wght@300;400;500&family=Playfair+Display:ital,wght@1,700&display=swap"
     rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="css/immersion.css" />
+  <link rel="stylesheet" href="css/index.css" />
   <link rel="stylesheet" href="css/menu.css" />
   <link rel="icon" href="assets/logo.png" />
 
@@ -512,15 +514,21 @@
 
 <body>
 
-  <div class="wave"></div>
-  <div class="wave"></div>
-  <div class="wave"></div>
-  <div class="wave"></div>
-  </div>
+  <!-- "The Surfacing" Preloader (Skeleton) -->
+  <div id="preloader">
+    <div class="preloader-content">
+      <img src="assets/logo.png" alt="Kiosko Azul" class="breathing-logo">
+      <div class="loader-text">Navegando el menú...</div>
+    </div>
+    <div class="preloader-bubbles"></div>
+    <svg class="preloader-wipe" preserveAspectRatio="none" viewBox="0 0 100 100">
+      <path d="M0 0 C 20 40, 80 40, 100 0 L 100 100 L 0 100 Z" />
+    </svg>
   </div>
 
-  <!-- Background layers -->
-  <nav>
+  <!-- Background layers injected by immersion.js -->
+  <div id="bg-overlay" style="position:fixed; inset:0; z-index:1; background:rgba(4,7,14,0.65); pointer-events:none;"></div>
+  <nav id="navbar">
     <a href="index.html" class="nav-logo">
       <img src="assets/logo.png" alt="Kiosko Azul Logo"
         style="height:40px;width:40px;border-radius:50%;object-fit:cover;border:1px solid var(--glass-border-gold);">
@@ -530,11 +538,22 @@
           style="font-family:'Inter',sans-serif;color:var(--gold);font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;">Restaurant</small>
       </div>
     </a>
-      <ul class="nav-links">
-        <li><a href="#menu"><i class="fas fa-book-open"></i> Explorar Menú</a></li>
-        <li><a href="#promociones"><i class="fas fa-tags"></i> Promociones</a></li>
-        <li><a href="mis-pedidos.html" style="color:var(--gold);font-weight:600;"><i class="fas fa-search-location"></i> Mis Pedidos</a></li>
-      </ul>
+
+    <button class="nav-toggle" id="nav-toggle" aria-label="Menú">
+      <i class="fas fa-bars"></i>
+    </button>
+
+    <ul class="nav-links" id="nav-links">
+      <li><a href="mis-pedidos.html"><i class="fas fa-receipt"></i> Mis Pedidos</a></li>
+      <li><a href="reservas.html"><i class="fas fa-calendar-alt"></i> Reservas</a></li>
+    </ul>
+
+    <div class="nav-right">
+      <a href="https://wa.me/+584126071753?text=Hola,%20quiero%20hacer%20un%20pedido%20en%20Kiosko%20Azul"
+        class="btn-whatsapp-nav" target="_blank" rel="noopener">
+        <i class="fab fa-whatsapp"></i> Pedir Ahora
+      </a>
+    </div>
   </nav>
 
   <main>
@@ -580,10 +599,30 @@
     </p>
   </footer>
 
-  <a href="https://wa.me/+584126071753" target="_blank"
+  <a href="https://wa.me/+584126071753" target="_blank" class="hide-mobile"
     style="position:fixed;bottom:2rem;right:2rem;width:56px;height:56px;background:#25D366;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.5rem;text-decoration:none;box-shadow:0 4px 18px rgba(37,211,102,0.4);z-index:999;">
     <i class="fab fa-whatsapp"></i>
   </a>
+
+  <!-- Mobile Bottom Dock -->
+  <div class="mobile-dock hide-tablet">
+    <a href="index.html" class="dock-item">
+      <i class="fas fa-home"></i>
+      <span>Inicio</span>
+    </a>
+    <a href="menu.html" class="dock-item active">
+      <i class="fas fa-book-open"></i>
+      <span>Menú</span>
+    </a>
+    <a href="mis-pedidos.html" class="dock-item">
+      <i class="fas fa-receipt"></i>
+      <span>Pedidos</span>
+    </a>
+    <a href="reservas.html" class="dock-item">
+      <i class="fas fa-calendar-check"></i>
+      <span>Reserva</span>
+    </a>
+  </div>
 
   <script>
     function showTab(id, btn) {
@@ -628,7 +667,14 @@
     let categorias = [];
     let menuItems = [];
     let promociones = [];
-    let cart = [];
+    let cart;
+    try {
+      cart = JSON.parse(localStorage.getItem('kb_cart')) || [];
+      if (!Array.isArray(cart)) cart = [];
+      cart = cart.filter(i => i && i.name && typeof i.price === 'number');
+    } catch (e) {
+      cart = [];
+    }
     let bcvRate = 0;
     let deliveryZonas = []; // Tasa oficial del BCV
 
@@ -665,10 +711,38 @@
     document.addEventListener('DOMContentLoaded', async () => {
       await fetchBCVRate();
       await loadDynamicMenu();
+      
+      const loader = document.getElementById('preloader');
+      if (loader) {
+        // Short timeout for aesthetics
+        setTimeout(() => {
+          loader.classList.add('fade-out');
+        }, 800);
+      }
+      
+      if (window.location.search.includes('showCart=1')) {
+        toggleCart(true);
+        // remove parameter without reload
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
     });
 
     // Cargar menú dinámico desde la API
     async function loadDynamicMenu() {
+      // Show skeletons while loading
+      const contentContainer = document.getElementById('dynamic-menu-content');
+      const tabsContainer = document.getElementById('dynamic-tabs');
+      tabsContainer.innerHTML = `
+        <div class="skeleton-tab"></div>
+        <div class="skeleton-tab"></div>
+        <div class="skeleton-tab"></div>
+      `;
+      contentContainer.innerHTML = `
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:2.5rem;margin-top:1rem;">
+          ${Array(4).fill('<div class="skeleton-card"><div class="skeleton-img"></div><div style="padding:2rem"><div class="skeleton-line" style="width:70%;height:1.5rem;margin-bottom:1rem"></div><div class="skeleton-line" style="width:45%"></div><div class="skeleton-line" style="width:90%;margin-top:1.5rem"></div><div class="skeleton-line" style="width:80%"></div></div></div>').join('')}
+        </div>
+      `;
+
       try {
         const [catsRes, itemsRes, promosRes] = await Promise.all([
           fetch('/api/categorias'),
@@ -842,6 +916,7 @@
       } else {
         cart.push({ name, price, qty: 1 });
       }
+      localStorage.setItem('kb_cart', JSON.stringify(cart));
       updateCartUI();
 
       const floatBtn = document.getElementById('cart-float');
@@ -858,11 +933,13 @@
       if (cart[index].qty <= 0) {
         cart.splice(index, 1);
       }
+      localStorage.setItem('kb_cart', JSON.stringify(cart));
       updateCartUI();
     }
 
     function removeCartItem(index) {
       cart.splice(index, 1);
+      localStorage.setItem('kb_cart', JSON.stringify(cart));
       updateCartUI();
     }
 
@@ -1261,9 +1338,10 @@
 
         if (response.ok) {
           alert(`¡Pedido Enviado Exitosamente!\nSu número de orden es: ${data.order_id}\n\nEl pago está siendo verificado.`);
+          document.getElementById('checkout-overlay').style.display = 'none';
           cart = [];
+          localStorage.setItem('kb_cart', JSON.stringify(cart));
           updateCartUI();
-          toggleCheckout();
           window.location.href = `mis-pedidos.html?track=${encodeURIComponent(data.order_id)}`;
         } else {
           alert('Hubo un error al procesar la orden. Intente de nuevo.');
@@ -1276,11 +1354,47 @@
         btn.disabled = false;
       }
     }
-
-
   </script>
 
+  <!-- JS: Global Immersion Logic -->
+  <script src="js/immersion.js"></script>
 
+  <script>
+    // Robust Mobile Nav Toggle
+    const navToggle = document.getElementById('nav-toggle');
+    const navLinks = document.getElementById('nav-links');
+    if (navToggle && navLinks) {
+      navToggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        navLinks.classList.toggle('mobile-open');
+      });
+      document.addEventListener('click', (e) => {
+        if (navLinks.classList.contains('mobile-open') && !navLinks.contains(e.target) && e.target !== navToggle) {
+          navLinks.classList.remove('mobile-open');
+        }
+      });
+    }
+  </script>
+
+  <!-- Mobile Bottom Dock (App-like Navigation) -->
+  <div class="mobile-dock">
+    <a href="index.html" class="dock-item">
+      <i class="fas fa-home"></i>
+      <span>Inicio</span>
+    </a>
+    <a href="menu.html" class="dock-item active">
+      <i class="fas fa-utensils"></i>
+      <span>Menú</span>
+    </a>
+    <a href="reservas.html" class="dock-item">
+      <i class="fas fa-calendar-alt"></i>
+      <span>Reservas</span>
+    </a>
+    <a href="mis-pedidos.html" class="dock-item">
+      <i class="fas fa-box"></i>
+      <span>Pedidos</span>
+    </a>
+  </div>
 </body>
 
 </html>

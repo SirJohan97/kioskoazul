@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
@@ -9,6 +9,27 @@
   <link rel="stylesheet" href="css/admin.css" />
 </head>
 <body>
+<script>
+// Sidebar toggle - inline fallback (works immediately on click)
+function toggleSidebar() {
+  var sb = document.getElementById('sidebar');
+  var ov = document.getElementById('sidebar-overlay');
+  if (!sb) return;
+  var open = sb.classList.toggle('open');
+  if (ov) ov.classList.toggle('show', open);
+  document.body.style.overflow = open ? 'hidden' : '';
+}
+document.addEventListener('DOMContentLoaded', function() {
+  // Create overlay if not yet injected by admin-shared.js
+  if (!document.getElementById('sidebar-overlay')) {
+    var ov = document.createElement('div');
+    ov.id = 'sidebar-overlay';
+    ov.className = 'sidebar-overlay';
+    ov.onclick = function() { toggleSidebar(); };
+    document.body.appendChild(ov);
+  }
+});
+</script>
 <div class="admin-layout">
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo">
@@ -22,6 +43,7 @@
       <div class="nav-section">Gestión</div>
       <a href="admin-menu.html" class="nav-link"><i class="fas fa-utensils"></i> Menú</a>
       <a href="admin-promociones.html" class="nav-link active"><i class="fas fa-tag"></i> Promociones</a>
+      <a href="admin-recomendaciones.html" class="nav-link"><i class="fas fa-star"></i> Recomendaciones</a>
       <div class="nav-section">Ajustes</div>
       <a href="admin-config.html" class="nav-link"><i class="fas fa-cog"></i> Configuración</a>
       <div class="nav-section">Sitio</div>
@@ -39,6 +61,7 @@
 
   <div class="admin-main">
     <header class="admin-topbar">
+      <button class="admin-hamburger" id="menu-toggle" onclick="toggleSidebar()" aria-label="Menu"><i class="fas fa-bars"></i></button>
       <span class="topbar-title"><i class="fas fa-tag" style="color:var(--gold);margin-right:0.5rem;"></i>Promociones</span>
       <button class="btn btn-gold btn-sm" onclick="openPromoModal()"><i class="fas fa-plus"></i> Nueva Promoción</button>
     </header>
@@ -138,6 +161,14 @@
       <div class="form-group">
         <label>Activa</label>
         <label class="toggle" style="margin-top:0.4rem;"><input type="checkbox" id="promo-activa" checked><span class="slider"></span></label>
+      </div>
+      <div class="form-group">
+        <label>Imagen de la Promoción</label>
+        <div style="display:flex; gap:0.5rem; align-items:center;">
+          <input type="file" id="promo-imagen" accept="image/*" style="flex:1;" />
+          <button type="button" class="btn btn-outline btn-sm" onclick="uploadPromoImage()"><i class="fas fa-upload"></i></button>
+        </div>
+        <img id="promo-imagen-preview" style="max-width:100px; max-height:100px; margin-top:0.5rem; display:none; border-radius:8px;" />
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-outline" onclick="closeModal('promo-modal')">Cancelar</button>
@@ -374,7 +405,28 @@
     } catch(ex) { toast(ex.message, 'error'); }
   });
 
+  async function uploadPromoImage() {
+    const file = document.getElementById('promo-imagen').files[0];
+    if (!file) return toast('Selecciona una imagen primero', 'error');
+    const id = document.getElementById('promo-id').value;
+    if (!id) { toast('Guarda la promoción primero para añadir imagen', 'error'); return; }
+    
+    const formData = new FormData();
+    formData.append('file', file);
+    try {
+      const r = await fetch(`${API}/api/promociones/${id}/imagen`, { method: 'POST', headers: authHeaders(), body: formData });
+      const d = await r.json();
+      if (r.ok) {
+        document.getElementById('promo-imagen-preview').src = d.imagen_url;
+        document.getElementById('promo-imagen-preview').style.display = 'block';
+        toast('Imagen subida');
+      } else toast('Error subiendo imagen', 'error');
+    } catch(ex) { toast(ex.message, 'error'); }
+  }
+
   loadData();
 </script>
+
+  <script src="js/admin-shared.js"></script>
 </body>
 </html>

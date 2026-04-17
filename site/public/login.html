@@ -6,17 +6,18 @@
   <title>Iniciar Sesión — Kiosko Azul</title>
   <link rel="icon" href="assets/logo.png" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="css/immersion.css" />
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --navy: #0A1428;
+      /* Inherits from immersion.css */
       --navy-dark: #050A14;
       --gold: #D4AF37;
       --gold-glow: rgba(212, 175, 55, 0.4);
       --cream: #FDFBF7;
       --pearl: #E8E5DF;
-      --glass-bg: rgba(10, 20, 40, 0.7);
-      --glass-border: rgba(255, 255, 255, 0.1);
+      --glass-bg: rgba(10, 20, 40, 0.6);
+      --glass-border: rgba(255, 255, 255, 0.08);
     }
     
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -180,10 +181,23 @@
   </style>
 </head>
 <body>
+  <!-- "The Surfacing" Preloader (Skeleton) -->
+  <div id="preloader">
+    <div class="preloader-content">
+      <img src="assets/logo.png" alt="Kiosko Azul" class="breathing-logo">
+      <div class="loader-text">Navegando...</div>
+    </div>
+    <div class="preloader-bubbles"></div>
+    <svg class="preloader-wipe" preserveAspectRatio="none" viewBox="0 0 100 100">
+      <path d="M0 0 C 20 40, 80 40, 100 0 L 100 100 L 0 100 Z" />
+    </svg>
+  </div>
 
-  <a href="menu.html" class="btn-back"><i class="fas fa-arrow-left"></i> Volver al Menú</a>
+  <div id="bg-overlay" style="position:fixed; inset:0; z-index:1; background:rgba(4,7,14,0.7); pointer-events:none;"></div>
+  
+  <a href="menu.html" class="btn-back" style="z-index: 100;"><i class="fas fa-arrow-left"></i> Volver al Menú</a>
 
-  <div class="auth-container">
+  <div class="auth-container" style="position:relative; z-index: 10;">
     <div class="auth-logo">
       <img src="assets/logo.png" alt="Kiosko Azul">
       <h1 class="auth-title">Bienvenido</h1>
@@ -352,5 +366,8 @@
       }
     });
   </script>
+
+  <!-- JS: Global Immersion Logic -->
+  <script src="js/immersion.js"></script>
 </body>
 </html>

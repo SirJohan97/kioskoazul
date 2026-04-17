@@ -95,6 +95,7 @@ class Promocion(Base):
     activa          = Column(Boolean, default=True)
     precio_original = Column(Float, nullable=True)
     precio_final    = Column(Float, nullable=True)
+    imagen_url      = Column(String(255), nullable=True)  # Imagen de la promoción
     creado_en       = Column(DateTime, default=datetime.utcnow)
 
     items_aplicados = relationship("PromocionItem", back_populates="promocion")
@@ -190,6 +191,19 @@ class PwdReset(Base):
     codigo    = Column(String(6), nullable=False)
     creado_en = Column(DateTime, default=datetime.utcnow)
     usado     = Column(Boolean, default=False)
+
+
+class Recomendacion(Base):
+    __tablename__ = "recomendaciones"
+    id          = Column(Integer, primary_key=True, index=True)
+    segmento    = Column(String(20), nullable=False)  # manana, mediodia, atardecer, noche
+    posicion    = Column(Integer, default=1)         # 1 o 2
+    tag         = Column(String(50), nullable=True)
+    titulo      = Column(String(120), nullable=False)
+    descripcion = Column(Text, nullable=True)
+    precio_usd  = Column(Float, default=0.0)         # <-- Nuevo
+    imagen_url  = Column(String(255), nullable=True)
+    activa      = Column(Boolean, default=True)
 
 
 # ─────────────────────────────────────────────────────────────────────────────

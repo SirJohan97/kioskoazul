@@ -1,148 +1,127 @@
 /* =====================================
-   Kiosko Azul - Ultra Premium Reservations
-===================================== */
-:root {
-  --base-dark: #05080f;     
-  --navy: #0a111f;          
-  --gold: #D4AF37;          
-  --gold-glow: rgba(212, 175, 55, 0.25);
-  --teal: #102636;          
-  --cream: #F8F9FA;         
-  --pearl: #8c9dae;         
-  
-  --glass-bg: rgba(10, 17, 31, 0.5);
-  --glass-hover: rgba(10, 17, 31, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.08);
-  --glass-border-gold: rgba(212, 175, 55, 0.2);
-  --glass-blur: blur(28px);
-  --glass-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
-  
-  --radius-pill: 100px;
-  --transition-liquid: 0.7s cubic-bezier(0.16, 1, 0.3, 1);
-  --transition-fast: 0.3s ease;
-}
+   Kiosko Azul - Ultra Premium Reservations 2.0
+   ===================================== */
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+@import url('immersion.css');
+
+:root {
+  /* Inherits tokens from immersion.css */
+}
 
 body {
   font-family: 'Inter', sans-serif;
   color: var(--cream);
   background: var(--base-dark);
-  background-image: radial-gradient(circle at 50% 0%, #0d1b2a 0%, var(--base-dark) 80%);
-  background-attachment: fixed;
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
-/* Navbar */
-nav {
-  position: sticky;
-  top: 30px;
-  width: 92%;
-  max-width: 1200px;
+/* =====================================
+   LAYOUT & HEADER
+   ===================================== */
+
+main {
+  max-width: 1000px;
   margin: 0 auto;
-  z-index: 100;
-  background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-pill);
-  box-shadow: var(--glass-shadow);
-  padding: 0.8rem 1.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  transition: all var(--transition-liquid);
-}
-
-.nav-logo {
-  font-family: 'Playfair Display', serif;
-  font-weight: 400;
-  font-size: 1.25rem;
-  color: var(--cream);
-  text-decoration: none;
-  letter-spacing: 0.05em;
-  display: flex; gap: 0.4rem;
-}
-.nav-logo span { color: var(--gold); }
-
-.nav-links { display: flex; gap: 1.5rem; list-style: none; }
-.nav-links a {
-  color: var(--pearl);
-  text-decoration: none;
-  font-family: 'Inter', sans-serif;
-  font-size: 0.85rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  transition: color var(--transition-fast);
+  padding: 6rem 1.5rem 10rem;
   position: relative;
+  z-index: 10;
+  animation: fadeUp 1s var(--transition-liquid) forwards;
+  opacity: 0;
+  transform: translateY(30px);
 }
-.nav-links a::after {
-  content: ''; position: absolute; bottom: -4px; left: 50%;
-  transform: translateX(-50%); width: 0; height: 1px;
-  background: var(--gold); transition: width var(--transition-liquid);
-}
-.nav-links a:hover, .nav-links a.active { color: var(--cream); }
-.nav-links a:hover::after, .nav-links a.active::after { width: 100%; }
-
-/* Page Header */
-main { max-width: 1000px; margin: 0 auto; padding: 6rem 2rem 8rem; animation: fadeUp 1s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; transform: translateY(30px); }
-.page-header { text-align: center; margin-bottom: 5rem; }
-.eyebrow {
-  display: inline-block;
-  font-size: 0.7rem; font-weight: 400; letter-spacing: 0.3em;
-  text-transform: uppercase; color: var(--gold);
-  margin-bottom: 1rem; position: relative; padding-left: 40px;
-}
-.eyebrow::before {
-  content: ''; position: absolute; left: 0; top: 50%;
-  width: 30px; height: 1px; background: var(--gold);
-}
-.page-title {
-  font-family: 'Playfair Display', serif;
-  font-size: clamp(2.5rem, 5vw, 4.5rem);
-  font-weight: 400; color: var(--cream);
-  margin-bottom: 1rem;
-}
-.page-sub { font-size: 1rem; color: var(--pearl); font-weight: 300; letter-spacing: 0.05em; max-width: 600px; margin: 0 auto;}
 
 @keyframes fadeUp {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* Contact Grid */
+.page-header {
+  text-align: center;
+  margin-bottom: 5rem;
+}
+
+.eyebrow {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 1.5rem;
+  position: relative;
+  padding-left: 45px;
+}
+
+.eyebrow::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 35px;
+  height: 1px;
+  background: var(--gold);
+}
+
+.page-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  font-weight: 400;
+  color: var(--cream);
+  margin-bottom: 1.5rem;
+  line-height: 1.1;
+}
+
+.page-sub {
+  font-size: 1.1rem;
+  color: var(--pearl);
+  font-weight: 300;
+  letter-spacing: 0.02em;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* =====================================
+   CONTACT CARDS (Abyssal Glass)
+   ===================================== */
+
 .contact-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 2.5rem;
+  gap: 2rem;
   margin-bottom: 4rem;
 }
 
 .contact-card {
   background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   border: 1px solid var(--glass-border);
-  border-radius: 4px; /* Editorial */
-  padding: 3rem 2.5rem;
+  border-radius: var(--radius-card);
+  padding: 3.5rem 2.5rem;
   text-align: center;
   transition: all var(--transition-liquid);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .contact-card:hover {
+  transform: translateY(-10px) scale(1.02);
   border-color: var(--glass-border-gold);
-  transform: translateY(-8px);
   box-shadow: var(--glass-shadow);
+  background: var(--glass-hover);
 }
 
 .contact-icon {
   font-size: 2.5rem;
   margin-bottom: 1.5rem;
   color: var(--gold);
+  filter: drop-shadow(0 0 10px var(--gold-glow));
 }
 
 .contact-card h3 {
   font-family: 'Playfair Display', serif;
-  font-size: 1.6rem;
-  font-weight: 400;
+  font-size: 1.75rem;
   margin-bottom: 1rem;
   color: var(--cream);
 }
@@ -151,71 +130,68 @@ main { max-width: 1000px; margin: 0 auto; padding: 6rem 2rem 8rem; animation: fa
   font-size: 0.95rem;
   color: var(--pearl);
   line-height: 1.6;
-  font-weight: 300;
   margin-bottom: 2rem;
+  max-width: 300px;
 }
 
 .btn-action {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  gap: 0.6rem;
-  padding: 0.9rem 2rem;
+  gap: 0.8rem;
+  padding: 1rem 2.5rem;
   border-radius: var(--radius-pill);
-  font-family: 'Inter', sans-serif;
-  font-weight: 400;
+  font-size: 0.85rem;
+  font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  font-size: 0.85rem;
-  cursor: pointer;
   text-decoration: none;
-  transition: all var(--transition-liquid);
-  box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+  transition: all var(--transition-fast);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
 }
 
-.btn-wa {
-  background: #25D366;
-  color: #fff;
-}
-.btn-wa:hover {
-  transform: translateY(-4px); background: #20b85a;
-  box-shadow: 0 15px 30px rgba(37, 211, 102, 0.4);
-}
+.btn-wa { background: #25D366; color: #fff; }
+.btn-wa:hover { transform: translateY(-3px); box-shadow: 0 15px 35px rgba(37, 211, 102, 0.4); }
 
-.btn-tel {
-  background: var(--gold);
-  color: var(--base-dark);
-}
-.btn-tel:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 15px 30px var(--gold-glow);
-}
+.btn-tel { background: var(--gold); color: var(--base-dark); }
+.btn-tel:hover { transform: translateY(-3px); box-shadow: 0 15px 35px var(--gold-glow); }
 
+/* =====================================
+   RESERVATION FORM (High-End Glass)
+   ===================================== */
 
-/* Form Card */
 .form-card {
   background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   border: 1px solid var(--glass-border);
-  border-radius: 4px;
-  padding: 4rem 3.5rem;
+  border-radius: var(--radius-card);
+  padding: 4.5rem 4rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.form-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 4px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
 }
 
 .form-card h2 {
   font-family: 'Playfair Display', serif;
   font-size: 2.2rem;
-  font-weight: 400;
   color: var(--cream);
-  margin-bottom: 0.8rem;
-  display: flex; align-items: center; gap: 1rem;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
 }
 
 .form-card .sub {
-  font-size: 1rem;
   color: var(--pearl);
+  font-size: 1.05rem;
+  margin-bottom: 3.5rem;
   font-weight: 300;
-  margin-bottom: 3rem;
-  line-height: 1.6;
 }
 
 .form-row {
@@ -226,31 +202,27 @@ main { max-width: 1000px; margin: 0 auto; padding: 6rem 2rem 8rem; animation: fa
 }
 
 .form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
   margin-bottom: 2rem;
 }
 
-.form-row .form-group { margin-bottom: 0; }
-
 label {
-  font-family: 'Inter', sans-serif;
-  font-size: 0.75rem;
-  font-weight: 400;
-  color: var(--pearl);
-  letter-spacing: 0.15em;
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--gold);
+  letter-spacing: 0.2em;
   text-transform: uppercase;
+  margin-bottom: 0.8rem;
 }
 
 input, select, textarea {
-  background: rgba(5, 8, 15, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
-  padding: 1rem 1.2rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 1.1rem 1.4rem;
   color: var(--cream);
   font-family: 'Inter', sans-serif;
-  font-size: 0.95rem;
+  font-size: 1rem;
   width: 100%;
   transition: all var(--transition-fast);
   outline: none;
@@ -258,104 +230,124 @@ input, select, textarea {
 
 input:focus, select:focus, textarea:focus {
   border-color: var(--gold);
-  background: rgba(10, 17, 31, 0.8);
-  box-shadow: 0 0 20px var(--gold-glow);
-}
-
-input::placeholder, textarea::placeholder {
-  color: rgba(140, 157, 174, 0.5); /* pearl */
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 0 25px var(--gold-glow);
 }
 
 select option { background: var(--navy); color: var(--cream); }
 
-textarea { resize: vertical; min-height: 120px; }
-
 .btn-submit {
   width: 100%;
-  background: transparent;
-  color: var(--gold);
-  border: 1px solid var(--gold);
-  border-radius: 4px; /* Matches editorial */
-  padding: 1.2rem;
+  background: var(--gold);
+  color: var(--base-dark);
+  border: none;
+  border-radius: 12px;
+  padding: 1.3rem;
   font-family: 'Inter', sans-serif;
-  font-weight: 500;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all var(--transition-liquid);
+  font-weight: 700;
+  font-size: 1rem;
   letter-spacing: 0.15em;
   text-transform: uppercase;
+  cursor: pointer;
+  transition: all var(--transition-liquid);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
   margin-top: 1rem;
-  display: flex; align-items: center; justify-content: center; gap: 0.8rem;
 }
 
 .btn-submit:hover {
-  background: var(--gold); color: var(--base-dark);
-  box-shadow: 0 10px 30px var(--gold-glow);
-  transform: translateY(-2px);
+  transform: translateY(-4px);
+  box-shadow: 0 15px 40px var(--gold-glow);
+  filter: brightness(1.1);
 }
 
-/* Info Strip - Redesigned to fit the elegant style */
+/* Success Message */
+.success-msg {
+  display: none;
+  text-align: center;
+  padding: 4rem 1rem;
+  animation: fadeUp 0.8s var(--transition-liquid) forwards;
+}
+
+.success-msg i {
+  font-size: 4rem;
+  color: var(--gold);
+  margin-bottom: 2rem;
+  filter: drop-shadow(0 0 20px var(--gold-glow));
+}
+
+.success-msg h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.5rem;
+  margin-bottom: 1.5rem;
+}
+
+/* =====================================
+   INFO STRIP & FOOTER
+   ===================================== */
+
 .info-strip {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 2rem;
-  margin-top: 5rem;
+  gap: 3rem;
+  margin-top: 6rem;
+  padding-top: 5rem;
   border-top: 1px solid var(--glass-border);
-  padding-top: 4rem;
 }
 
-.info-item { text-align: center; }
+.info-item {
+  text-align: center;
+}
 
 .info-item i {
   font-size: 1.5rem;
   color: var(--gold);
-  margin-bottom: 1rem;
-  opacity: 0.8;
+  margin-bottom: 1.5rem;
+  opacity: 0.9;
 }
 
 .info-item h4 {
   font-family: 'Playfair Display', serif;
   font-size: 1.4rem;
-  font-weight: 400;
-  color: var(--cream);
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
 }
 
 .info-item p {
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   color: var(--pearl);
+  line-height: 1.7;
   font-weight: 300;
-  line-height: 1.6;
 }
 
-.success-msg {
-  display: none;
-  text-align: center;
-  padding: 4rem 2rem;
-  background: rgba(212, 175, 55, 0.05);
-  border: 1px solid var(--glass-border-gold);
-  border-radius: 4px;
-  margin-top: 2rem;
-  animation: fadeUp 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.success-msg i { font-size: 3.5rem; color: var(--gold); margin-bottom: 1.5rem; }
-.success-msg h3 { font-family: 'Playfair Display', serif; font-size: 2.2rem; font-weight: 400; color: var(--cream); margin-bottom: 1rem; }
-.success-msg p { font-size: 1rem; color: var(--pearl); font-weight: 300; line-height: 1.6; max-width: 500px; margin: 0 auto;}
-
-/* Footer */
 footer {
-  padding: 6rem 2rem; text-align: center; background: var(--navy);
-  border-top: 1px solid var(--glass-border); position: relative; z-index: 10;
+  padding: 4rem 1.5rem 10rem;
+  text-align: center;
+  position: relative;
+  z-index: 10;
 }
-footer p { font-size: 0.75rem; color: var(--pearl); letter-spacing: 0.1em; text-transform: uppercase; font-family: 'Inter', sans-serif; margin-bottom: 1rem;}
-footer a { color: var(--gold); text-decoration: none; transition: color var(--transition-fast); }
-footer a:hover { color: var(--cream); }
 
-@media (max-width: 900px) {
-  nav { width: 100%; top: 0; border-radius: 0; border-top: none; border-left: none; border-right: none; }
-  .nav-links { display: none; }
-  main { padding: 4rem 1.5rem 6rem; }
-  .contact-grid, .form-row, .info-strip { grid-template-columns: 1fr; gap: 1.5rem;}
-  .form-card { padding: 2.5rem 1.5rem; }
+footer p {
+  font-size: 0.8rem;
+  color: var(--pearl);
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+}
+
+footer a {
+  color: var(--gold);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+/* =====================================
+   RESPONSIVE
+   ===================================== */
+
+@media (max-width: 800px) {
+  main { padding: 4rem 1.5rem 10rem; }
+  .contact-grid, .form-row, .info-strip { grid-template-columns: 1fr; gap: 2rem; }
+  .form-card { padding: 3rem 1.5rem; }
+  .page-title { font-size: 3rem; }
 }

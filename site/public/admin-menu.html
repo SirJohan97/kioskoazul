@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
@@ -9,6 +9,27 @@
   <link rel="stylesheet" href="css/admin.css" />
 </head>
 <body>
+<script>
+// Sidebar toggle - inline fallback (works immediately on click)
+function toggleSidebar() {
+  var sb = document.getElementById('sidebar');
+  var ov = document.getElementById('sidebar-overlay');
+  if (!sb) return;
+  var open = sb.classList.toggle('open');
+  if (ov) ov.classList.toggle('show', open);
+  document.body.style.overflow = open ? 'hidden' : '';
+}
+document.addEventListener('DOMContentLoaded', function() {
+  // Create overlay if not yet injected by admin-shared.js
+  if (!document.getElementById('sidebar-overlay')) {
+    var ov = document.createElement('div');
+    ov.id = 'sidebar-overlay';
+    ov.className = 'sidebar-overlay';
+    ov.onclick = function() { toggleSidebar(); };
+    document.body.appendChild(ov);
+  }
+});
+</script>
 <div class="admin-layout">
 
   <!-- Sidebar -->
@@ -44,6 +65,7 @@
   <!-- Main -->
   <div class="admin-main">
     <header class="admin-topbar">
+      <button class="admin-hamburger" id="menu-toggle" onclick="toggleSidebar()" aria-label="Menu"><i class="fas fa-bars"></i></button>
       <span class="topbar-title"><i class="fas fa-utensils" style="color:var(--gold);margin-right:0.5rem;"></i>Gestión de Menú</span>
       <div class="topbar-actions">
         <button class="btn btn-outline btn-sm" onclick="openBatchModal()"><i class="fas fa-percent"></i> Ajustar Precios</button>
@@ -427,5 +449,7 @@
 
   loadCategorias().then(() => loadMenu());
 </script>
+
+  <script src="js/admin-shared.js"></script>
 </body>
 </html>

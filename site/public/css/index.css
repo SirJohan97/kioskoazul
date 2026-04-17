@@ -24,7 +24,63 @@
   --radius-card: 24px;
   --transition-liquid: 0.7s cubic-bezier(0.16, 1, 0.3, 1);
   --transition-fast: 0.3s ease;
+  
+  /* Nautical Accents */
+  --sea-foam: #e0f2f1;
+  --deep-blue: #02040a;
 }
+
+::selection {
+  background: var(--gold);
+  color: var(--base-dark);
+}
+
+
+/* =====================================
+   SCROLL PROGRESS BAR (Gold Horizon)
+   ===================================== */
+#scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  width: 0%;
+  background: linear-gradient(90deg, var(--gold), #e6c55e, var(--gold));
+  z-index: 9999;
+  transition: width 0.1s linear;
+  box-shadow: 0 0 8px rgba(212,175,55,0.7);
+}
+
+/* Grain, Wave and Caustics moved to immersion.css */
+
+/* =====================================
+   ANIMATED WAVE ACCENT (Above footer)
+   ===================================== */
+.wave-divider {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  line-height: 0;
+  margin: 0;
+}
+.wave-divider svg {
+  display: block;
+  width: 200%;
+  height: 90px;
+  fill: rgba(212, 175, 55, 0.06);
+  animation: waveDrift 12s linear infinite;
+}
+.wave-divider.dark svg {
+  fill: rgba(10, 17, 31, 0.9);
+}
+
+@keyframes waveDrift {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* Water Caustics moved to immersion.css */
+
 
 *, *::before, *::after {
   box-sizing: border-box;
@@ -106,62 +162,7 @@ body.manana, body.mediodia, body.atardecer, body.noche {
   opacity: 1;
 }
 
-/* =====================================
-   PRELOADER (Redesigned Editorial Style)
-===================================== */
-#preloader {
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  background: var(--base-dark);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  transition: opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1), visibility 1.2s ease;
-}
-
-#preloader.fade-out {
-  opacity: 0;
-  visibility: hidden;
-}
-
-.loader-logo {
-  width: 90px;
-  height: 90px;
-  border-radius: 50%;
-  object-fit: cover;
-  margin-bottom: 30px;
-  animation: pulseGold 2.5s infinite ease-in-out;
-  box-shadow: 0 0 40px rgba(212, 175, 55, 0.1);
-}
-
-@keyframes pulseGold {
-  0% { transform: scale(0.98); box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.2); }
-  50% { transform: scale(1.02); box-shadow: 0 0 0 20px rgba(212, 175, 55, 0); }
-  100% { transform: scale(0.98); box-shadow: 0 0 0 0 rgba(212, 175, 55, 0); }
-}
-
-.loader-waves {
-  display: flex;
-  gap: 12px;
-}
-.wave {
-  width: 2px;
-  height: 24px;
-  background: var(--gold);
-  opacity: 0.5;
-  animation: editorialWave 1.5s infinite ease-in-out;
-}
-.wave:nth-child(2) { animation-delay: -1.3s; }
-.wave:nth-child(3) { animation-delay: -1.1s; background: var(--cream); opacity: 0.8;}
-.wave:nth-child(4) { animation-delay: -0.9s; }
-.wave:nth-child(5) { animation-delay: -0.7s; }
-
-@keyframes editorialWave {
-  0%, 40%, 100% { transform: scaleY(0.3); opacity: 0.3; }
-  20% { transform: scaleY(1); opacity: 1; }
-}
+/* Preloader moved to immersion.css */
 
 /* =====================================
    NAVIGATION (Floating Glass Pill)
@@ -420,6 +421,39 @@ nav#navbar.scrolled {
 .btn-outline:hover {
   border-color: var(--cream);
   background: rgba(255,255,255,0.05);
+}
+
+/* Scroll Indicator — bouncing chevron */
+.scroll-indicator {
+  position: absolute;
+  bottom: 3rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--gold);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.65rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  opacity: 0.75;
+  animation: bounceDown 2.5s ease-in-out infinite;
+  cursor: pointer;
+}
+.scroll-indicator i {
+  font-size: 1rem;
+}
+@keyframes bounceDown {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(8px); }
+}
+
+/* Hero greeting smooth parallax */
+.hero-greeting {
+  transition: transform 0.1s ease-out;
+  will-change: transform;
 }
 
 /* =====================================
@@ -829,19 +863,104 @@ footer {
   box-shadow: 0 15px 40px rgba(37, 211, 102, 0.4);
 }
 
+/* Floating Shell for Audio */
+#audio-toggle {
+  position: fixed;
+  bottom: 2rem;
+  left: 2rem;
+  z-index: 999;
+  width: 50px;
+  height: 50px;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border-gold);
+  color: var(--gold);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all var(--transition-liquid);
+  box-shadow: var(--glass-shadow);
+}
+#audio-toggle:hover {
+  transform: scale(1.1) rotate(15deg);
+  background: var(--glass-hover);
+  color: var(--cream);
+}
+#audio-toggle.playing {
+  animation: floatShell 3s infinite ease-in-out;
+  background: var(--gold);
+  color: var(--base-dark);
+}
+
+@keyframes floatShell {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+
 /* Responsive */
 @media (max-width: 900px) {
   .cards-row { display: flex; flex-direction: column; gap: 2rem; }
   .dish-card { min-height: 400px !important; }
   
-  nav#navbar { top: 0; width: 100%; border-radius: 0; border-top: none; border-left: none; border-right: none; }
+  nav#navbar { 
+    top: 0; width: 100%; border-radius: 0; border: none; 
+    padding: 0.8rem 1rem;
+    flex-wrap: wrap;
+    position: relative;
+  }
   nav#navbar.scrolled { top: 0; width: 100%; border-radius: 0; }
   
-  .nav-links, .btn-whatsapp-nav { display: none; }
-  .nav-toggle { display: block; }
+  .nav-links { 
+    display: flex;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    flex-direction: column;
+    padding: 1rem;
+    gap: 0.5rem;
+    border-radius: 0 0 16px 16px;
+    transform: translateY(-10px);
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s ease;
+  }
+  .nav-links.mobile-open {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .nav-links li { padding: 0.5rem; border-radius: 8px; }
+  .nav-links li:hover { background: var(--glass-hover); }
+  .btn-whatsapp-nav { display: none; }
+  .nav-toggle { 
+    display: block; 
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+  }
   
   .about-inner { grid-template-columns: 1fr; gap: 3rem; }
   .about-stat:not(:last-child)::after { display: none; }
+  
+  .hero-content h1 { font-size: 2.5rem; }
+  .hero-content p { font-size: 1rem; }
+}
+
+@media (max-width: 600px) {
+  html { font-size: 14px; }
+  .hero-greeting { font-size: 2rem; }
+  .hero-time-badge { font-size: 0.8rem; padding: 0.5rem 0.8rem; }
+  .dish-card { min-height: 300px !important; }
+  .footer-content { flex-direction: column; gap: 2rem; }
+  .footer-section { text-align: center; }
 }
 
 /* Segment fade transitions */
@@ -851,4 +970,46 @@ footer {
 @keyframes bgFadeTransition {
   0% { opacity: 0.7; filter: blur(10px); }
   100% { opacity: 1; filter: blur(0); }
+}
+
+/* =====================================
+   SURFACING: TIDE WAVE & SEA FOAM
+   ===================================== */
+.tide-wave {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  line-height: 0;
+  margin-top: -1px;
+}
+.tide-wave svg {
+  display: block;
+  width: 200%;
+  height: 60px;
+  fill: var(--navy);
+  animation: tideSwell 8s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite alternate;
+}
+
+@keyframes tideSwell {
+  0% { transform: translateX(0) scaleY(1); }
+  100% { transform: translateX(-50%) scaleY(1.5); }
+}
+
+/* Particle Sea Foam */
+.sea-foam-particles {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.2) 1px, transparent 1px);
+  background-size: 80px 80px;
+  opacity: 0.3;
+  animation: foamDrift 60s linear infinite;
+  mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 80%);
+  -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 80%);
+}
+
+@keyframes foamDrift {
+  from { background-position: 0 0; }
+  to { background-position: -800px 800px; }
 }
