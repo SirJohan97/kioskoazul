@@ -1,0 +1,15 @@
+# Entorno
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+env/
+
+# Base de datos
+*.db
+
+# Assets/Logs
+*.log
