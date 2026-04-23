@@ -93,9 +93,9 @@ main {
 
 .contact-card {
   background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: 1px solid var(--glass-border);
+  backdrop-filter: var(--glass-blur) brightness(1.2);
+  -webkit-backdrop-filter: var(--glass-blur) brightness(1.2);
+  border: 1px solid rgba(255,255,255,0.25);
   border-radius: var(--radius-card);
   padding: 3.5rem 2.5rem;
   text-align: center;
@@ -161,9 +161,9 @@ main {
 
 .form-card {
   background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: 1px solid var(--glass-border);
+  backdrop-filter: var(--glass-blur) brightness(1.2);
+  -webkit-backdrop-filter: var(--glass-blur) brightness(1.2);
+  border: 1px solid rgba(255,255,255,0.25);
   border-radius: var(--radius-card);
   padding: 4.5rem 4rem;
   position: relative;

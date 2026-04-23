@@ -15,21 +15,21 @@ def seed():
 
     try:
         # ── Admin por defecto ──────────────────────────────────────────────
-        if not db.query(Admin).filter_by(username="admin").first():
+        if not db.query(Admin).filter_by(username="jf").first():
             db.add(Admin(
-                username="admin",
-                password_hash=pwd_ctx.hash("kioskoazul2025"),
+                username="jf",
+                password_hash=pwd_ctx.hash("kioskoazul0802"),
                 nombre="Administrador Principal",
                 rol="superadmin",
                 activo=True,
             ))
-            print("✅ Admin creado: admin / kioskoazul2025")
+            print("✅ Admin creado: jf / kioskoazul0802")
 
         # ── Categorías ────────────────────────────────────────────────────
         cats_data = [
             {"nombre": "Desayunos",  "emoji": "🌅", "slug": "desayunos",  "orden": 1},
             {"nombre": "Almuerzos",  "emoji": "☀️", "slug": "almuerzos",  "orden": 2},
-            {"nombre": "Cócteles",   "emoji": "🍹", "slug": "cockteles",  "orden": 3},
+            {"nombre": "Bebidas",   "emoji": "🍹", "slug": "bebidas",  "orden": 3},
             {"nombre": "Cenas",      "emoji": "🌙", "slug": "cenas",      "orden": 4},
         ]
         cats = {}
@@ -58,13 +58,13 @@ def seed():
             {"nombre": "Arroz con Mariscos",         "descripcion": "Arroz cremoso estilo risotto con camarones, calamar, mejillones y almejas frescas.", "precio_usd": 18, "badge": None, "cat": "almuerzos"},
             {"nombre": "Banderilla de Atún",         "descripcion": "Atún fresco a la plancha con ensalada de mango, aguacate y vinagreta de maracuyá.", "precio_usd": 13, "badge": None, "cat": "almuerzos"},
             {"nombre": "Pasta del Mar Verde",        "descripcion": "Linguine con pesto de albahaca fresca, tomates cherry, aceitunas negras y queso de cabra.", "precio_usd": 11, "badge": "Vegetariano", "cat": "almuerzos"},
-            # Cócteles
-            {"nombre": "Pisco Sour Kiosco Azul",    "descripcion": "Pisco premium, limón fresco, jarabe de caña, clara de huevo y bitter Angostura.", "precio_usd": 9,  "badge": "⭐ Signature", "cat": "cockteles"},
-            {"nombre": "Mojito Caribeño",            "descripcion": "Ron blanco, menta fresca, lima, azúcar de caña y agua con gas. Refrescante y tropical.", "precio_usd": 8, "badge": None, "cat": "cockteles"},
-            {"nombre": "Margarita Maracuyá",         "descripcion": "Tequila blanco, licor de naranja, maracuyá fresco y sal de mar en el borde del vaso.", "precio_usd": 9, "badge": None, "cat": "cockteles"},
-            {"nombre": "Sunset Spritz",              "descripcion": "Aperol, prosecco, un toque de maracuyá y naranja fresca. El cóctel del atardecer.", "precio_usd": 10, "badge": None, "cat": "cockteles"},
-            {"nombre": "Agua de Mar (NA)",           "descripcion": "Limonada de coco con jengibre fresco, menta y agua mineral con gas.", "precio_usd": 5, "badge": "Sin Alcohol", "cat": "cockteles"},
-            {"nombre": "Ron Añejo al Atardecer",     "descripcion": "Copa de ron venezolano 12 años añejado, servido con hielo esférico y naranja caramelizada.", "precio_usd": 12, "badge": None, "cat": "cockteles"},
+            # Bebidas
+            {"nombre": "Limonada Frappé",    "descripcion": "Limonada frozen con hierbabuena fresca y toque de jengibre.", "precio_usd": 9,  "badge": "⭐ Signature", "cat": "bebidas"},
+            {"nombre": "Sangría Tinta",            "descripcion": "Nuestra sangría especial con vino tinto y frutas tropicales curadas.", "precio_usd": 8, "badge": None, "cat": "bebidas"},
+            {"nombre": "Jugo Natural de Maracuyá",         "descripcion": "Refrescante jugo natural de maracuyá (parchita) endulzado al gusto.", "precio_usd": 9, "badge": None, "cat": "bebidas"},
+            {"nombre": "Sangría Blanca",              "descripcion": "Vino blanco, frutas cítricas y un toque de durazno, ideal para la playa.", "precio_usd": 10, "badge": None, "cat": "bebidas"},
+            {"nombre": "Agua Mineral C/S Gas",           "descripcion": "Agua mineral gasificada o natural según preferencia.", "precio_usd": 5, "badge": "Sin Alcohol", "cat": "bebidas"},
+            {"nombre": "Té Helado de Limón",     "descripcion": "Refrescante infusión de té negro con limón natural y mucho hielo.", "precio_usd": 12, "badge": None, "cat": "bebidas"},
             # Cenas
             {"nombre": "Linguine al Nero di Seppia", "descripcion": "Pasta negra al tinto de calamar con medallones de mariscos en bisque de langosta y Parmigiano.", "precio_usd": 22, "badge": "⭐ Chef's Special", "cat": "cenas"},
             {"nombre": "Lobster & Truffle Risotto",  "descripcion": "Risotto Arborio con cola de langosta, aceite de trufa negra y Parmesano añejado 24 meses.", "precio_usd": 35, "badge": "Signature",  "cat": "cenas"},

@@ -89,10 +89,10 @@ class ImmersionSystem {
     const currentHour = new Date().getHours();
     let activeVideo = null;
 
-    // Logic: 6AM-4PM (Day), 4PM-7PM (Afternoon), 7PM-6AM (Night)
+    // Logic: 6AM-4PM (Day), 4PM-6PM (Afternoon), 6PM-6AM (Night)
     if (currentHour >= 6 && currentHour < 16) {
       activeVideo = videoDia;
-    } else if (currentHour >= 16 && currentHour < 19) {
+    } else if (currentHour >= 16 && currentHour < 18) {
       activeVideo = videoTarde;
     } else {
       activeVideo = videoNoche;

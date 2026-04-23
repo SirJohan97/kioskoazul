@@ -418,6 +418,7 @@ input:checked + .slider::before { transform: translateX(20px); background: #1a09
     z-index: 1000;
     transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     overflow-y: auto;
+    padding-bottom: 5rem; /* Safe area for mobile browsers */
   }
   .sidebar.open { transform: translateX(0); }
 

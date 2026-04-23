@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Menú Completo — Kiosko Azul</title>
   <meta name="description"
-    content="Explora el menú completo de Kiosko Azul: desayunos, almuerzos, cenas gourmet y cócteles de autor." />
+    content="Explora el menú completo de Kiosko Azul: desayunos, almuerzos, cenas gourmet y bebidas refrescantes." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link
     href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Inter:wght@300;400;500&family=Playfair+Display:ital,wght@1,700&display=swap"
@@ -512,7 +512,10 @@
 </head>
 
 
-<body>
+<body class="ocean-page">
+  <div class="ocean-rays"></div>
+  <div class="ocean-glow"></div>
+
 
   <!-- "The Surfacing" Preloader (Skeleton) -->
   <div id="preloader">
@@ -526,8 +529,6 @@
     </svg>
   </div>
 
-  <!-- Background overlay: opacidad reducida ya que el menu no tiene video de fondo -->
-  <div id="bg-overlay" style="position:fixed; inset:0; z-index:1; background:rgba(4,7,14,0.10); pointer-events:none;"></div>
   <nav id="navbar">
     <a href="index.html" class="nav-logo">
       <img src="assets/logo.png" alt="Kiosko Azul Logo"
@@ -559,7 +560,7 @@
 
   <main>
     <header class="page-header">
-      <p class="eyebrow">🍽️ Nuestra Carta</p>
+      <p class="eyebrow"> Nuestra Carta</p>
       <h1 class="page-title">Menú Completo</h1>
       <p class="page-sub">Todo preparado con ingredientes frescos del mar y la tierra</p>
     </header>

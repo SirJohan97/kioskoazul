@@ -5,17 +5,17 @@
 :root {
   --base-dark: #05080f;
   --navy: #0a111f;
-  --gold: #D4AF37;
-  --gold-glow: rgba(212, 175, 55, 0.25);
+  --gold: #F2C94C;
+  --gold-glow: rgba(242, 201, 76, 0.40);
   --teal: #102636;
   --cream: #F8F9FA;
-  --pearl: #8c9dae;
+  --pearl: #e6f0ff;
   
-  --glass-bg: rgba(10, 17, 31, 0.78);
-  --glass-hover: rgba(10, 17, 31, 0.92);
-  --glass-border: rgba(255, 255, 255, 0.14);
-  --glass-border-gold: rgba(212, 175, 55, 0.28);
-  --glass-blur: blur(32px);
+  --glass-bg: rgba(255, 255, 255, 0.06);
+  --glass-hover: rgba(15, 40, 80, 0.35);
+  --glass-border: rgba(255, 255, 255, 0.18);
+  --glass-border-gold: rgba(242, 201, 76, 0.35);
+  --glass-blur: blur(12px) brightness(1.1);
   --glass-shadow: 0 16px 48px rgba(0, 0, 0, 0.45);
   
   --radius-pill: 100px;
@@ -25,6 +25,67 @@
   
   --deep-blue: #02040a;
 }
+
+/* =====================================
+   DEEP OCEAN BACKGROUND (Subpages)
+   Applied via .ocean-page class on body
+   ===================================== */
+
+body.ocean-page {
+  background: url('../assets/ocean_bg.png') no-repeat center bottom fixed;
+  background-size: cover;
+  min-height: 100vh;
+}
+
+/* God-ray shimmer layer — positioned behind content via z-index */
+.ocean-rays {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(
+      355deg,
+      transparent 0%,
+      transparent 8%,
+      rgba(0, 140, 200, 0.025) 9%,
+      transparent 10%
+    ),
+    repeating-linear-gradient(
+      5deg,
+      transparent 0%,
+      transparent 12%,
+      rgba(0, 100, 180, 0.02) 13%,
+      transparent 14%
+    );
+  animation: godrays 20s ease-in-out infinite alternate;
+}
+
+@keyframes godrays {
+  0%   { transform: skewY(-2deg) translateY(0px); opacity: 0.7; }
+  50%  { transform: skewY(1deg) translateY(-15px); opacity: 1; }
+  100% { transform: skewY(-3deg) translateY(5px); opacity: 0.8; }
+}
+
+/* Bioluminescent glow layer */
+.ocean-glow {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 15% 60%, rgba(0, 180, 255, 0.08) 0%, transparent 35%),
+    radial-gradient(circle at 85% 30%, rgba(0, 120, 255, 0.07) 0%, transparent 30%),
+    radial-gradient(circle at 50% 90%, rgba(0, 80, 200, 0.10) 0%, transparent 40%);
+  animation: bioglow 12s ease-in-out infinite alternate;
+}
+
+@keyframes bioglow {
+  0%   { opacity: 0.6; transform: scale(1) translateY(0); }
+  50%  { opacity: 1;   transform: scale(1.05) translateY(-10px); }
+  100% { opacity: 0.7; transform: scale(0.97) translateY(5px); }
+}
+
 
 /* =====================================
    BACKGROUND LAYERS
@@ -103,7 +164,8 @@
   position: fixed;
   inset: 0;
   z-index: 9999;
-  background: var(--deep-blue);
+  background: url('../assets/ocean_transition_bg.png') no-repeat center center;
+  background-size: cover;
   display: flex;
   flex-direction: column;
   align-items: center;

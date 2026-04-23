@@ -2,21 +2,14 @@
    Kiosko Azul - Ultra Premium Menu System
 ===================================== */
 :root {
-  --base-dark: #05080f;     
-  --navy: #0a111f;          
-  --gold: #D4AF37;          
+  --base-dark: #05080f;
+  --navy: #0a111f;
+  --gold: #D4AF37;
   --gold-glow: rgba(212, 175, 55, 0.25);
-  --teal: #102636;          
-  --cream: #F8F9FA;         
-  --pearl: #8c9dae;         
-  
-  --glass-bg: rgba(10, 17, 31, 0.78);
-  --glass-hover: rgba(10, 17, 31, 0.92);
-  --glass-border: rgba(255, 255, 255, 0.15);
-  --glass-border-gold: rgba(212, 175, 55, 0.30);
-  --glass-blur: blur(32px);
-  --glass-shadow: 0 16px 48px rgba(0, 0, 0, 0.45);
-  
+  --teal: #102636;
+  --cream: #F8F9FA;
+  --pearl: #ddeeff;
+  /* Glass vars come from immersion.css — do NOT override here */
   --radius-pill: 100px;
   --radius-card: 24px;
   --transition-liquid: 0.7s cubic-bezier(0.16, 1, 0.3, 1);
@@ -25,50 +18,6 @@
 
 /* Ambient immersion layers moved to immersion.css */
 
-/* =====================================
-   THE SURFACING PRELOADER
-   ===================================== */
-#preloader {
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  background: var(--navy);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  transition: opacity 0.8s ease, visibility 0.8s;
-}
-
-#preloader.fade-out {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-}
-
-.preloader-content {
-  position: relative;
-  z-index: 10;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.breathing-logo {
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  object-fit: cover;
-  box-shadow: 0 0 30px rgba(212, 175, 55, 0.2);
-  animation: logoBreath 3s ease-in-out infinite;
-  margin-bottom: 20px;
-}
-
-@keyframes logoBreath {
-  0%, 100% { transform: scale(1); box-shadow: 0 0 20px rgba(212, 175, 55, 0.1); }
-  50% { transform: scale(1.05); box-shadow: 0 0 50px rgba(212, 175, 55, 0.5); }
-}
 
 .loader-text {
   font-family: 'Inter', sans-serif;
@@ -150,8 +99,6 @@
 body {
   font-family: 'Inter', sans-serif;
   color: var(--cream);
-  background: var(--base-dark);
-  background-image: radial-gradient(circle at 50% 0%, #0d1b2a 0%, var(--base-dark) 80%);
   background-attachment: fixed;
   min-height: 100vh;
 }
@@ -164,10 +111,10 @@ nav {
   max-width: 1200px;
   margin: 0 auto;
   z-index: 100;
-  /* Navbar más claro y visible */
-  background: rgba(12, 22, 42, 0.85);
-  backdrop-filter: blur(32px) saturate(1.4);
-  -webkit-backdrop-filter: blur(32px) saturate(1.4);
+  /* Crystal transparent navbar instead of opaque blocks */
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(12px) brightness(1.1);
+  -webkit-backdrop-filter: blur(12px) brightness(1.1);
   border: 1px solid rgba(255, 255, 255, 0.18);
   border-bottom: 1px solid rgba(212, 175, 55, 0.22);
   border-radius: var(--radius-pill);
@@ -210,7 +157,7 @@ nav {
 .nav-links a:hover::after, .nav-links a.active::after { width: 100%; }
 
 /* Page Header */
-main { max-width: 1300px; margin: 0 auto; padding: 6rem 2rem 8rem; }
+main { max-width: 1300px; margin: 0 auto; padding: 6rem 2rem 8rem; position: relative; z-index: 10; }
 .page-header { text-align: center; margin-bottom: 5rem; }
 .eyebrow {
   display: inline-block;
@@ -272,20 +219,25 @@ main { max-width: 1300px; margin: 0 auto; padding: 6rem 2rem 8rem; }
   gap: 2.5rem;
 }
 
-/* Card */
+/* Card — bright glass to match reservas cards */
 .menu-item {
-  background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
-  border: 1px solid var(--glass-border);
-  border-radius: 4px; /* Sharper for editorial magazine style */
-  padding: 3rem 2.5rem;
+  background: rgba(20, 60, 110, 0.35);
+  backdrop-filter: blur(14px) saturate(1.4) brightness(1.15);
+  -webkit-backdrop-filter: blur(14px) saturate(1.4) brightness(1.15);
+  border: 1px solid rgba(120, 210, 255, 0.30);
+  border-top: 2px solid rgba(242, 201, 76, 0.7);
+  border-radius: var(--radius-card);
+  padding: 2.5rem 2rem;
   transition: all var(--transition-liquid);
-  display: flex; flex-direction: column;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.18);
 }
 .menu-item:hover {
-  border-color: var(--glass-border-gold);
+  background: rgba(25, 70, 130, 0.45);
+  border-color: rgba(242, 201, 76, 0.9);
   transform: translateY(-8px);
-  box-shadow: var(--glass-shadow);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.35), 0 0 25px rgba(242, 201, 76, 0.15);
 }
 .item-meta { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; }
 .item-name { font-family: 'Playfair Display', serif; font-size: 1.6rem; font-weight: 400; color: var(--cream); line-height: 1.1; max-width: 80%;}
@@ -306,7 +258,7 @@ main { max-width: 1300px; margin: 0 auto; padding: 6rem 2rem 8rem; }
   margin-top: 0.2rem;
   letter-spacing: normal;
 }
-.item-desc { font-size: 0.95rem; color: var(--pearl); line-height: 1.7; font-weight: 300; margin-bottom: 2.5rem; flex-grow: 1; }
+.item-desc { font-size: 0.95rem; color: #b8d4ef; line-height: 1.7; font-weight: 300; margin-bottom: 2.5rem; flex-grow: 1; }
 .item-badge {
   align-self: flex-start;
   font-size: 0.65rem; background: transparent; border: 1px solid rgba(212, 175, 55, 0.4);
@@ -416,20 +368,22 @@ footer a:hover { color: var(--cream); }
     transform: translateY(-100%);
   }
 
-  /* Sticky Tab Bar */
+  /* Sticky Tab Bar — translucent glass, not opaque */
   .menu-tabs {
     position: sticky;
     top: 0;
     z-index: 100;
-    background: rgba(10, 20, 40, 0.95);
+    background: rgba(5, 15, 30, 0.35);
     padding: 1rem 0;
-    backdrop-filter: blur(10px);
-    margin: 0 -1rem 2rem -1rem; /* Negate main padding */
+    backdrop-filter: blur(20px) saturate(1.2);
+    -webkit-backdrop-filter: blur(20px) saturate(1.2);
+    margin: 0 -1rem 2rem -1rem;
     padding-left: 1rem;
     padding-right: 1rem;
     overflow-x: auto;
     flex-wrap: nowrap;
     justify-content: flex-start;
+    border-bottom: 1px solid rgba(100, 200, 255, 0.10);
   }
 
   .tab-btn {
@@ -442,7 +396,7 @@ footer a:hover { color: var(--cream); }
     50% { transform: translateY(-3px); }
   }
   
-  .menu-item {
+    .menu-item {
     animation: buoyancyMobile 6s ease-in-out infinite;
   }
   .menu-item:nth-child(even) { animation-delay: 3s; }

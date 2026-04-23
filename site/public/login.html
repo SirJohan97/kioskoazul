@@ -180,7 +180,10 @@
     }
   </style>
 </head>
-<body>
+<body class="ocean-page">
+  <div class="ocean-rays"></div>
+  <div class="ocean-glow"></div>
+
   <!-- "The Surfacing" Preloader (Skeleton) -->
   <div id="preloader">
     <div class="preloader-content">
@@ -193,7 +196,7 @@
     </svg>
   </div>
 
-  <div id="bg-overlay" style="position:fixed; inset:0; z-index:1; background:rgba(4,7,14,0.7); pointer-events:none;"></div>
+  <div id="bg-overlay" style="position:fixed; inset:0; z-index:1; background:rgba(4,7,14,0.15); pointer-events:none;"></div>
   
   <a href="menu.html" class="btn-back" style="z-index: 100;"><i class="fas fa-arrow-left"></i> Volver al Menú</a>
 
@@ -243,6 +246,9 @@
       </div>
 
       <!-- Paso 2: Digitar Código -->
+      <div id="countdown-timer" style="display:none; text-align:center; font-family:'Inter'; color:var(--gold); margin-bottom:1rem; font-weight:bold; padding: 0.5rem; border: 1px dashed var(--gold); border-radius: 8px;">
+        ⏳ Tiempo restante: <span id="timer-display">15:00</span>
+      </div>
       <div id="rec-step-2" style="display:none;">
         <p style="font-size:0.9rem; text-align:center; opacity:0.8;">Ingresa el código enviado a tu correo.</p>
         <div class="otp-inputs" id="otp-container">
@@ -264,7 +270,33 @@
 
   <script>
     function openRecoveryModal(e) { e.preventDefault(); document.getElementById('recovery-modal').style.display = 'flex'; }
-    function closeRecoveryModal() { document.getElementById('recovery-modal').style.display = 'none'; }
+    function closeRecoveryModal() { clearInterval(countdownInterval); document.getElementById('recovery-modal').style.display = 'none'; }
+    
+    
+    let countdownInterval;
+    function startTimer() {
+        let timeLeft = 900; // 15 mins * 60
+        document.getElementById('countdown-timer').style.display = 'block';
+        document.getElementById('timer-display').innerText = "15:00";
+        
+        clearInterval(countdownInterval);
+        countdownInterval = setInterval(() => {
+            timeLeft--;
+            let mins = Math.floor(timeLeft / 60);
+            let secs = timeLeft % 60;
+            document.getElementById('timer-display').innerText = 
+                (mins < 10 ? "0" : "") + mins + ":" + (secs < 10 ? "0" : "") + secs;
+            
+            if (timeLeft <= 0) {
+                clearInterval(countdownInterval);
+                document.getElementById('countdown-timer').style.display = 'none';
+                alert("⏳ El tiempo ha expirado. El código de seguridad ha sido destruido.");
+                closeRecoveryModal();
+                document.getElementById('rec-step-2').style.display = 'none';
+                document.getElementById('rec-step-1').style.display = 'block';
+            }
+        }, 1000);
+    }
     
     function moveOtp(el, next) {
       if(el.value.length === 1) {
@@ -291,6 +323,7 @@
         if(r.ok) {
           document.getElementById('rec-step-1').style.display = 'none';
           document.getElementById('rec-step-2').style.display = 'block';
+          startTimer();
         }
       } catch(e) {
         alert("Error de conexión");

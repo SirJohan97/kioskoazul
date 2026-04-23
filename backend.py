@@ -15,7 +15,7 @@ from email.mime.multipart import MIMEMultipart
 import random
 import string
 
-from fastapi import FastAPI, HTTPException, Depends, status, UploadFile, File, Form, Request
+from fastapi import FastAPI, BackgroundTasks, HTTPException, Depends, status, UploadFile, File, Form, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.staticfiles import StaticFiles
@@ -309,6 +309,7 @@ def create_token(data: dict) -> str:
     return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
 
 def send_recovery_email(destinatario: str, codigo: str):
+    print(f"\n🔑 [SISTEMA] CÓDIGO DE RECUPERACIÓN GENERADO: {codigo} (Para: {destinatario})\n")
     if SMTP_EMAIL == "tucorreo@gmail.com":
         print(f"⚠️ SIMULACIÓN SMTP: Código enviado a {destinatario} -> {codigo}")
         return
@@ -730,6 +731,11 @@ order_counter = 100  # contador en memoria, se sincroniza con BD al arrancar
 
 @app.on_event("startup")
 async def sync_counter():
+    print("--------------------------------------------------")
+    if SMTP_EMAIL == "tucorreo@gmail.com":
+        print("⚠️ PRECAUCIÓN: Servidor SMTP no está configurado (Modo Simulación).")
+        print("⚠️ Los correos de recuperación no se enviarán a clientes.")
+    print("--------------------------------------------------")
     global order_counter
     db = next(get_db())
     last = db.query(Pedido).order_by(Pedido.id.desc()).first()
@@ -743,9 +749,9 @@ async def sync_counter():
 @app.post("/api/orden")
 async def create_order(order: OrderRequest, db: Session = Depends(get_db)):
     # BLOQUEO HORARIO (08:00 - 20:00)
-    # hora_actual = datetime.now().hour
-    # if hora_actual < 8 or hora_actual >= 20:
-    #     raise HTTPException(status_code=403, detail="El horario de recepción de pedidos es de 08:00 AM a 08:00 PM.")
+    hora_actual = datetime.now().hour
+    if hora_actual < 8 or hora_actual >= 20:
+        raise HTTPException(status_code=403, detail="El horario de recepción de pedidos es de 08:00 AM a 08:00 PM.")
 
     global order_counter
     order_counter += 1
@@ -1136,8 +1142,22 @@ async def cliente_login(data: ClienteLoginIn, db: Session = Depends(get_db)):
                     "direccion": cliente.direccion}
     }
 
+async def destruir_codigo_expirado_task(correo: str, codigo: str):
+    await asyncio.sleep(900) # Espera 15 minutos exactos
+    from database import SessionLocal, PwdReset
+    db = SessionLocal()
+    try:
+        bloques = db.query(PwdReset).filter_by(correo=correo, codigo=codigo).all()
+        if bloques:
+            for b in bloques:
+                db.delete(b)
+            db.commit()
+            print(f"\n🗑️ [SISTEMA] El código {codigo} de expiración para {correo} HA SIDO DESTRUIDO.\n")
+    finally:
+        db.close()
+
 @app.post("/api/auth/recuperar-password")
-async def recuperar_password(data: RecuperarInfo, db: Session = Depends(get_db)):
+async def recuperar_password(data: RecuperarInfo, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
     cliente = db.query(Cliente).filter_by(correo=data.correo).first()
     if not cliente:
         # Previene enumeración de correos
@@ -1152,6 +1172,7 @@ async def recuperar_password(data: RecuperarInfo, db: Session = Depends(get_db))
     db.commit()
     
     send_recovery_email(data.correo, codigo)
+    background_tasks.add_task(destruir_codigo_expirado_task, data.correo, codigo)
     return {"status": "ok", "msg": "Si el correo está registrado, recibirás un código."}
 
 @app.post("/api/auth/reset-password")
