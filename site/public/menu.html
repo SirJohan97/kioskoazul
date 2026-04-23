@@ -506,6 +506,186 @@
         right: -100%;
       }
     }
+
+    /* ===== PRIVACY POLICY MODAL ===== */
+    .privacy-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 3000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+    .privacy-overlay.active {
+      display: flex;
+      animation: privacyFadeIn 0.4s ease;
+    }
+    @keyframes privacyFadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    .privacy-card {
+      background: linear-gradient(145deg, rgba(10, 20, 45, 0.97), rgba(5, 10, 25, 0.99));
+      border: 1px solid var(--gold);
+      border-radius: 20px;
+      padding: 2.5rem;
+      width: 100%;
+      max-width: 480px;
+      max-height: 85vh;
+      overflow-y: auto;
+      position: relative;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6), 0 0 40px rgba(212, 175, 55, 0.08);
+      animation: privacySlideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes privacySlideUp {
+      from { opacity: 0; transform: translateY(40px) scale(0.96); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .privacy-card::-webkit-scrollbar { width: 5px; }
+    .privacy-card::-webkit-scrollbar-thumb { background: rgba(212, 175, 55, 0.3); border-radius: 4px; }
+
+    .privacy-icon {
+      width: 64px; height: 64px;
+      background: linear-gradient(135deg, rgba(212, 175, 55, 0.15), rgba(212, 175, 55, 0.05));
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      border-radius: 16px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.8rem; color: var(--gold);
+      margin: 0 auto 1.5rem;
+    }
+    .privacy-card h2 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.5rem;
+      color: var(--cream);
+      text-align: center;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    .privacy-card .privacy-sub {
+      text-align: center;
+      font-size: 0.88rem;
+      color: var(--pearl);
+      opacity: 0.7;
+      margin-bottom: 1.8rem;
+    }
+    .privacy-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+      padding: 1rem;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .privacy-item-icon {
+      width: 40px; height: 40px;
+      min-width: 40px;
+      background: rgba(212, 175, 55, 0.1);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--gold);
+      font-size: 1rem;
+    }
+    .privacy-item-text h4 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.95rem;
+      color: var(--cream);
+      margin-bottom: 0.25rem;
+    }
+    .privacy-item-text p {
+      font-size: 0.82rem;
+      color: var(--pearl);
+      line-height: 1.5;
+      opacity: 0.8;
+    }
+    .privacy-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      margin: 1.5rem 0;
+      padding: 0.75rem 1.25rem;
+      background: rgba(39, 174, 96, 0.1);
+      border: 1px solid rgba(39, 174, 96, 0.25);
+      border-radius: 10px;
+      color: #2ecc71;
+      font-size: 0.85rem;
+      font-weight: 600;
+      font-family: 'Outfit', sans-serif;
+    }
+    .btn-accept-privacy {
+      width: 100%;
+      padding: 1rem;
+      background: var(--gold);
+      color: #1a0900;
+      border: none;
+      border-radius: 14px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-top: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+    .btn-accept-privacy:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(212, 175, 55, 0.35);
+    }
+    .privacy-close-btn {
+      position: absolute;
+      top: 1rem; right: 1rem;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: var(--pearl);
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 1rem;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s;
+    }
+    .privacy-close-btn:hover {
+      background: rgba(255,255,255,0.1);
+      color: var(--gold);
+    }
+    .privacy-overlay.reopen .privacy-close-btn {
+      display: flex;
+    }
+    .privacy-overlay.reopen .btn-accept-privacy {
+      display: none;
+    }
+
+    /* Footer privacy link */
+    .btn-privacy-footer {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      color: rgba(255,255,255,0.35);
+      font-size: 0.75rem;
+      text-decoration: none;
+      cursor: pointer;
+      transition: color 0.3s;
+      font-family: 'Inter', sans-serif;
+      letter-spacing: 0.05em;
+      background: none;
+      border: none;
+      margin-top: 0.5rem;
+    }
+    .btn-privacy-footer:hover {
+      color: var(--gold);
+    }
   </style>
 
 
@@ -595,6 +775,11 @@
     <br>
     <p>© 2025 Kiosko Azul</p>
     <p style="margin-top:0.75rem;">
+      <button class="btn-privacy-footer" onclick="openPrivacyModal(true)">
+        <i class="fas fa-shield-alt"></i> Privacidad y Datos
+      </button>
+    </p>
+    <p style="margin-top:0.75rem;">
       <a href="admin-login.html" style="color:rgba(255,255,255,0.25);font-size:0.7rem;text-decoration:none;transition:color 0.3s;letter-spacing:0.1em;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='rgba(255,255,255,0.25)'">
         <i class="fas fa-lock"></i> Administración
       </a>
@@ -634,6 +819,59 @@
       btn.classList.add('active');
     }
   </script>
+
+  <!-- PRIVACY POLICY MODAL -->
+  <div class="privacy-overlay" id="privacy-modal">
+    <div class="privacy-card">
+      <button class="privacy-close-btn" onclick="closePrivacyModal()">&times;</button>
+      <div class="privacy-icon">
+        <i class="fas fa-shield-alt"></i>
+      </div>
+      <h2>Tu Privacidad Importa</h2>
+      <p class="privacy-sub">Antes de comenzar, queremos que sepas cómo usamos tus datos</p>
+
+      <div class="privacy-item">
+        <div class="privacy-item-icon"><i class="fas fa-motorcycle"></i></div>
+        <div class="privacy-item-text">
+          <h4>Solo para Delivery</h4>
+          <p>Tu número telefónico será utilizado <strong>únicamente</strong> para coordinar la entrega de tus pedidos y contactarte en caso necesario.</p>
+        </div>
+      </div>
+
+      <div class="privacy-item">
+        <div class="privacy-item-icon"><i class="fas fa-key"></i></div>
+        <div class="privacy-item-text">
+          <h4>Recuperación de Cuenta</h4>
+          <p>Tu correo electrónico se usará <strong>exclusivamente</strong> para enviarte un código de seguridad si necesitas recuperar tu contraseña.</p>
+        </div>
+      </div>
+
+      <div class="privacy-item">
+        <div class="privacy-item-icon"><i class="fas fa-ban"></i></div>
+        <div class="privacy-item-text">
+          <h4>Cero Publicidad</h4>
+          <p>No te enviaremos correos promocionales, SMS ni llamadas comerciales. <strong>Jamás.</strong> Tu información no será compartida con terceros.</p>
+        </div>
+      </div>
+
+      <div class="privacy-item">
+        <div class="privacy-item-icon"><i class="fas fa-lock"></i></div>
+        <div class="privacy-item-text">
+          <h4>Datos Protegidos</h4>
+          <p>Tu información personal se almacena de forma segura y solo es accedida por el equipo de Kiosko Azul para gestionar tu experiencia.</p>
+        </div>
+      </div>
+
+      <div class="privacy-badge">
+        <i class="fas fa-check-circle"></i>
+        Cumplimos con prácticas responsables de protección de datos
+      </div>
+
+      <button class="btn-accept-privacy" id="btn-accept-privacy" onclick="acceptPrivacy()">
+        <i class="fas fa-check"></i> Entendido, Acepto
+      </button>
+    </div>
+  </div>
 
   <!-- CART UI -->
   <button id="cart-float" aria-label="Abrir carrito" onclick="toggleCart()">
@@ -710,6 +948,32 @@
       }
     }
 
+    // ===== PRIVACY MODAL LOGIC =====
+    function openPrivacyModal(isReopen) {
+      const modal = document.getElementById('privacy-modal');
+      modal.classList.add('active');
+      if (isReopen) {
+        modal.classList.add('reopen');
+      } else {
+        modal.classList.remove('reopen');
+      }
+    }
+    function closePrivacyModal() {
+      document.getElementById('privacy-modal').classList.remove('active', 'reopen');
+    }
+    function acceptPrivacy() {
+      localStorage.setItem('kb_privacy_accepted', 'true');
+      closePrivacyModal();
+    }
+    function checkPrivacyModal() {
+      const cliente = localStorage.getItem('kb_cliente');
+      const accepted = localStorage.getItem('kb_privacy_accepted');
+      // Only show if user is logged in AND hasn't accepted yet
+      if (cliente && !accepted) {
+        setTimeout(() => openPrivacyModal(false), 1200);
+      }
+    }
+
     document.addEventListener('DOMContentLoaded', async () => {
       await fetchBCVRate();
       await loadDynamicMenu();
@@ -727,6 +991,9 @@
         // remove parameter without reload
         window.history.replaceState({}, document.title, window.location.pathname);
       }
+
+      // Check if we need to show the privacy policy modal
+      checkPrivacyModal();
     });
 
     // Cargar menú dinámico desde la API
